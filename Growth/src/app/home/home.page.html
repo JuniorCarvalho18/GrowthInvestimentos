@@ -19,7 +19,7 @@
 
   <!-- Saudação -->
   <div class="greeting">
-    <p>Olá, name!</p> 
+    <p>Olá, name!</p>
   </div>
 
   <!-- Projetos em Destaque -->
@@ -130,11 +130,16 @@
   </ion-fab>
 
   <!-- Modal -->
-  <ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="fullscreen-modal" style=" bottom: -200px;">
-    <ng-template>
-      <app-addproj class="ion-page"></app-addproj>
-    </ng-template>
-  </ion-modal>
+<ion-modal
+  [isOpen]="isModalOpen"
+  (didDismiss)="closeModal()"
+  [initialBreakpoint]="0.7"
+  [breakpoints]="[0, 1]"
+  class="add-project-modal">
+  <ng-template>
+    <app-addproj></app-addproj>
+  </ng-template>
+</ion-modal>
 
   <!-- Modal de Notificações -->
   <ion-modal [isOpen]="isNotificationsModalOpen" (didDismiss)="closeNotificationsModal()" class="notifications-modal">

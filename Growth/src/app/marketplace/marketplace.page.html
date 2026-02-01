@@ -41,43 +41,48 @@
   <!-- Prêmios patrocinados -->
   <div class="sponsored-rewards">
     <h3>Prêmios patrocinados</h3>
-    <div class="reward-card">
+    <div class="reward-card spot">
       <h4>Tech Collection</h4>
       <p class="category">Tecnologia</p>
       <p>Explore o mundo da tecnologia renovável com o nosso curso de treinamento!</p>
       <p class="sponsor">Team Growth Investimentos</p>
     </div>
 
-    <div class="separator"></div>
+<div class="separator"></div>
 
-    <!-- Painel de opções de recompensa -->
-    <div class="reward-options">
-      <ion-row class="reward-row">
-        <div class="reward-option">
-          <ion-icon name="construct-outline"></ion-icon>
-          <p>Novo</p>
-          <p>Equipamentos</p>
-          <p>100 tokens</p>
-        </div>
-        <div class="reward-option">
-          <ion-icon name="pricetag-outline"></ion-icon>
-          <p>Limitado</p>
-          <p>Desconto com provedor</p>
-          <p>200 tokens</p>
-        </div>
-        <div class="reward-option">
-          <ion-icon name="star-outline"></ion-icon>
-          <p>Exclusivo</p>
-          <p>Plano VIP</p>
-          <p>500 tokens</p>
-        </div>
-        <div class="reward-option">
-          <ion-icon name="gift-outline"></ion-icon>
-          <p>Popular</p>
-          <p>Pacote de Prêmios</p>
-          <p>300 tokens</p>
-        </div>
-      </ion-row>
+<div class="reward-options">
+
+  <div class="carousel-wrapper">
+
+    <div class="reward-carousel" #carousel (scroll)="checkScroll()">
+      <div class="reward-card">
+        <ion-icon name="construct-outline"></ion-icon>
+        <p class="status">Novo</p>
+        <p class="title">Equipamentos</p>
+        <p class="price">100 tokens</p>
+      </div>
+      <div class="reward-card">
+        <ion-icon name="pricetag-outline"></ion-icon>
+        <p class="status">Limitado</p>
+        <p class="title">Desconto</p>
+        <p class="price">200 tokens</p>
+      </div>
+      <div class="reward-card">
+        <ion-icon name="star-outline"></ion-icon>
+        <p class="status">Exclusivo</p>
+        <p class="title">Plano VIP</p>
+        <p class="price">500 tokens</p>
+      </div>
+      <div class="reward-card">
+        <ion-icon name="gift-outline"></ion-icon>
+        <p class="status">Popular</p>
+        <p class="title">Prêmios</p>
+        <p class="price">300 tokens</p>
+      </div>
+    </div> <div class="scroll-shadow" [class.visible]="showShadow"></div>
+
+  </div>
+</div>
     </div>
   </div>
 

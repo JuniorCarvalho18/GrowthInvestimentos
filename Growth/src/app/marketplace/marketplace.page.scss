@@ -54,13 +54,69 @@ display: flex;
     flex-wrap: nowrap;
     flex-direction: row;
 }
-.reward-card {
-  background-color: var(--ion-background-color);
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  margin-bottom: 16px;
+.reward-carousel {
+  display: flex;
+  overflow-x: auto; /* Permite rolagem lateral */
+  gap: 5vw; /* Espaço entre os itens */
+  padding: 10px 0;
+
+  /* A Mágica do Scroll Suave e Snap */
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory; /* Faz o item "grudar" ao parar */
+  -webkit-overflow-scrolling: touch; /* Física nativa no iOS */
+
+  /* Esconder a barra de rolagem */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
+.reward-card {
+  /* Tamanho fixo é crucial para carrossel funcionar */
+  min-width: 140px;
+  width: 180px;
+
+  /* Estilo do Card */
+  background: rgba(255, 255, 255, 0.05); /* Fundo sutil */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px 38px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* Alinha o snap no início do card */
+  scroll-snap-align: start;
+
+  ion-icon {
+    font-size: 50px;
+    margin-bottom: 8px;
+    color: var(--ion-color-primary);
+  }
+
+  p {
+    margin: 2px 0;
+    color: var(--ion-text-color);
+  }
+
+  .status {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--ion-color-secondary);
+    text-transform: uppercase;
+  }
+
+  .price {
+    color: #2dd36f; /* Verde ou sua cor de destaque */
+    font-weight: 600;
+  }
+}
+
+.spot {
+    width: auto;
+    margin-bottom: 20px;
+  }
 
 .reward-card h4 {
   font-size: 18px;
@@ -69,7 +125,6 @@ display: flex;
 }
 
 .reward-card p {
-  font-size: 14px;
   margin: 4px 0;
   color: var(--ion-text-color);
 }
@@ -123,6 +178,43 @@ display: flex;
   margin-bottom: 12px; /* Espaçamento abaixo do ícone */
 }
 
+.carousel-wrapper {
+  position: relative; /* Necessário para posicionar a sombra */
+}
+
+.reward-carousel {
+  /* Seu CSS anterior do Método 1 continua aqui */
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* A Sombra */
+.scroll-shadow {
+  position: absolute;
+  top: 10px; /* Ajuste conforme o padding do carrossel */
+  bottom: 10px;
+  right: 0;
+  width: 60px; /* Tamanho do degradê */
+
+  /* Degradê do transparente para a cor do seu fundo (ajuste a cor final se precisar) */
+  background: linear-gradient(to right, transparent, rgba(0,0,0, 0.6));
+  
+  pointer-events: none; /* Deixa clicar no card que está embaixo da sombra */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 0 12px 12px 0; /* Arredondar igual aos cards se quiser */
+}
+
+/* Classe que torna a sombra visível */
+.scroll-shadow.visible {
+  opacity: 1;
+}
+
 .recently-supported {
   margin: 16px;
 }
@@ -166,14 +258,6 @@ display: flex;
   cursor: pointer;
   padding-right: 10px;
   color: var(--ion-text-color);
-}
-
-.notifications-modal {
-  --width: 90%;
-  --height: 70%;
-  --border-radius: 16px;
-  --background: var(--ion-background-color);
-  animation: slide-down 0.2s ease-out forwards;
 }
 
 @keyframes slide-down {

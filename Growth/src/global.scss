@@ -20,8 +20,8 @@
     border: 1px solid rgba(227, 227, 227, 0.7);
     --padding-start: 10px;
     border-radius: 5px;
-    margin-top: 15px; 
-    margin-bottom: 15px; 
+    margin-top: 15px;
+    margin-bottom: 15px;
   }
   .native-input.sc-ion-input-md {
     padding-left: 10px;
@@ -37,6 +37,24 @@
     --background: var(--dourado);
     --color: var(--ion-text-color);
   }
+
+ion-modal.notifications-modal {
+  /* Define que a altura será automática baseada no conteúdo */
+  --height: 70%;
+  /* Impede que fique maior que 50% da tela se tiver muita notificação */
+  --max-height: 70%;
+  /* Opcional: Arredonda as bordas se quiser estilo "card" */
+  --border-radius: 16px;
+  /* Ajusta o alinhamento (center para meio da tela, ou deixe sem para bottom) */
+  align-items: center;
+}
+
+ion-modal.notifications-modal .ion-page {
+  /* Garante que a página interna não force altura */
+  position: relative;
+  display: block;
+  contain: content;
+}
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 

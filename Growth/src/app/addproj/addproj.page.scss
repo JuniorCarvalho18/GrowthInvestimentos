@@ -3,6 +3,20 @@ ion-title {
     margin: 16px 0;
 }
 
+ion-content {
+  /* Garante que a rolagem funcional continue existindo */
+  --overflow: hidden;
+
+  /* Oculta a barra visualmente em navegadores baseados em WebKit (Android/Chrome/Safari) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Remove a barra lateral padrão */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE e Edge antigos */
+}
+
 .addproj-content {
   --display: block;
   --background: var(--ion-background-color);

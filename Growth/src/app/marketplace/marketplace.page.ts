@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -7,49 +7,43 @@ import { Router } from '@angular/router';
   styleUrls: ['./marketplace.page.scss'],
   standalone: false,
 })
-export class MarketplacePage implements OnInit {
-  isNotificationsModalOpen = false; // Controla o estado do modal de notificações
-  isDragging = false; // Controla o estado de arraste
-  startX = 0; // Posição inicial do cursor
-  scrollLeft = 0; // Posição inicial do scroll
+export class MarketplacePage implements AfterViewInit {
+  // Pega a referência da div #carousel do HTML
+  @ViewChild('carousel') carousel!: ElementRef;
 
-  constructor(private rota: Router, private renderer: Renderer2) {}
+  isNotificationsModalOpen = false;
+  showShadow = true; // Controla se a sombra aparece ou não
 
-  ngOnInit() {
-    const rewardOptions = document.querySelector('.reward-options') as HTMLElement;
+  constructor(private rota: Router) {}
 
-    // Adiciona eventos para o comportamento de arraste
-    this.renderer.listen(rewardOptions, 'mousedown', (e: MouseEvent) => {
-      this.isDragging = true;
-      rewardOptions.classList.add('active');
-      this.startX = e.pageX - rewardOptions.offsetLeft;
-      this.scrollLeft = rewardOptions.scrollLeft;
-    });
+  // Executado quando a tela termina de carregar os elementos visuais
+  ngAfterViewInit() {
+    // Faz uma verificação inicial (caso a lista seja pequena e não precise de scroll)
+    this.checkScroll();
+  }
 
-    this.renderer.listen(rewardOptions, 'mouseleave', () => {
-      this.isDragging = false;
-      rewardOptions.classList.remove('active');
-    });
+  // Lógica da Sombra (Chamada pelo evento (scroll) no HTML)
+  checkScroll() {
+    if (!this.carousel) return;
 
-    this.renderer.listen(rewardOptions, 'mouseup', () => {
-      this.isDragging = false;
-      rewardOptions.classList.remove('active');
-    });
+    const el = this.carousel.nativeElement;
 
-    this.renderer.listen(rewardOptions, 'mousemove', (e: MouseEvent) => {
-      if (!this.isDragging) return;
-      e.preventDefault();
-      const x = e.pageX - rewardOptions.offsetLeft;
-      const walk = (x - this.startX) * 2; // Velocidade de rolagem
-      rewardOptions.scrollLeft = this.scrollLeft - walk;
-    });
+    // Calcula se chegou no fim da rolagem horizontal
+    // scrollLeft: quanto já rolou
+    // offsetWidth: largura visível na tela
+    // scrollWidth: largura total do conteúdo
+    // -10: pequena tolerância para garantir que funcione em qualquer tela
+    const isEnd = el.scrollLeft + el.offsetWidth >= el.scrollWidth - 10;
+
+    // Se chegou no fim, esconde a sombra (!true = false). Se não, mostra.
+    this.showShadow = !isEnd;
   }
 
   openNotificationsModal() {
-    this.isNotificationsModalOpen = true; // Abre o modal de notificações
+    this.isNotificationsModalOpen = true;
   }
 
   closeNotificationsModal() {
-    this.isNotificationsModalOpen = false; // Fecha o modal de notificações
+    this.isNotificationsModalOpen = false;
   }
 }

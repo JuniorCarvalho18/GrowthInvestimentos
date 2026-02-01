@@ -53,3 +53,8 @@ ion-content {
   background-color: #004d40; /* Linha separadora verde escuro */
   margin: 0 16px;
 }
+
+.scroll-y {
+    overflow-y: hidden !important;
+    overscroll-behavior-y: contain;
+}

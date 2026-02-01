@@ -35,9 +35,9 @@ div {
 }
 .resumo-cards {
 border: none;
-display: flex; 
-justify-content: space-between; 
-gap: 10px; 
+display: flex;
+justify-content: space-between;
+gap: 10px;
 }
 .resumo-card {
     width: 100%;
@@ -56,14 +56,6 @@ gap: 10px;
 .resumo-card p {
     margin: 0;
     font-size: 14px;
-}
-
-.notifications-modal {
-  --width: 90%; /* Largura do modal */
-  --height: 70%; /* Altura do modal */
-  --border-radius: 16px; /* Bordas arredondadas */
-  --background: var(--ion-background-color); /* Fundo do modal */
-  animation: slide-down 0.2s ease-out forwards; /* Animação para descer */
 }
 
 @keyframes slide-down {

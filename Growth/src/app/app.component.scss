@@ -13,7 +13,7 @@ ion-item{
   background:  #0b3d2e00;
 }
 #icone{
-  background: rgba(255, 255, 255, 0.1); 
+  background: rgba(255, 255, 255, 0.1);
   padding: 5px;
   border-radius: 50%;
 }
@@ -22,29 +22,29 @@ ion-item{
   margin: 10px;
   border: 1px solid rgba(4, 93, 86, 0.9);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1); 
-  backdrop-filter: blur(2px); 
-  color: var(--ion-text-color); 
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(2px);
+  color: var(--ion-text-color);
 }
 #Contas.ativo {
   transition: 300ms;
   transform: scale(1.01);
   box-shadow: rgba(227, 227, 227, 0.2) 0px 0px 10px ;
   border: 1px solid rgba(227, 227, 227, 0.6);
-  backdrop-filter: blur(5px); 
+  backdrop-filter: blur(5px);
 }
 #Historico {
   width: min-content;
   padding: 5px;
   border-radius: 80px;
-  background: rgba(255, 255, 255, 0.1); 
-  backdrop-filter: blur(3px); 
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(3px);
 }
 #Historico.ativo {
   transition: 300ms;
   transform: scale(1.1);
   border: 1px solid rgba(227, 227, 227, 0.8);
-  backdrop-filter: blur(5px); 
+  backdrop-filter: blur(5px);
 }
 ion-menu.md ion-content {
   --padding-start: 8px;
@@ -94,7 +94,22 @@ ion-menu.md ion-item {
 }
 
 ion-menu.md ion-item.selected {
+  /* Mantém o fundo sutil que você já tinha */
   --background: rgba(var(--ion-color-primary-rgb), 0.14);
+
+  /* IMPORTANTE: Força a cor do texto a ser a padrão (branca/clara) em vez do verde escuro */
+  --color: var(--ion-text-color);
+
+  ion-icon {
+    /* Remove o #045D56 e herda a cor clara do texto */
+    color: inherit;
+  }
+
+  /* O efeito que você pediu: */
+  &:hover {
+    opacity: 0.6; /* Diminui a opacidade */
+    --color: var(--ion-text-color); /* Garante que não mude de cor */
+  }
 }
 
 ion-menu.md ion-item.selected ion-icon {
