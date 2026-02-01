@@ -17,13 +17,11 @@
     </ion-toolbar>
   </ion-header>
 
-  <!-- Campo de busca -->
   <div class="search-container">
     <ion-searchbar placeholder="Buscar"></ion-searchbar>
     <p>Explore e resgate recompensa com tokens</p>
   </div>
 
-  <!-- Categorias -->
   <div class="categories">
     <h3>Categorias</h3>
     <div class="category-buttons">
@@ -38,7 +36,6 @@
     </div>
   </div>
 
-  <!-- Prêmios patrocinados -->
   <div class="sponsored-rewards">
     <h3>Prêmios patrocinados</h3>
     <div class="reward-card spot">
@@ -48,45 +45,38 @@
       <p class="sponsor">Team Growth Investimentos</p>
     </div>
 
-<div class="separator"></div>
+    <div class="separator"></div>
 
-<div class="reward-options">
-
-  <div class="carousel-wrapper">
-
-    <div class="reward-carousel" #carousel (scroll)="checkScroll()">
-      <div class="reward-card">
-        <ion-icon name="construct-outline"></ion-icon>
-        <p class="status">Novo</p>
-        <p class="title">Equipamentos</p>
-        <p class="price">100 tokens</p>
+    <div class="reward-options">
+      <div class="reward-carousel">
+        <div class="reward-card">
+          <ion-icon name="construct-outline"></ion-icon>
+          <p class="status">Novo</p>
+          <p class="title">Equipamentos</p>
+          <p class="price">100 tokens</p>
+        </div>
+        <div class="reward-card">
+          <ion-icon name="pricetag-outline"></ion-icon>
+          <p class="status">Limitado</p>
+          <p class="title">Desconto</p>
+          <p class="price">200 tokens</p>
+        </div>
+        <div class="reward-card">
+          <ion-icon name="star-outline"></ion-icon>
+          <p class="status">Exclusivo</p>
+          <p class="title">Plano VIP</p>
+          <p class="price">500 tokens</p>
+        </div>
+        <div class="reward-card">
+          <ion-icon name="gift-outline"></ion-icon>
+          <p class="status">Popular</p>
+          <p class="title">Prêmios</p>
+          <p class="price">300 tokens</p>
+        </div>
       </div>
-      <div class="reward-card">
-        <ion-icon name="pricetag-outline"></ion-icon>
-        <p class="status">Limitado</p>
-        <p class="title">Desconto</p>
-        <p class="price">200 tokens</p>
-      </div>
-      <div class="reward-card">
-        <ion-icon name="star-outline"></ion-icon>
-        <p class="status">Exclusivo</p>
-        <p class="title">Plano VIP</p>
-        <p class="price">500 tokens</p>
-      </div>
-      <div class="reward-card">
-        <ion-icon name="gift-outline"></ion-icon>
-        <p class="status">Popular</p>
-        <p class="title">Prêmios</p>
-        <p class="price">300 tokens</p>
-      </div>
-    </div> <div class="scroll-shadow" [class.visible]="showShadow"></div>
-
-  </div>
-</div>
     </div>
   </div>
 
-  <!-- Recentemente apoiados -->
   <div class="recently-supported">
     <h3>Recentemente apoiados</h3>
     <div class="support-item">
@@ -113,10 +103,8 @@
     </div>
   </div>
 
-  <!-- Botão de ação -->
   <ion-button expand="block" class="action-button">Reivindicar agora</ion-button>
 
-  <!-- Modal de Notificações -->
   <ion-modal [isOpen]="isNotificationsModalOpen" (didDismiss)="closeNotificationsModal()" class="notifications-modal">
     <ng-template>
       <app-notificacoes></app-notificacoes>

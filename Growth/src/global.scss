@@ -55,6 +55,31 @@ ion-modal.notifications-modal .ion-page {
   display: block;
   contain: content;
 }
+
+/* --- Personalização da Barra de Rolagem (Global) --- */
+
+/* Define a largura e altura da barra */
+::-webkit-scrollbar {
+  width: 8px;  /* Largura da barra vertical */
+  height: 8px; /* Altura da barra horizontal (se houver) */
+  background: transparent; /* Remove o fundo geral da área da barra */
+}
+
+/* O "trilho" (fundo) por onde a barra corre */
+::-webkit-scrollbar-track {
+  background: transparent; /* Deixa o fundo transparente */
+}
+
+/* A "pega" (a parte que se mexe) */
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3); /* Cor discreta e semi-transparente */
+  border-radius: 10px; /* Bordas arredondadas */
+}
+
+/* Efeito ao passar o rato por cima da barra */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.6); /* Fica um pouco mais visível */
+}
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 
