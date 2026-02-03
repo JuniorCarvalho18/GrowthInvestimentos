@@ -80,6 +80,56 @@ ion-modal.notifications-modal .ion-page {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.6); /* Fica um pouco mais visível */
 }
+
+// Estilos para loading customizado
+.custom-loading {
+  --background: rgba(0, 0, 0, 0.8);
+  --spinner-color: var(--dourado);
+
+  .loading-wrapper {
+    border-radius: 8px;
+  }
+}
+
+// Melhorias nos toasts
+ion-toast {
+  --border-radius: 8px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  &::part(message) {
+    font-size: 14px;
+  }
+}
+
+// Animações suaves
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Melhoria nos inputs
+ion-input, ion-textarea {
+  --background: rgba(255, 255, 255, 0.05);
+  --color: var(--ion-text-color);
+  --placeholder-color: rgba(227, 227, 227, 0.5);
+  --padding-start: 15px;
+  --padding-end: 15px;
+
+  &:focus-within {
+    --border-color: var(--dourado);
+    --background: rgba(255, 255, 255, 0.08);
+  }
+}
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 

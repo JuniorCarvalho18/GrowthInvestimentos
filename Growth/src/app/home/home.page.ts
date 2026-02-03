@@ -1,37 +1,47 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; // Importação do HttpClient
+import { AuthService, User } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
-  standalone: false, 
+  standalone: false,
 })
 export class HomePage implements OnInit {
-  isModalOpen = false; // Controla o estado do modal
-  isNotificationsModalOpen = false; // Controla o estado do modal de notificações
-  userName: string = ''; // Variável para armazenar o nome do usuário
+  isModalOpen = false;
+  isNotificationsModalOpen = false;
+  currentUser: User | null = null;
 
-  constructor(private rota: Router, private http: HttpClient) {}
+  constructor(
+    private rota: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
+    // Subscreve para mudanças no usuário
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
+  }
+
+  get userName(): string {
+    return this.currentUser?.nome || 'Usuário';
   }
 
   openAddProjectModal() {
-    this.isModalOpen = true; // Abre o modal
+    this.isModalOpen = true;
   }
 
   closeModal() {
-    this.isModalOpen = false; // Fecha o modal
+    this.isModalOpen = false;
   }
 
   openNotificationsModal() {
-    this.isNotificationsModalOpen = true; // Abre o modal de notificações
+    this.isNotificationsModalOpen = true;
   }
 
   closeNotificationsModal() {
-    this.isNotificationsModalOpen = false; // Fecha o modal de notificações
+    this.isNotificationsModalOpen = false;
   }
-
 }

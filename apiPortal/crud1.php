@@ -12,12 +12,14 @@ if (!$postjson) {
     exit;
 }
 
-// ✅ CRIAR (Salvar)
+// ✅ CRIAR (Salvar) - COM SENHA SEGURA
 if ($postjson['requisicao'] == 'salvar') {
-    $senha_crip = md5($postjson['senha']);
+    // BCRYPT é MUITO mais seguro que MD5
+    $senha_hash = password_hash($postjson['senha'], PASSWORD_BCRYPT);
+    
     $query = $pdo->prepare("INSERT INTO usuarios (senha, nome, email, cnpj) 
                             VALUES (:senha, :nome, :email, :cnpj)");
-    $query->bindValue(':senha', $senha_crip);
+    $query->bindValue(':senha', $senha_hash);
     $query->bindValue(':nome', $postjson['nome']);
     $query->bindValue(':email', $postjson['email']);
     $query->bindValue(':cnpj', $postjson['cnpj']);
@@ -27,30 +29,41 @@ if ($postjson['requisicao'] == 'salvar') {
     echo json_encode(['success' => $query->rowCount() > 0, 'id' => $id]);
 }
 
-// ✅ LOGIN
+// ✅ LOGIN - COM VERIFICAÇÃO SEGURA
 else if ($postjson['requisicao'] == 'login') {
-    $senha_crip = md5($postjson['senha']);
-    $query = $pdo->prepare("SELECT * FROM usuarios WHERE (email = :emailCnpj OR cnpj = :emailCnpj) AND senha = :senha");
+    $query = $pdo->prepare("SELECT * FROM usuarios WHERE (email = :emailCnpj OR cnpj = :emailCnpj)");
     $query->bindValue(':emailCnpj', $postjson['emailCnpj']);
-    $query->bindValue(':senha', $senha_crip);
     $query->execute();
-
-    echo json_encode([
-        'success' => $query->rowCount() > 0,
-        'message' => $query->rowCount() > 0 ? 'Login realizado com sucesso!' : 'E-mail/CNPJ ou senha inválidos!'
-    ]);
+    
+    $usuario = $query->fetch(PDO::FETCH_ASSOC);
+    
+    if ($usuario && password_verify($postjson['senha'], $usuario['senha'])) {
+        // Remove a senha antes de enviar para o frontend
+        unset($usuario['senha']);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Login realizado com sucesso!',
+            'user' => $usuario
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'E-mail/CNPJ ou senha inválidos!'
+        ]);
+    }
 }
 
 // ✅ LISTAR
 else if ($postjson['requisicao'] == 'listar') {
-    $query = $pdo->prepare("SELECT * FROM usuarios ORDER BY id DESC");
+    $query = $pdo->prepare("SELECT id, nome, email, cnpj FROM usuarios ORDER BY id DESC");
     $query->execute();
     $dados = $query->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode(['success' => true, 'usuarios' => $dados]);
 }
 
-// ✅ EDITAR
+// ✅ EDITAR (sem alterar senha)
 else if ($postjson['requisicao'] == 'editar') {
     $query = $pdo->prepare("UPDATE usuarios SET nome = :nome, email = :email, cnpj = :cnpj WHERE id = :id");
     $query->bindValue(':nome', $postjson['nome']);
@@ -60,6 +73,45 @@ else if ($postjson['requisicao'] == 'editar') {
     $query->execute();
 
     echo json_encode(['success' => $query->rowCount() > 0]);
+}
+
+// ✅ ALTERAR SENHA (nova funcionalidade)
+else if ($postjson['requisicao'] == 'alterar_senha') {
+    try {
+        // Busca o usuário para verificar a senha atual
+        $query = $pdo->prepare("SELECT senha FROM usuarios WHERE id = :id");
+        $query->bindValue(':id', $postjson['id']);
+        $query->execute();
+        $usuario = $query->fetch(PDO::FETCH_ASSOC);
+
+        if (!$usuario) {
+            echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
+            exit;
+        }
+
+        // Verifica se a senha atual está correta
+        if (!password_verify($postjson['senha_atual'], $usuario['senha'])) {
+            echo json_encode(['success' => false, 'message' => 'Senha atual incorreta!']);
+            exit;
+        }
+
+        // Hash da nova senha
+        $nova_senha_hash = password_hash($postjson['nova_senha'], PASSWORD_BCRYPT);
+
+        // Atualiza a senha
+        $query = $pdo->prepare("UPDATE usuarios SET senha = :senha WHERE id = :id");
+        $query->bindValue(':senha', $nova_senha_hash);
+        $query->bindValue(':id', $postjson['id']);
+        $query->execute();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Senha alterada com sucesso!'
+        ]);
+
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => 'Erro no servidor: ' . $e->getMessage()]);
+    }
 }
 
 // ✅ DELETAR
@@ -76,6 +128,21 @@ else if ($postjson['requisicao'] == 'deletar') {
         }
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Erro no servidor: ' . $e->getMessage()]);
+    }
+}
+
+// ✅ BUSCAR PERFIL
+else if ($postjson['requisicao'] == 'perfil') {
+    $query = $pdo->prepare("SELECT id, nome, email, cnpj, saldo, tokens FROM usuarios WHERE id = :id");
+    $query->bindValue(':id', $postjson['id']);
+    $query->execute();
+    
+    $usuario = $query->fetch(PDO::FETCH_ASSOC);
+    
+    if ($usuario) {
+        echo json_encode(['success' => true, 'user' => $usuario]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
     }
 }
 

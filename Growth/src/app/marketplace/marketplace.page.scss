@@ -136,6 +136,7 @@ display: flex;
 
 .reward-options {
   display: flex;
+  justify-content: space-evenly;
   gap: 80px; /* Aumenta o espaçamento entre os itens */
   margin-top: 16px;
   padding: 16px;
@@ -203,7 +204,7 @@ display: flex;
 
   /* Degradê do transparente para a cor do seu fundo (ajuste a cor final se precisar) */
   background: linear-gradient(to right, transparent, rgba(0,0,0, 0.6));
-  
+
   pointer-events: none; /* Deixa clicar no card que está embaixo da sombra */
   opacity: 0;
   transition: opacity 0.3s ease;

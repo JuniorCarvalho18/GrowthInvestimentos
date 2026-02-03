@@ -1,6 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
+import { UtilsService } from '../services/utils.service';
 
 @Component({
   selector: 'app-folder',
@@ -14,40 +15,46 @@ export class FolderPage implements OnInit {
     senha: '',
   };
 
-  constructor(private rota:Router, private http: HttpClient) {}
+  constructor(
+    private rota: Router,
+    private authService: AuthService,
+    private utils: UtilsService
+  ) {}
 
   ngOnInit() {
-   
+    if (this.authService.isAuthenticated()) {
+      this.rota.navigate(['/home']);
+    }
   }
-  criarConta(){
+
+  criarConta() {
     this.rota.navigate(['/cadastro']);
   }
 
-   // Método para realizar o login
-   logar() {
-    // Verifica se os campos estão preenchidos
+  async logar() {
     if (!this.login.emailCnpj.trim() || !this.login.senha.trim()) {
-      alert('Por favor, preencha todos os campos!');
+      await this.utils.showWarning('Por favor, preencha todos os campos!');
       return;
     }
-  
-    // Envia os dados para o backend
-    this.http.post('http://localhost/apiPortal/crud1.php', {
-      requisicao: 'login',
-      emailCnpj: this.login.emailCnpj,
-      senha: this.login.senha,
-    }).subscribe((response: any) => {
-      if (response.success) {
-        alert('Login realizado com sucesso!');
-        this.rota.navigate(['/home']); // Redireciona para a página inicial
-      } else {
-        alert(response.message || 'E-mail/CNPJ ou senha inválidos!');
+
+    await this.utils.showLoading('Entrando...');
+
+    this.authService.login(this.login.emailCnpj, this.login.senha).subscribe({
+      next: async (response) => {
+        await this.utils.hideLoading();
+
+        if (response.success) {
+          await this.utils.showSuccess('Bem-vindo ao Growth!');
+          this.rota.navigate(['/home']);
+        } else {
+          await this.utils.showError(response.message || 'Credenciais inválidas!');
+        }
+      },
+      error: async (error) => {
+        await this.utils.hideLoading();
+        console.error('Erro:', error);
+        await this.utils.showError('Erro ao conectar ao servidor.');
       }
-    }, (error) => {
-      console.error('Erro na requisição:', error);
-      alert('Erro ao conectar ao servidor. Tente novamente mais tarde.');
     });
   }
-
-
 }

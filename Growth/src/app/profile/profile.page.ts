@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; // Importação do HttpClient
+import { AuthService, User } from '../services/auth.service';
+import { UtilsService } from '../services/utils.service';
+import { AlertController } from '@ionic/angular';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-profile',
@@ -9,51 +12,155 @@ import { HttpClient } from '@angular/common/http'; // Importação do HttpClient
   standalone: false,
 })
 export class ProfilePage implements OnInit {
-  user = {
-    name: '',
+  user: User = {
+    id: 0,
+    nome: '',
     cnpj: '',
     email: '',
-    password: '',
+    saldo: 0,
+    tokens: 0
   };
 
-  constructor(private rota: Router, private http: HttpClient) {} // Adicionado HttpClient
+  private apiUrl = 'http://localhost/apiPortal/crud1.php';
+
+  constructor(
+    private rota: Router,
+    private authService: AuthService,
+    private utils: UtilsService,
+    private alertController: AlertController,
+    private http: HttpClient
+  ) {}
 
   ngOnInit() {
-    this.loadUserProfile(); // Carrega as informações do usuário ao iniciar a página
+    this.loadUserProfile();
   }
 
   loadUserProfile() {
-    const userId = 'id_do_usuario_logado'; // Substitua pelo ID do usuário logado
-    const apiUrl = `https://sua-api.com/usuarios/${userId}`; // URL da API para buscar os dados do usuário
-
-    this.http.get(apiUrl).subscribe(
-      (data: any) => {
-        this.user = {
-          name: data.name,
-          cnpj: data.cnpj,
-          email: data.email,
-          password: data.senha,
-        };
-      },
-      (error) => {
-        console.error('Erro ao carregar perfil:', error);
-        alert('Não foi possível carregar as informações do perfil.');
-      }
-    );
+    const currentUser = this.authService.currentUserValue;
+    if (currentUser) {
+      this.user = { ...currentUser };
+    }
   }
 
-  saveProfile() {
-    const userId = 'id_do_usuario_logado'; // Substitua pelo ID do usuário logado
-    const apiUrl = `https://sua-api.com/usuarios/${userId}`; // URL da API para salvar os dados do usuário
+  async saveProfile() {
+    // Validações
+    if (!this.user.nome.trim() || !this.user.email.trim()) {
+      await this.utils.showWarning('Nome e email são obrigatórios!');
+      return;
+    }
 
-    this.http.put(apiUrl, this.user).subscribe(
-      () => {
-        alert('Informações salvas com sucesso!');
+    // Validação de email
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(this.user.email)) {
+      await this.utils.showError('Email inválido!');
+      return;
+    }
+
+    await this.utils.showLoading('Salvando...');
+
+    // Chama a API para atualizar o perfil
+    this.http.post<any>(this.apiUrl, {
+      requisicao: 'editar',
+      id: this.user.id,
+      nome: this.user.nome,
+      email: this.user.email,
+      cnpj: this.user.cnpj
+    }).subscribe({
+      next: async (response) => {
+        await this.utils.hideLoading();
+
+        if (response.success) {
+          // Atualiza os dados localmente
+          this.authService.updateUser(this.user);
+          await this.utils.showSuccess('Perfil atualizado com sucesso!');
+        } else {
+          await this.utils.showError('Erro ao atualizar perfil. Email pode já estar em uso.');
+        }
       },
-      (error) => {
-        console.error('Erro ao salvar perfil:', error);
-        alert('Não foi possível salvar as informações do perfil.');
+      error: async (error) => {
+        await this.utils.hideLoading();
+        console.error('Erro:', error);
+        await this.utils.showError('Erro ao conectar ao servidor.');
       }
-    );
+    });
+  }
+
+  async changePassword() {
+    const alert = await this.alertController.create({
+      header: 'Alterar Senha',
+      inputs: [
+        {
+          name: 'senhaAtual',
+          type: 'password',
+          placeholder: 'Senha atual'
+        },
+        {
+          name: 'novaSenha',
+          type: 'password',
+          placeholder: 'Nova senha'
+        },
+        {
+          name: 'confirmarSenha',
+          type: 'password',
+          placeholder: 'Confirmar nova senha'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Alterar',
+          handler: async (data) => {
+            if (!data.senhaAtual || !data.novaSenha || !data.confirmarSenha) {
+              await this.utils.showWarning('Preencha todos os campos!');
+              return false;
+            }
+
+            if (data.novaSenha.length < 6) {
+              await this.utils.showWarning('A nova senha deve ter pelo menos 6 caracteres!');
+              return false;
+            }
+
+            if (data.novaSenha !== data.confirmarSenha) {
+              await this.utils.showError('As senhas não coincidem!');
+              return false;
+            }
+
+            await this.updatePassword(data.senhaAtual, data.novaSenha);
+            return true;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async updatePassword(senhaAtual: string, novaSenha: string) {
+    await this.utils.showLoading('Alterando senha...');
+
+    this.http.post<any>(this.apiUrl, {
+      requisicao: 'alterar_senha',
+      id: this.user.id,
+      senha_atual: senhaAtual,
+      nova_senha: novaSenha
+    }).subscribe({
+      next: async (response) => {
+        await this.utils.hideLoading();
+
+        if (response.success) {
+          await this.utils.showSuccess('Senha alterada com sucesso!');
+        } else {
+          await this.utils.showError(response.message || 'Senha atual incorreta!');
+        }
+      },
+      error: async (error) => {
+        await this.utils.hideLoading();
+        console.error('Erro:', error);
+        await this.utils.showError('Erro ao conectar ao servidor.');
+      }
+    });
   }
 }
