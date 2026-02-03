@@ -27,7 +27,7 @@ export class CadastroPage implements OnInit {
   ngOnInit() {}
 
   voltar() {
-    this.rota.navigate(['/folder']);
+    this.rota.navigate(['/folder/inbox']);
   }
 
   async cadastrar() {
@@ -71,7 +71,7 @@ export class CadastroPage implements OnInit {
         await this.utils.hideLoading();
 
         if (response.success) {
-          await this.utils.showSuccess('Conta criada com sucesso!');
+          await this.utils.showSuccess('Conta criada! Faça login para continuar.');
           this.rota.navigate(['/folder/inbox']);
         } else {
           await this.utils.showError('Erro ao criar conta. Email ou CNPJ já cadastrado.');

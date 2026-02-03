@@ -11,11 +11,16 @@ export class AuthGuard implements CanActivate {
     private authService: AuthService
   ) {}
 
+
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    console.log('🛡️ AuthGuard verificando autenticação...');
+
     if (this.authService.isAuthenticated()) {
+      console.log('✅ Usuário autenticado!');
       return true;
     }
 
+    console.log('❌ Usuário NÃO autenticado, redirecionando para login');
     this.router.navigate(['/folder/inbox'], {
       queryParams: { returnUrl: state.url }
     });
