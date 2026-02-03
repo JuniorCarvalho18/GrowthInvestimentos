@@ -189,6 +189,7 @@ ionic capacitor run ios
 - [ ] API REST documentada (Swagger)
 - [ ] Testes unitários e E2E
 
+## 👨 Feito Por:
 **Junior Carvalho**
 
 ## 🙏 Agradecimentos
