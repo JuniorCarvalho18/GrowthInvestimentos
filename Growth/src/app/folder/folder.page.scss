@@ -1,5 +1,5 @@
 ion-content{
-  --background: url(../../../assets/icon-background.png);
+  --background: url(../../../assets/icon-background.png) center / cover no-repeat;
 }
 
 ion-header {
@@ -7,8 +7,8 @@ ion-header {
 }
 
 #Entrar {
-  --background: #e3e3e3; 
-  --color: #045D56; 
+  --background: #e3e3e3;
+  --color: #045D56;
 }
 #Entrar:active {
   transition: 100ms;
@@ -17,7 +17,7 @@ ion-header {
 }
 #Criar {
   --background: #232325;
-  --color: #e3e3e3; 
+  --color: #e3e3e3;
   border: 1px solid #e3e3e3b1;
   border-radius: 8px;
 }

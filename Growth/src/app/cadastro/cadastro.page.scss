@@ -1,7 +1,7 @@
 ion-content{
-    --background: url(../../../assets/icon-background.png);
+    --background: url(../../../assets/icon-background.png) center / cover no-repeat;
   }
-  
+
 #Cadastrar{
     --background: var(--ion-text-color);
     --color: #045D56;
