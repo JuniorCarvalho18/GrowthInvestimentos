@@ -130,6 +130,14 @@ ion-input, ion-textarea {
     --background: rgba(255, 255, 255, 0.08);
   }
 }
+
+.alert-button {
+  color: var(--ion-text-color) !important; /* Cor do texto */
+}
+
+.alert-button.alert-button-role-cancel {
+  color: #232323 !important;
+}
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 

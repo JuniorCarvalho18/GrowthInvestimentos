@@ -1,4 +1,17 @@
 <?php
+// Headers CORS - DEVE SER ANTES DE TUDO
+header("Access-Control-Allow-Origin: http://localhost:4200");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Content-Type: application/json; charset=utf-8");
+
+// Resposta rápida para o teste do navegador (Preflight)
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 include_once('connection.php');
 
 $postjson = json_decode(file_get_contents('php://input'), true);
