@@ -189,22 +189,6 @@ ionic capacitor run ios
 - [ ] API REST documentada (Swagger)
 - [ ] Testes unitários e E2E
 
-## 🤝 Contribuindo
-
-Este é um projeto educacional, mas contribuições são bem-vindas!
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto é licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 👨‍💻 Autor
-
 **Junior Carvalho**
 
 ## 🙏 Agradecimentos
@@ -214,7 +198,3 @@ Este projeto é licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE
 - Comunidade Ionic Brasil
 
 ---
-
-⭐ Se este projeto te ajudou, considere dar uma estrela!
-
-Feito com 💚 e compromisso com o meio ambiente
