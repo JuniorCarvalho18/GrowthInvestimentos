@@ -154,7 +154,7 @@ ionic capacitor run ios
 
 ## 🔒 Segurança
 
-- ✅ Senhas com hash bcrypt (não MD5)
+- ✅ Senhas com hash bcrypt
 - ✅ Prepared statements (PDO)
 - ✅ Validação de inputs
 - ✅ Proteção contra SQL Injection
@@ -189,7 +189,7 @@ ionic capacitor run ios
 - [ ] API REST documentada (Swagger)
 - [ ] Testes unitários e E2E
 
-## 👨 Feito Por:
+## 👤 Feito Por:
 **Junior Carvalho**
 
 ## 🙏 Agradecimentos
