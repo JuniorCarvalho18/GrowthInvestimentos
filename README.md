@@ -182,10 +182,8 @@ Para um guia completo de configuração no htdocs, consulte:
 - [x] Saldo (UI)
 
 ### 🚧 Em Desenvolvimento
-- [ ] Investimento real em projetos
 - [ ] Sistema de tokens funcional
 - [ ] Resgate de recompensas
-- [ ] Dashboard com gráficos
 - [ ] Filtros e busca de projetos
 
 ## 🎨 Design e UX
@@ -218,26 +216,15 @@ Para um guia completo de configuração no htdocs, consulte:
 
 ## 🎯 Roadmap Futuro
 
-### Versão 1.1
 - [ ] Sistema completo de investimentos
 - [ ] Cálculo automático de tokens
 - [ ] Histórico detalhado funcional
 - [ ] Notificações push
 - [ ] Upload de imagens para projetos
-
-### Versão 2.0
-- [ ] Integração com gateway de pagamento
-- [ ] Dashboard analytics com gráficos
-- [ ] Sistema de chat entre investidores
+- [ ] Sistema de posts de investidores
 - [ ] API REST documentada (Swagger)
 - [ ] Testes unitários e E2E
-- [ ] Deploy em servidor cloud
-
-### Versão 3.0
 - [ ] App nativo (Android/iOS)
-- [ ] Sistema de blockchain para tokens
-- [ ] Marketplace real com integração de parceiros
-- [ ] Gamificação avançada (níveis, conquistas)
 
 ## 🐛 Troubleshooting
 
