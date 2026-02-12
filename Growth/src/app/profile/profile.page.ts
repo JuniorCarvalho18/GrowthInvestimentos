@@ -4,6 +4,8 @@ import { AuthService, User } from '../services/auth.service';
 import { UtilsService } from '../services/utils.service';
 import { AlertController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+
 
 @Component({
   selector: 'app-profile',
@@ -21,7 +23,7 @@ export class ProfilePage implements OnInit {
     tokens: 0
   };
 
-  private apiUrl = 'http://localhost/apiPortal/crud1.php';
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private rota: Router,

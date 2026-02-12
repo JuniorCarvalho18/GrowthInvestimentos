@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { AlertController, ToastController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { UsuariosService, Usuario } from '../services/Usuarios.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -10,76 +10,183 @@ import { AlertController, ToastController } from '@ionic/angular';
   standalone: false,
 })
 export class UsuariosPage implements OnInit {
-
-  usuarios: any[] = [];
-  usuario = { id: null, nome: '', email: '', senha: '', cnpj: '' };
-  apiUrl = 'http://localhost/phpmyadmin/crud1.php'; // Ajuste o caminho conforme necessário
+  usuarios: Usuario[] = [];
+  usuario: Usuario = this.limparFormulario();
+  loading: HTMLIonLoadingElement | null = null;
 
   constructor(
     private rota: Router,
-    private http: HttpClient,
+    private usuariosService: UsuariosService,
     private toast: ToastController,
-    private alert: AlertController
+    private alert: AlertController,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {
     this.listarUsuarios();
   }
 
-  async presentToast(msg: string) {
-    const toast = await this.toast.create({ message: msg, duration: 2000 });
-    toast.present();
+  limparFormulario(): Usuario {
+    return {
+      nome: '',
+      email: '',
+      cnpj: '',
+      senha: ''
+    };
   }
 
-  listarUsuarios() {
-    this.http.post<any>(this.apiUrl, { requisicao: 'listar' }).subscribe(res => {
-      if (res.success) {
-        this.usuarios = res.usuarios;
+  async showLoading(message: string = 'Carregando...') {
+    this.loading = await this.loadingController.create({
+      message,
+      spinner: 'crescent'
+    });
+    await this.loading.present();
+  }
+
+  async hideLoading() {
+    if (this.loading) {
+      await this.loading.dismiss();
+      this.loading = null;
+    }
+  }
+
+  async presentToast(msg: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toast.create({
+      message: msg,
+      duration: 3000,
+      color,
+      position: 'top',
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
+  }
+
+  async listarUsuarios() {
+    await this.showLoading('Carregando usuários...');
+
+    this.usuariosService.listarUsuarios().subscribe({
+      next: async (res) => {
+        await this.hideLoading();
+        if (res.success) {
+          this.usuarios = res.usuarios;
+        } else {
+          await this.presentToast('Erro ao carregar usuários', 'danger');
+        }
+      },
+      error: async (error) => {
+        await this.hideLoading();
+        console.error('Erro:', error);
+        await this.presentToast('Erro ao conectar ao servidor', 'danger');
       }
     });
   }
 
-  salvarUsuario() {
-    const requisicao = this.usuario.id ? 'editar' : 'salvar';
-    const payload: any = {
-      requisicao,
-      id: this.usuario.id,
-      nome: this.usuario.nome,
-      email: this.usuario.email,
-      cnpj: this.usuario.cnpj
-    };
-
-    if (requisicao === 'salvar') {
-      payload.senha = this.usuario.senha;
+  validarFormulario(): boolean {
+    if (!this.usuario.nome.trim()) {
+      this.presentToast('Nome é obrigatório!', 'warning');
+      return false;
+    }
+    if (!this.usuario.email.trim()) {
+      this.presentToast('Email é obrigatório!', 'warning');
+      return false;
+    }
+    if (!this.usuario.cnpj.trim()) {
+      this.presentToast('CNPJ é obrigatório!', 'warning');
+      return false;
     }
 
-    this.http.post(this.apiUrl, payload).subscribe(() => {
-      this.presentToast(requisicao === 'salvar' ? 'Usuário salvo!' : 'Usuário editado!');
-      this.usuario = { id: null, nome: '', email: '', senha: '', cnpj: '' };
-      this.listarUsuarios();
+    // Validação de email
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(this.usuario.email)) {
+      this.presentToast('Email inválido!', 'warning');
+      return false;
+    }
+
+    // Validação de senha (só ao criar novo)
+    if (!this.usuario.id && (!this.usuario.senha || this.usuario.senha.length < 6)) {
+      this.presentToast('Senha deve ter pelo menos 6 caracteres!', 'warning');
+      return false;
+    }
+
+    return true;
+  }
+
+  async salvarUsuario() {
+    if (!this.validarFormulario()) {
+      return;
+    }
+
+    await this.showLoading(this.usuario.id ? 'Atualizando...' : 'Salvando...');
+
+    const observable = this.usuario.id
+      ? this.usuariosService.editarUsuario(this.usuario)
+      : this.usuariosService.salvarUsuario(this.usuario);
+
+    observable.subscribe({
+      next: async (res) => {
+        await this.hideLoading();
+        if (res.success) {
+          await this.presentToast(
+            this.usuario.id ? 'Usuário atualizado!' : 'Usuário criado!',
+            'success'
+          );
+          this.usuario = this.limparFormulario();
+          this.listarUsuarios();
+        } else {
+          await this.presentToast('Erro: Email ou CNPJ já cadastrado!', 'danger');
+        }
+      },
+      error: async (error) => {
+        await this.hideLoading();
+        console.error('Erro:', error);
+        await this.presentToast('Erro ao salvar usuário', 'danger');
+      }
     });
   }
 
-  editar(u: any) {
-    this.usuario = { ...u, senha: '' }; // não carrega a senha
+  editar(u: Usuario) {
+    this.usuario = { ...u, senha: '' }; // Não carrega a senha
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  async deletar(id: number) {
+  cancelarEdicao() {
+    this.usuario = this.limparFormulario();
+  }
+
+  async deletar(id: number, nome: string) {
     const alert = await this.alert.create({
-      header: 'Confirmar',
-      message: 'Deseja excluir este usuário?',
+      header: 'Confirmar Exclusão',
+      message: `Deseja realmente excluir o usuário "${nome}"? Esta ação não pode ser desfeita.`,
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
         {
           text: 'Excluir',
-          handler: () => {
-            this.http.post(this.apiUrl, { requisicao: 'deletar', id }).subscribe(() => {
-              this.presentToast('Usuário excluído!');
-              this.listarUsuarios();
+          cssClass: 'alert-button-danger',
+          handler: async () => {
+            await this.showLoading('Excluindo...');
+
+            this.usuariosService.deletarUsuario(id).subscribe({
+              next: async (res) => {
+                await this.hideLoading();
+                if (res.success) {
+                  await this.presentToast('Usuário excluído!', 'success');
+                  this.listarUsuarios();
+                } else {
+                  await this.presentToast('Erro ao excluir usuário', 'danger');
+                }
+              },
+              error: async (error) => {
+                await this.hideLoading();
+                console.error('Erro:', error);
+                await this.presentToast('Erro ao conectar ao servidor', 'danger');
+              }
             });
-          },
-        },
-      ],
+          }
+        }
+      ]
     });
     await alert.present();
   }

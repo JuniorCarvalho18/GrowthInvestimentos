@@ -14,11 +14,14 @@ Growth Investimentos é uma plataforma mobile desenvolvida com **Ionic + Angular
 ### 🎯 Funcionalidades Principais
 
 - 🔐 **Autenticação Segura**: Login e cadastro com hash bcrypt
+- 👥 **CRUD de Usuários**: Gerenciamento completo de usuários (admin)
+- 📁 **CRUD de Projetos**: Criação e gestão de projetos sustentáveis
 - 💰 **Sistema de Investimentos**: Investimento em projetos sustentáveis
 - 🪙 **Gamificação**: Sistema de tokens para recompensas
 - 🛒 **Marketplace**: Resgate de prêmios com tokens acumulados
 - 📊 **Dashboard**: Visualização de saldo e histórico
 - 🔔 **Notificações**: Sistema de notificações de projetos
+- ⚙️ **Painel Admin**: Área administrativa para desenvolvedores
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -33,6 +36,7 @@ Growth Investimentos é uma plataforma mobile desenvolvida com **Ionic + Angular
 - **PHP 8.0** - Linguagem de servidor
 - **MySQL** - Banco de dados relacional
 - **PDO** - Camada de abstração de dados
+- **BCrypt** - Hash de senhas
 
 ## 📦 Estrutura do Projeto
 
@@ -71,68 +75,118 @@ Growth/
 
 ### Passo a Passo
 
-1. **Clone o repositório**
+#### 1. Clone o repositório no htdocs do XAMPP
+
 ```bash
 git clone https://github.com/seu-usuario/growth-investimentos.git
 cd growth-investimentos
 ```
 
-2. **Configure o banco de dados**
+#### 2. Configure o banco de dados
+
 ```bash
 # Importe o arquivo SQL
 mysql -u root -p < growthDB.sql
 ```
 
-3. **Configure a API**
-```bash
-# Edite apiPortal/connection.php com suas credenciais
+#### 3. Configure a API
+
+Edite `apiPortal/connection.php`:
+```php
 $banco = 'growth';
 $host = 'localhost';
 $usuario = 'root';
-$senha = '';
+$senha = ''; // Sua senha do MySQL
 ```
 
-4. **Instale as dependências**
+#### 4. Ajuste as URLs da API
+
+Em **3 arquivos TypeScript**, ajuste o nome da pasta conforme seu projeto:
+
+- `Growth/src/app/services/auth.service.ts`
+- `Growth/src/app/services/usuarios.service.ts`
+- `Growth/src/app/services/projetos.service.ts`
+
+```typescript
+private apiUrl = 'http://localhost/GrowthInvestimentos/apiPortal/crud1.php';
+```
+
+#### 5. Instale as dependências
+
 ```bash
-cd Growth
+cd GrowthInvestimentos/Growth
 npm install
 ```
 
-5. **Execute o projeto**
+#### 6. Execute o projeto
+
 ```bash
 # Modo desenvolvimento (navegador)
 ionic serve
 
-# Modo Android
-ionic capacitor run android
-
-# Modo iOS
-ionic capacitor run ios
+# Ou abra em http://localhost:4200
 ```
 
-## 🔑 Arquitetura e Padrões
+#### 7. Teste a API
 
-### Autenticação
-- Sistema de autenticação com JWT (planejado)
-- Armazenamento seguro com LocalStorage
-- Guards para proteção de rotas
-- Serviço centralizado de autenticação
+Abra no navegador:
+```
+http://localhost/GrowthInvestimentos/apiPortal/crud1.php
+```
 
-### Organização de Código
-- **Services**: Lógica de negócio centralizada
-- **Guards**: Proteção de rotas autenticadas
-- **Components**: Componentes reutilizáveis
-- **Pages**: Páginas da aplicação
 
-### Boas Práticas Implementadas
-- ✅ Separação de responsabilidades
-- ✅ Injeção de dependências
-- ✅ Observables do RxJS
-- ✅ Tipagem forte com TypeScript
-- ✅ Validação de formulários
-- ✅ Tratamento de erros
-- ✅ Loading states
-- ✅ Feedback ao usuário (toasts)
+## 🔧 Configuração Detalhada
+
+Para um guia completo de configuração no htdocs, consulte:
+- [`CONFIGURACAO_HTDOCS.md`](CONFIGURACAO_HTDOCS.md)
+
+## 🗂️ Funcionalidades Implementadas
+
+### ✅ Autenticação
+- [x] Login com email/CNPJ
+- [x] Cadastro de novos usuários
+- [x] Autenticação persistente (localStorage)
+- [x] Guards para rotas protegidas
+- [x] Hash de senha com BCrypt
+- [x] Logout
+
+### ✅ Perfil de Usuário
+- [x] Visualização de dados pessoais
+- [x] Edição de nome, email, CNPJ
+- [x] Alteração de senha
+- [x] Visualização de saldo e tokens
+
+### ✅ CRUD de Usuários (Admin)
+- [x] Listagem de todos os usuários
+- [x] Criação de novos usuários
+- [x] Edição de usuários existentes
+- [x] Exclusão de usuários
+- [x] Validação de dados
+- [x] Feedback visual (loading, toasts)
+
+### ✅ CRUD de Projetos (Admin)
+- [x] Listagem de projetos
+- [x] Criação de projetos
+- [x] Edição de projetos
+- [x] Exclusão de projetos
+- [x] Categorização por tipo
+- [x] Controle de status (ativo/concluído/cancelado)
+- [x] Cálculo de progresso
+- [x] Registro de impacto ambiental
+
+### ✅ Interface do Usuário
+- [x] Página inicial (Home)
+- [x] Marketplace (UI)
+- [x] Sistema de notificações (UI)
+- [x] Histórico (UI)
+- [x] Saldo (UI)
+
+### 🚧 Em Desenvolvimento
+- [ ] Investimento real em projetos
+- [ ] Sistema de tokens funcional
+- [ ] Resgate de recompensas
+- [ ] Dashboard com gráficos
+- [ ] Filtros e busca de projetos
 
 ## 🎨 Design e UX
 
@@ -150,46 +204,115 @@ ionic capacitor run ios
 - `investimentos` - Relação usuário-projeto
 - `tokens` - Sistema de pontuação
 - `marketplace` - Itens para resgate
+- `resgates` - Histórico de resgates
 - `notificacoes` - Sistema de notificações
 
 ## 🔒 Segurança
 
-- ✅ Senhas com hash bcrypt
-- ✅ Prepared statements (PDO)
-- ✅ Validação de inputs
-- ✅ Proteção contra SQL Injection
-- ⚠️ CORS configurado (ajustar para produção)
-
-## 📱 Funcionalidades Implementadas
-
-- [x] Login e Cadastro
-- [x] Autenticação persistente
-- [x] Perfil de usuário
-- [x] Listagem de projetos
-- [x] Sistema de notificações (UI)
-- [x] Marketplace (UI)
-- [ ] Investimento real em projetos
-- [ ] Sistema de tokens funcional
-- [ ] Resgate de recompensas
-- [ ] Dashboard com gráficos
-- [ ] Filtros e busca de projetos
+- ✅ Senhas com hash BCrypt (NUNCA MD5)
+- ✅ Prepared statements (PDO) contra SQL Injection
+- ✅ Validação de inputs no frontend e backend
+- ✅ CORS configurado para localhost:4200
+- ✅ Guards para rotas administrativas
+- ⚠️ CORS deve ser ajustado para produção
 
 ## 🎯 Roadmap Futuro
 
 ### Versão 1.1
 - [ ] Sistema completo de investimentos
 - [ ] Cálculo automático de tokens
-- [ ] Histórico detalhado
+- [ ] Histórico detalhado funcional
 - [ ] Notificações push
+- [ ] Upload de imagens para projetos
 
 ### Versão 2.0
 - [ ] Integração com gateway de pagamento
-- [ ] Dashboard analytics
+- [ ] Dashboard analytics com gráficos
 - [ ] Sistema de chat entre investidores
 - [ ] API REST documentada (Swagger)
 - [ ] Testes unitários e E2E
+- [ ] Deploy em servidor cloud
 
-## 👤 Feito Por:
+### Versão 3.0
+- [ ] App nativo (Android/iOS)
+- [ ] Sistema de blockchain para tokens
+- [ ] Marketplace real com integração de parceiros
+- [ ] Gamificação avançada (níveis, conquistas)
+
+## 🐛 Troubleshooting
+
+### Erro: "CORS policy"
+```
+Solução: Verifique se XAMPP está rodando e se a URL está correta
+```
+
+### Erro: "Connection refused"
+```
+Solução: Inicie Apache no XAMPP
+```
+
+### Erro: "Database connection failed"
+```
+Solução: 
+1. Verifique se MySQL está ativo
+2. Confirme credenciais em connection.php
+3. Importe growthDB.sql
+```
+
+### Erro: "404 Not Found" na API
+```
+Solução: Ajuste o nome da pasta nas URLs dos serviços TypeScript
+```
+
+## 📝 Scripts Úteis
+
+```bash
+# Iniciar servidor de desenvolvimento
+ionic serve
+
+# Build para produção
+ionic build --prod
+
+# Adicionar plataforma Android
+ionic capacitor add android
+
+# Sincronizar com Capacitor
+ionic capacitor sync
+
+# Abrir no Android Studio
+ionic capacitor open android
+
+# Limpar cache
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 👨‍💻 Desenvolvimento
+
+### Padrões de Código
+
+- **Services**: Lógica de negócio e chamadas à API
+- **Components**: Componentes reutilizáveis
+- **Pages**: Páginas da aplicação
+- **Guards**: Proteção de rotas
+- **Interfaces**: Tipagem TypeScript
+
+### Boas Práticas Implementadas
+
+- ✅ Separação de responsabilidades
+- ✅ Injeção de dependências
+- ✅ Observables do RxJS
+- ✅ Tipagem forte com TypeScript
+- ✅ Validação de formulários
+- ✅ Tratamento de erros
+- ✅ Loading states
+- ✅ Feedback ao usuário (toasts e alerts)
+- ✅ Componentização
+- ✅ SCSS modular
+
+## 👤 Autor
+
 **Junior Carvalho**
 
 ## 🙏 Agradecimentos
@@ -197,5 +320,10 @@ ionic capacitor run ios
 - Desenvolvido como projeto da disciplina de Desenvolvimento Mobile
 - Inspirado em plataformas de crowdfunding sustentável
 - Comunidade Ionic Brasil
+- Professores e colegas da faculdade
+
+## 📄 Licença
+
+Este projeto é para fins educacionais.
 
 ---

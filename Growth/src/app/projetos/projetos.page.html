@@ -1,16 +1,157 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+      <ion-back-button defaultHref="/dev"></ion-back-button>
     </ion-buttons>
-    <ion-title>Projetos</ion-title>
+    <ion-title>Gerenciar Projetos</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Projetos</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <!-- Formulário -->
+  <div class="form-container">
+    <h2>{{ projeto.id ? 'Editar Projeto' : 'Novo Projeto' }}</h2>
+
+    <ion-item>
+      <ion-label position="floating">Nome do Projeto *</ion-label>
+      <ion-input [(ngModel)]="projeto.nome" placeholder="Ex: Fazenda Solar Comunitária"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Categoria *</ion-label>
+      <ion-select [(ngModel)]="projeto.categoria" interface="popover">
+        <ion-select-option *ngFor="let cat of categorias" [value]="cat">
+          {{ cat }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Meta (R$) *</ion-label>
+      <ion-input
+        [(ngModel)]="projeto.meta"
+        type="number"
+        min="0"
+        placeholder="50000.00">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Previsão de Conclusão *</ion-label>
+      <ion-input
+        [(ngModel)]="projeto.previsao"
+        type="date">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Local *</ion-label>
+      <ion-input [(ngModel)]="projeto.local" placeholder="Ex: São Paulo, SP"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Impacto Estimado</ion-label>
+      <ion-input
+        [(ngModel)]="projeto.impacto_estimado"
+        placeholder="Ex: Redução de 50 toneladas de CO2/ano">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Descrição *</ion-label>
+      <ion-textarea
+        [(ngModel)]="projeto.descricao"
+        rows="4"
+        placeholder="Descreva o projeto em detalhes...">
+      </ion-textarea>
+    </ion-item>
+
+    <ion-item *ngIf="projeto.id">
+      <ion-label position="floating">Status</ion-label>
+      <ion-select [(ngModel)]="projeto.status" interface="popover">
+        <ion-select-option *ngFor="let s of statusOptions" [value]="s.value">
+          {{ s.label }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <div class="button-group">
+      <ion-button expand="block" (click)="salvarProjeto()">
+        <ion-icon slot="start" [name]="projeto.id ? 'checkmark-circle-outline' : 'add-circle-outline'"></ion-icon>
+        {{ projeto.id ? 'Atualizar' : 'Salvar' }}
+      </ion-button>
+
+      <ion-button
+        *ngIf="projeto.id"
+        expand="block"
+        color="medium"
+        (click)="cancelarEdicao()">
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        Cancelar
+      </ion-button>
+    </div>
+  </div>
+
+  <ion-item-divider class="divider">
+    <ion-label>Projetos Cadastrados ({{ projetos.length }})</ion-label>
+  </ion-item-divider>
+
+  <!-- Lista de Projetos -->
+  <ion-list *ngIf="projetos.length > 0" class="project-list">
+    <ion-item *ngFor="let p of projetos" class="project-card">
+      <div class="project-info">
+        <div class="project-header">
+          <h3>{{ p.nome }}</h3>
+          <ion-badge [color]="getStatusColor(p.status!)">
+            {{ getStatusLabel(p.status!) }}
+          </ion-badge>
+        </div>
+
+        <p class="category">
+          <ion-icon name="pricetag-outline"></ion-icon>
+          {{ p.categoria }}
+        </p>
+
+        <p class="description">{{ p.descricao }}</p>
+
+        <div class="project-meta">
+          <p><ion-icon name="location-outline"></ion-icon> {{ p.local }}</p>
+          <p><ion-icon name="calendar-outline"></ion-icon> {{ p.previsao | date:'dd/MM/yyyy' }}</p>
+        </div>
+
+        <div class="progress-info">
+          <div class="progress-text">
+            <span>Meta: R$ {{ (p.meta || 0).toFixed(2) }}</span>
+            <span>Arrecadado: R$ {{ (p.arrecadado || 0).toFixed(2) }}</span>
+          </div>
+          <ion-progress-bar
+            [value]="calcularProgresso(p.meta!, p.arrecadado!) / 100"
+            [color]="calcularProgresso(p.meta!, p.arrecadado!) >= 100 ? 'success' : 'primary'">
+          </ion-progress-bar>
+          <span class="progress-percentage">
+            {{ calcularProgresso(p.meta!, p.arrecadado!).toFixed(1) }}%
+          </span>
+        </div>
+
+        <p *ngIf="p.impacto_estimado" class="impact">
+          <ion-icon name="leaf-outline"></ion-icon>
+          <strong>Impacto:</strong> {{ p.impacto_estimado }}
+        </p>
+      </div>
+
+      <div class="actions" slot="end">
+        <ion-button color="warning" (click)="editar(p)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button color="danger" (click)="deletar(p.id!, p.nome)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+
+  <div *ngIf="projetos.length === 0" class="empty-state">
+    <ion-icon name="folder-open-outline"></ion-icon>
+    <p>Nenhum projeto cadastrado</p>
+  </div>
 </ion-content>

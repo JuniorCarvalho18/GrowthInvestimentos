@@ -1,38 +1,93 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+      <ion-back-button defaultHref="/dev"></ion-back-button>
     </ion-buttons>
-    <ion-title>Usuários</ion-title>
+    <ion-title>Gerenciar Usuários</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-item>
-    <ion-input [(ngModel)]="usuario.nome" placeholder="Nome"></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-input [(ngModel)]="usuario.email" placeholder="Email"></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-input [(ngModel)]="usuario.cnpj" placeholder="CNPJ"></ion-input>
-  </ion-item>
-  <ion-item *ngIf="!usuario.id">
-    <ion-input [(ngModel)]="usuario.senha" type="password" placeholder="Senha"></ion-input>
-  </ion-item>
+  <!-- Formulário -->
+  <div class="form-container">
+    <h2>{{ usuario.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
 
-  <ion-button expand="full" (click)="salvarUsuario()">
-    {{ usuario.id ? 'Atualizar' : 'Salvar' }}
-  </ion-button>
+    <ion-item>
+      <ion-label position="floating">Nome Completo *</ion-label>
+      <ion-input [(ngModel)]="usuario.nome" placeholder="Digite o nome"></ion-input>
+    </ion-item>
 
-  <ion-list>
-    <ion-item *ngFor="let u of usuarios">
-      <ion-label>
-        <h2>{{ u.nome }}</h2>
-        <p>{{ u.email }} | {{ u.cnpj }}</p>
-      </ion-label>
-      <ion-button color="warning" (click)="editar(u)">Editar</ion-button>
-      <ion-button color="danger" (click)="deletar(u.id)">Excluir</ion-button>
+    <ion-item>
+      <ion-label position="floating">Email *</ion-label>
+      <ion-input [(ngModel)]="usuario.email" type="email" placeholder="Digite o email"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">CNPJ *</ion-label>
+      <ion-input
+        [(ngModel)]="usuario.cnpj"
+        placeholder="00.000.000/0000-00"
+        maxlength="18">
+      </ion-input>
+    </ion-item>
+
+    <ion-item *ngIf="!usuario.id">
+      <ion-label position="floating">Senha *</ion-label>
+      <ion-input
+        [(ngModel)]="usuario.senha"
+        type="password"
+        placeholder="Mínimo 6 caracteres">
+      </ion-input>
+    </ion-item>
+
+    <div class="button-group">
+      <ion-button expand="block" (click)="salvarUsuario()">
+        <ion-icon slot="start" [name]="usuario.id ? 'checkmark-circle-outline' : 'add-circle-outline'"></ion-icon>
+        {{ usuario.id ? 'Atualizar' : 'Salvar' }}
+      </ion-button>
+
+      <ion-button
+        *ngIf="usuario.id"
+        expand="block"
+        color="medium"
+        (click)="cancelarEdicao()">
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        Cancelar
+      </ion-button>
+    </div>
+  </div>
+
+  <ion-item-divider class="divider">
+    <ion-label>Lista de Usuários ({{ usuarios.length }})</ion-label>
+  </ion-item-divider>
+
+  <!-- Lista de Usuários -->
+  <ion-list *ngIf="usuarios.length > 0" class="user-list">
+    <ion-item *ngFor="let u of usuarios" class="user-card">
+      <div class="user-info">
+        <h3>{{ u.nome }}</h3>
+        <p><ion-icon name="mail-outline"></ion-icon> {{ u.email }}</p>
+        <p><ion-icon name="document-text-outline"></ion-icon> {{ u.cnpj }}</p>
+        <p class="metadata">
+          <ion-icon name="cash-outline"></ion-icon> Saldo: R$ {{ (u.saldo || 0).toFixed(2) }}
+          <span class="separator">|</span>
+          <ion-icon name="star-outline"></ion-icon> Tokens: {{ (u.tokens || 0).toFixed(2) }}
+        </p>
+      </div>
+
+      <div class="actions" slot="end">
+        <ion-button color="warning" (click)="editar(u)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button color="danger" (click)="deletar(u.id!, u.nome)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
     </ion-item>
   </ion-list>
+
+  <div *ngIf="usuarios.length === 0" class="empty-state">
+    <ion-icon name="people-outline"></ion-icon>
+    <p>Nenhum usuário cadastrado</p>
+  </div>
 </ion-content>
