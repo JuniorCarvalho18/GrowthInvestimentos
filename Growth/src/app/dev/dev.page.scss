@@ -9,3 +9,7 @@
     --color: var(--ion-text-color); /* Cor do texto */
     font-size: 16px; /* Tamanho do texto */
   }
+
+  ion-content {
+    height: fit-content;
+  }
