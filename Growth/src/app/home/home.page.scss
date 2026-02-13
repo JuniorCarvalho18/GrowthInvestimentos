@@ -1,6 +1,6 @@
 .custom-content {
   background-color: var(--ion-background-color);
-  color: var(--ion-text-color); /* Substituído para usar a variável */
+  color: var(--ion-text-color);
   padding: 16px;
 }
 
@@ -8,21 +8,21 @@
   font-size: 24px;
   cursor: pointer;
   padding-right: 10px;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
+  color: var(--ion-text-color);
 }
 
 p {
-    margin: 16px;
+  margin: 16px;
   font-size: 18px;
   font-weight: bold;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
+  color: var(--ion-text-color);
 }
 
 .greeting p:nth-child(2) {
   font-size: 14px;
   font-weight: normal;
   margin-top: 4px;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
+  color: var(--ion-text-color);
 }
 
 .section {
@@ -32,11 +32,11 @@ p {
 h2 {
   font-size: 20px;
   margin: 16px;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
+  color: var(--ion-text-color);
 }
 
 .destaque .tags {
-    margin: 16px;
+  margin: 16px;
   display: flex;
   gap: 8px;
 }
@@ -46,69 +46,93 @@ h2 {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  border: 1px solid var(--ion-text-color); /* Substituído para usar a variável */
+  border: 1px solid var(--ion-text-color);
   padding: 6px 12px;
   border-radius: 4px;
   flex: 1;
   font-size: 14px;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
+  color: var(--ion-text-color);
 }
 
-.destaques-projetos h2 {
-  font-size: 20px;
-  margin: 16px;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
+// ==========================================
+// DESTAQUES - RESPONSIVO
+// ==========================================
+.destaques-projetos {
+  h2 {
+    font-size: 20px;
+    margin: 16px;
+    color: var(--ion-text-color);
+  }
+}
+
+.destaques-grid {
+  display: grid;
+  grid-template-columns: 1fr; // 1 coluna em mobile
+  gap: 16px;
+  padding: 0 16px;
+
+  // Telas médias e grandes: 2 colunas
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .projeto {
   background-color: var(--ion-background-color);
   padding: 16px;
-  margin-bottom: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  .badge {
+    background-color: #045D56;
+    color: var(--ion-text-color);
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: inline-block;
+  }
+
+  .imagem {
+    background-color: #23252480;
+    color: var(--ion-text-color);
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    border-radius: 8px;
+  }
+
+  .projeto-nome {
+    margin: 8px 0 4px 0;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .projeto-data {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: rgba(227, 227, 227, 0.7);
+  }
 }
 
-.projeto .badge {
-  background-color: #045D56;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  display: inline-block;
-}
-
-.projeto .imagem {
-  background-color: #23252480;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-  border-radius: 8px;
-}
-
-.projeto p {
-  margin: 4px 0;
-  color: var(--ion-text-color); /* Substituído para usar a variável */
-}
-
-.investir {
-  --background: var(--dourado);
-  --color: var(--ion-text-color); /* Substituído para usar a variável */
-  font-size: 14px;
-}
-
-.fixed-button {
-  --background: #000;
-  --color: var(--ion-text-color); /* Substituído para usar a variável */
+// ==========================================
+// GRID DE PROJETOS COM AVALIAÇÕES
+// ==========================================
+.projetos-sustaveis {
+  h2 {
+    font-size: 20px;
+    margin: 16px;
+    color: var(--ion-text-color);
+  }
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 colunas */
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  padding: 0 16px;
 }
 
 .card {
@@ -116,32 +140,205 @@ h2 {
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.card .imagem {
-  background-color: #23252480; /* Fundo com 50% de transparência */
-  height: 100px;
-  margin-bottom: 8px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+  flex-direction: column;
+
+  .imagem {
+    background-color: #23252480;
+    height: 100px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  .card-title {
+    margin: 8px 0 4px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ion-text-color);
+  }
+
+  .card-description {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    color: rgba(227, 227, 227, 0.7);
+    line-height: 1.4;
+  }
+
+  // Avaliação dentro do card
+  .avaliacao-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--dourado);
+    padding: 8px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+
+    .avaliador {
+      margin: 0 0 4px 0;
+      font-size: 12px;
+      color: var(--ion-text-color);
+
+      strong {
+        font-weight: 600;
+      }
+    }
+
+    .comentario {
+      margin: 0;
+      font-size: 11px;
+      color: rgba(227, 227, 227, 0.8);
+      font-style: italic;
+      line-height: 1.3;
+    }
+  }
 }
 
-.card p {
-  margin: 4px 0;
-  color: var(--ion-text-color);
+// ==========================================
+// POSTS DA COMUNIDADE - SISTEMA FUNCIONAL
+// ==========================================
+.posts-comunidade {
+  .posts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 16px 16px 16px;
+
+    h2 {
+      margin: 0;
+    }
+
+    ion-button {
+      --background: var(--dourado);
+      --color: var(--ion-text-color);
+      font-size: 13px;
+    }
+  }
+
+  .posts-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 16px;
+  }
+
+  .post {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid rgba(227, 227, 227, 0.1);
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      ion-avatar {
+        width: 40px;
+        height: 40px;
+
+        ion-icon {
+          font-size: 40px;
+          color: var(--dourado);
+        }
+      }
+
+      .post-info {
+        flex: 1;
+
+        .post-autor {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--ion-text-color);
+        }
+
+        .post-tempo {
+          margin: 0;
+          font-size: 12px;
+          color: rgba(227, 227, 227, 0.6);
+        }
+      }
+    }
+
+    .post-imagem {
+      width: 100%;
+      max-height: 200px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .post-imagem-placeholder {
+      background-color: #23252480;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .post-texto {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: var(--ion-text-color);
+      line-height: 1.5;
+    }
+
+    .post-categoria {
+      margin: 0 0 12px 0;
+      font-size: 12px;
+      color: var(--dourado);
+      font-weight: 500;
+    }
+
+    .post-acoes {
+      display: flex;
+      gap: 16px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(227, 227, 227, 0.1);
+
+      ion-button {
+        --color: rgba(227, 227, 227, 0.8);
+        font-size: 13px;
+
+        &:hover {
+          --color: var(--dourado);
+        }
+      }
+    }
+  }
 }
 
-.imagem-post {
-  background-color: #23252480;
-  height: 120px;
-  width: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  margin: 16px auto;
+// Modal Novo Post
+.btn-publicar {
+  --background: var(--dourado);
+  --color: var(--ion-text-color);
+  margin-top: 16px;
+}
+
+// ==========================================
+// OUTROS ESTILOS
+// ==========================================
+.investir {
+  --background: var(--dourado);
+  --color: var(--ion-text-color);
+  font-size: 14px;
+  margin-top: auto; // Empurra o botão para o fim do card
+}
+
+.fixed-button {
+  --background: #000;
+  --color: var(--ion-text-color);
 }
 
 .placeholder-icon {
@@ -150,29 +347,25 @@ h2 {
 }
 
 .fullscreen-modal {
-  position: absolute; /* Define a posição absoluta */
-  bottom: -60px; /* Fixa o modal na parte inferior */
+  position: absolute;
+  bottom: -60px;
   left: 0;
   right: 0;
-  --width: 100%; /* Largura total da tela */
-  --border-radius: 16px 16px 0 0; /* Bordas arredondadas apenas no topo */
-  --background: var(--ion-background-color); /* Fundo do modal */
-  animation: slide-up 0.2s ease-out forwards; /* Animação para crescer para cima */
+  --width: 100%;
+  --border-radius: 16px 16px 0 0;
+  --background: var(--ion-background-color);
+  animation: slide-up 0.2s ease-out forwards;
 }
-.ion-page{
+
+.ion-page {
   display: block;
 }
 
 ion-modal.add-project-modal {
   --overflow-y: hidden;
-  --width: 100%; /* Largura total */
-  /* Alinha o modal na parte inferior */
+  --width: 100%;
   align-items: flex-end;
-
-  /* Arredonda as bordas superiores */
   --border-radius: 20px 20px 0 0;
-
-  /* Sombra para destacar do fundo */
   --box-shadow: 0px -4px 10px rgba(0,0,0,0.1);
 }
 
@@ -184,18 +377,41 @@ ion-content.addproj-content {
 
 @keyframes slide-up {
   from {
-    transform: translateY(100%); /* Começa fora da tela, abaixo */
+    transform: translateY(100%);
   }
   to {
-    transform: translateY(0); /* Fica visível */
+    transform: translateY(0);
   }
 }
 
 @keyframes slide-down {
   from {
-    transform: translateY(-100%); /* Começa fora da tela, acima */
+    transform: translateY(-100%);
   }
   to {
-    transform: translateY(0); /* Fica visível */
+    transform: translateY(0);
   }
+}
+
+::ng-deep {
+  .alert-radio-label {
+    color: var(--ion-text-color) !important;
+  }
+
+  .alert-radio-button-checked .alert-radio-label {
+    color: var(--dourado) !important;
+  }
+
+  .alert-title {
+    color: var(--ion-text-color) !important;
+  }
+
+  .alert-button {
+    color: var(--dourado) !important;
+
+    &.alert-button-role-cancel {
+      color: #999 !important; // Cor do botão Cancelar
+    }
+  }
+
 }

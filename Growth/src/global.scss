@@ -138,6 +138,30 @@ ion-input, ion-textarea {
 .alert-button.alert-button-role-cancel {
   color: #232323 !important;
 }
+
+::ng-deep {
+  .alert-radio-label {
+    color: var(--ion-text-color) !important;
+  }
+
+  .alert-radio-button-checked .alert-radio-label {
+    color: var(--dourado) !important;
+  }
+
+  .alert-title {
+    color: var(--ion-text-color) !important;
+  }
+
+  .alert-button {
+    color: var(--dourado) !important;
+
+    &.alert-button-role-cancel {
+      color: #999 !important; // Cor do botão Cancelar
+    }
+  }
+
+}
+
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 

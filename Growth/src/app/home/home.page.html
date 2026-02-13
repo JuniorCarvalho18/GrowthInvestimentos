@@ -17,7 +17,7 @@
     </ion-toolbar>
   </ion-header>
 
-<!-- Saudação -->
+  <!-- Saudação -->
   <div class="greeting">
     <p>Olá, {{ userName }}!</p>
   </div>
@@ -37,88 +37,149 @@
     </div>
   </div>
 
-  <!-- Destaques de Projetos Sustentáveis -->
+  <!-- Destaques de Projetos Sustentáveis - RESPONSIVO -->
   <div class="section destaques-projetos">
     <h2>Destaques de Projetos Sustentáveis</h2>
-    <div class="projeto">
-      <div class="badge">Sustentável</div>
-      <div class="imagem">
-        <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+    <div class="destaques-grid">
+      <div class="projeto">
+        <div class="badge">Sustentável</div>
+        <div class="imagem">
+          <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+        </div>
+        <p class="projeto-nome">Projeto 1</p>
+        <p class="projeto-data">Data de Início: DD/MM/AAAA</p>
+        <ion-button expand="block" class="investir">Investir</ion-button>
       </div>
-      <p>Projeto 1</p>
-      <p>Data de Início: DD/MM/AAAA</p>
-      <ion-button expand="block" class="investir">Investir</ion-button>
-    </div>
-    <div class="projeto">
-      <div class="badge">Sustentável</div>
-      <div class="imagem">
-        <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+      <div class="projeto">
+        <div class="badge">Sustentável</div>
+        <div class="imagem">
+          <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+        </div>
+        <p class="projeto-nome">Projeto 2</p>
+        <p class="projeto-data">Data de Início: DD/MM/AAAA</p>
+        <ion-button expand="block" class="investir">Investir</ion-button>
       </div>
-      <p>Projeto 2</p>
-      <p>Data de Início: DD/MM/AAAA</p>
-      <ion-button expand="block" class="investir">Investir</ion-button>
     </div>
   </div>
 
-  <!-- Projetos Sustentáveis -->
+  <!-- Projetos Sustentáveis COM AVALIAÇÕES -->
   <div class="section projetos-sustaveis">
     <h2>Projetos Sustentáveis</h2>
     <div class="grid">
+      <!-- Projeto 1 -->
       <div class="card">
         <div class="imagem">
           <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
         </div>
-        <p>Projeto 1</p>
-        <p>Breve descrição do projeto</p>
+        <p class="card-title">Projeto 1</p>
+        <p class="card-description">Breve descrição do projeto</p>
+
+        <!-- Avaliação dentro do card -->
+        <div class="avaliacao-card">
+          <p class="avaliador"><strong>CotistaFeliz99</strong> ⭐⭐⭐⭐⭐</p>
+          <p class="comentario">O projeto tem trazido muitos retornos!</p>
+        </div>
+
         <ion-button expand="block" class="investir">Investir</ion-button>
       </div>
+
+      <!-- Projeto 2 -->
       <div class="card">
         <div class="imagem">
           <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
         </div>
-        <p>Projeto 2</p>
-        <p>Breve descrição do projeto</p>
+        <p class="card-title">Projeto 2</p>
+        <p class="card-description">Breve descrição do projeto</p>
+
+        <!-- Avaliação dentro do card -->
+        <div class="avaliacao-card">
+          <p class="avaliador"><strong>InvestidorVerde</strong> ⭐⭐⭐⭐</p>
+          <p class="comentario">Excelente iniciativa sustentável!</p>
+        </div>
+
         <ion-button expand="block" class="investir">Investir</ion-button>
       </div>
+
+      <!-- Projeto 3 -->
       <div class="card">
         <div class="imagem">
           <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
         </div>
-        <p>Projeto 3</p>
-        <p>Breve descrição do projeto</p>
+        <p class="card-title">Projeto 3</p>
+        <p class="card-description">Breve descrição do projeto</p>
+
+        <!-- Avaliação dentro do card -->
+        <div class="avaliacao-card">
+          <p class="avaliador"><strong>ApoiadorEco</strong> ⭐⭐⭐⭐⭐</p>
+          <p class="comentario">Impacto ambiental visível!</p>
+        </div>
+
         <ion-button expand="block" class="investir">Investir</ion-button>
       </div>
+
+      <!-- Projeto 4 -->
       <div class="card">
         <div class="imagem">
           <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
         </div>
-        <p>Projeto 4</p>
-        <p>Breve descrição do projeto</p>
+        <p class="card-title">Projeto 4</p>
+        <p class="card-description">Breve descrição do projeto</p>
+
+        <!-- Avaliação dentro do card -->
+        <div class="avaliacao-card">
+          <p class="avaliador"><strong>InvesteSustentavel</strong> ⭐⭐⭐⭐</p>
+          <p class="comentario">Resultados consistentes!</p>
+        </div>
+
         <ion-button expand="block" class="investir">Investir</ion-button>
       </div>
     </div>
   </div>
 
-  <!-- Avaliações dos Cotistas -->
-  <div class="section avaliacoes">
-    <h2>Avaliações dos Cotistas</h2>
-    <div class="avaliacao">
-      <p><strong>CotistaFeliz99</strong> ⭐⭐⭐⭐⭐</p>
-      <p>O projeto tem trazido muitos retornos!</p>
-      <p>👍 💬</p>
-    </div>
-  </div>
-
-  <!-- Posts da Comunidade -->
+  <!-- Posts da Comunidade - SISTEMA FUNCIONAL -->
   <div class="section posts-comunidade">
-    <h2>Posts da Comunidade</h2>
-    <div class="post">
-      <p><strong>ApoiadorSocial1</strong> - 2h, New York</p>
-      <div class="imagem-post">
-        <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+    <div class="posts-header">
+      <h2>Posts da Comunidade</h2>
+      <ion-button size="small" (click)="abrirNovoPost()">
+        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+        Novo Post
+      </ion-button>
+    </div>
+
+    <!-- Lista de Posts -->
+    <div class="posts-lista">
+      <div class="post" *ngFor="let post of posts">
+        <div class="post-header">
+          <ion-avatar>
+            <ion-icon name="person-circle-outline"></ion-icon>
+          </ion-avatar>
+          <div class="post-info">
+            <p class="post-autor">{{ post.autor }}</p>
+            <p class="post-tempo">{{ post.tempo }}</p>
+          </div>
+        </div>
+
+        <div class="post-imagem" *ngIf="post.imagem">
+          <img [src]="post.imagem" alt="Post image" />
+        </div>
+        <div class="post-imagem-placeholder" *ngIf="!post.imagem">
+          <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+        </div>
+
+        <p class="post-texto">{{ post.texto }}</p>
+        <p class="post-categoria">{{ post.categoria }}</p>
+
+        <div class="post-acoes">
+          <ion-button fill="clear" size="small" (click)="curtirPost(post)">
+            <ion-icon slot="start" [name]="post.curtido ? 'thumbs-up' : 'thumbs-up-outline'"></ion-icon>
+            {{ post.curtidas }}
+          </ion-button>
+          <ion-button fill="clear" size="small">
+            <ion-icon slot="start" name="chatbubble-outline"></ion-icon>
+            {{ post.comentarios }}
+          </ion-button>
+        </div>
       </div>
-      <p>Empolgado com minha nova aquisição!</p>
-      <p>Comunidade Prêmios</p>
     </div>
   </div>
 
@@ -129,22 +190,63 @@
     </ion-fab-button>
   </ion-fab>
 
-  <!-- Modal -->
-<ion-modal
-  [isOpen]="isModalOpen"
-  (didDismiss)="closeModal()"
-  [initialBreakpoint]="0.7"
-  [breakpoints]="[0, 1]"
-  class="add-project-modal">
-  <ng-template>
-    <app-addproj></app-addproj>
-  </ng-template>
-</ion-modal>
+  <!-- Modal Adicionar Projeto -->
+  <ion-modal
+    [isOpen]="isModalOpen"
+    (didDismiss)="closeModal()"
+    [initialBreakpoint]="0.7"
+    [breakpoints]="[0, 1]"
+    class="add-project-modal">
+    <ng-template>
+      <app-addproj></app-addproj>
+    </ng-template>
+  </ion-modal>
 
   <!-- Modal de Notificações -->
   <ion-modal [isOpen]="isNotificationsModalOpen" (didDismiss)="closeNotificationsModal()" class="notifications-modal">
     <ng-template>
       <app-notificacoes></app-notificacoes>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Modal Novo Post -->
+  <ion-modal [isOpen]="isNovoPostModalOpen" (didDismiss)="fecharNovoPost()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Novo Post</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="fecharNovoPost()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-label position="stacked">Texto do Post</ion-label>
+          <ion-textarea
+            [(ngModel)]="novoPost.texto"
+            rows="4"
+            placeholder="Compartilhe suas conquistas...">
+          </ion-textarea>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Categoria</ion-label>
+          <ion-select [(ngModel)]="novoPost.categoria" placeholder="Selecione">
+            <ion-select-option value="Comunidade Prêmios">Comunidade Prêmios</ion-select-option>
+            <ion-select-option value="Investimentos">Investimentos</ion-select-option>
+            <ion-select-option value="Projetos Sustentáveis">Projetos Sustentáveis</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-button expand="block" (click)="publicarPost()" class="btn-publicar">
+          <ion-icon slot="start" name="send-outline"></ion-icon>
+          Publicar
+        </ion-button>
+      </ion-content>
     </ng-template>
   </ion-modal>
 </ion-content>
