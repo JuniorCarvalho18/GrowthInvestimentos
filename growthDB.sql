@@ -99,6 +99,53 @@ CREATE TABLE IF NOT EXISTS notificacoes (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    autor VARCHAR(100) NOT NULL,
+    texto TEXT NOT NULL,
+    categoria VARCHAR(50),
+    imagem VARCHAR(255),
+    curtidas INT DEFAULT 0,
+    comentarios INT DEFAULT 0,
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS post_curtidas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    post_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    UNIQUE KEY (post_id, usuario_id)
+);
+
+CREATE TABLE IF NOT EXISTS post_comentarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    post_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    autor VARCHAR(100) NOT NULL,
+    texto TEXT NOT NULL,
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS projeto_avaliacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    projeto_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    autor VARCHAR(100) NOT NULL,
+    nota INT NOT NULL CHECK (nota >= 1 AND nota <= 5),
+    comentario TEXT,
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (projeto_id) REFERENCES projetos(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    UNIQUE KEY (projeto_id, usuario_id)
+);
+
 -- Inserir alguns dados de exemplo (OPCIONAL)
 INSERT INTO projetos (nome, descricao, meta, previsao, local, categoria, impacto_estimado) VALUES
 ('Fazenda Solar Comunitária', 'Instalação de painéis solares para comunidade local', 50000.00, '2025-12-31', 'São Paulo, SP', 'Energia Renovável', 'Redução de 50 toneladas de CO2/ano'),

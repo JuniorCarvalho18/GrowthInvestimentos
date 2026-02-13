@@ -41,114 +41,126 @@
   <div class="section destaques-projetos">
     <h2>Destaques de Projetos Sustentáveis</h2>
     <div class="destaques-grid">
-      <div class="projeto">
-        <div class="badge">Sustentável</div>
+      <div class="projeto" *ngFor="let projeto of projetosDestaque">
+        <div class="badge">{{ projeto.categoria }}</div>
         <div class="imagem">
           <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
         </div>
-        <p class="projeto-nome">Projeto 1</p>
-        <p class="projeto-data">Data de Início: DD/MM/AAAA</p>
-        <ion-button expand="block" class="investir">Investir</ion-button>
-      </div>
-      <div class="projeto">
-        <div class="badge">Sustentável</div>
-        <div class="imagem">
-          <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
-        </div>
-        <p class="projeto-nome">Projeto 2</p>
-        <p class="projeto-data">Data de Início: DD/MM/AAAA</p>
-        <ion-button expand="block" class="investir">Investir</ion-button>
+        <p class="projeto-nome">{{ projeto.nome }}</p>
+        <p class="projeto-data">Data de Início: {{ projeto.dataInicio }}</p>
+        <ion-button expand="block" class="investir" (click)="abrirModalInvestir(projeto)">
+          Investir
+        </ion-button>
       </div>
     </div>
   </div>
 
   <!-- Projetos Sustentáveis COM AVALIAÇÕES -->
   <div class="section projetos-sustaveis">
-    <h2>Projetos Sustentáveis</h2>
-    <div class="grid">
-      <!-- Projeto 1 -->
-      <div class="card">
+    <div class="section-header">
+      <h2>Projetos Sustentáveis</h2>
+      <div class="filtros">
+        <ion-select [(ngModel)]="filtroCategoria" placeholder="Categoria" interface="popover" (ionChange)="filtrarProjetos()">
+          <ion-select-option value="todos">Todas</ion-select-option>
+          <ion-select-option value="Energia Renovável">Energia Renovável</ion-select-option>
+          <ion-select-option value="Reflorestamento">Reflorestamento</ion-select-option>
+          <ion-select-option value="Reciclagem">Reciclagem</ion-select-option>
+          <ion-select-option value="Sustentável">Sustentável</ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+
+    <!-- Skeleton Loading -->
+    <div class="grid" *ngIf="loadingProjetos">
+      <div class="card skeleton" *ngFor="let item of [1,2,3,4]">
+        <ion-skeleton-text [animated]="true" style="height: 100px; border-radius: 8px;"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 80%; margin-top: 8px;"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 60%;"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <!-- Grid de Projetos -->
+    <div class="grid" *ngIf="!loadingProjetos">
+      <div class="card" *ngFor="let projeto of projetosFiltrados; trackBy: trackByProjetoId"
+           [@fadeIn]>
         <div class="imagem">
           <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
         </div>
-        <p class="card-title">Projeto 1</p>
-        <p class="card-description">Breve descrição do projeto</p>
+        <p class="card-title">{{ projeto.nome }}</p>
+        <p class="card-description">{{ projeto.descricao }}</p>
 
-        <!-- Avaliação dentro do card -->
-        <div class="avaliacao-card">
-          <p class="avaliador"><strong>CotistaFeliz99</strong> ⭐⭐⭐⭐⭐</p>
-          <p class="comentario">O projeto tem trazido muitos retornos!</p>
+        <!-- Múltiplas Avaliações por Projeto -->
+        <div class="avaliacoes-container">
+          <div class="avaliacao-card" *ngFor="let avaliacao of projeto.avaliacoes?.slice(0, 2)">
+            <p class="avaliador">
+              <strong>{{ avaliacao.autor }}</strong>
+              <span class="estrelas">{{ getEstrelas(avaliacao.nota) }}</span>
+            </p>
+            <p class="comentario">{{ avaliacao.comentario }}</p>
+          </div>
+
+          <ion-button
+            *ngIf="projeto.avaliacoes && projeto.avaliacoes.length > 2"
+            fill="clear"
+            size="small"
+            class="ver-mais-avaliacoes"
+            (click)="verTodasAvaliacoes(projeto)">
+            +{{ projeto.avaliacoes.length - 2 }} avaliações
+          </ion-button>
         </div>
 
-        <ion-button expand="block" class="investir">Investir</ion-button>
+        <ion-button expand="block" class="investir" (click)="abrirModalInvestir(projeto)">
+          Investir
+        </ion-button>
       </div>
+    </div>
 
-      <!-- Projeto 2 -->
-      <div class="card">
-        <div class="imagem">
-          <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
-        </div>
-        <p class="card-title">Projeto 2</p>
-        <p class="card-description">Breve descrição do projeto</p>
-
-        <!-- Avaliação dentro do card -->
-        <div class="avaliacao-card">
-          <p class="avaliador"><strong>InvestidorVerde</strong> ⭐⭐⭐⭐</p>
-          <p class="comentario">Excelente iniciativa sustentável!</p>
-        </div>
-
-        <ion-button expand="block" class="investir">Investir</ion-button>
-      </div>
-
-      <!-- Projeto 3 -->
-      <div class="card">
-        <div class="imagem">
-          <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
-        </div>
-        <p class="card-title">Projeto 3</p>
-        <p class="card-description">Breve descrição do projeto</p>
-
-        <!-- Avaliação dentro do card -->
-        <div class="avaliacao-card">
-          <p class="avaliador"><strong>ApoiadorEco</strong> ⭐⭐⭐⭐⭐</p>
-          <p class="comentario">Impacto ambiental visível!</p>
-        </div>
-
-        <ion-button expand="block" class="investir">Investir</ion-button>
-      </div>
-
-      <!-- Projeto 4 -->
-      <div class="card">
-        <div class="imagem">
-          <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
-        </div>
-        <p class="card-title">Projeto 4</p>
-        <p class="card-description">Breve descrição do projeto</p>
-
-        <!-- Avaliação dentro do card -->
-        <div class="avaliacao-card">
-          <p class="avaliador"><strong>InvesteSustentavel</strong> ⭐⭐⭐⭐</p>
-          <p class="comentario">Resultados consistentes!</p>
-        </div>
-
-        <ion-button expand="block" class="investir">Investir</ion-button>
-      </div>
+    <!-- Estado vazio -->
+    <div class="empty-state" *ngIf="!loadingProjetos && projetosFiltrados.length === 0">
+      <ion-icon name="folder-open-outline"></ion-icon>
+      <p>Nenhum projeto encontrado</p>
     </div>
   </div>
 
-  <!-- Posts da Comunidade - SISTEMA FUNCIONAL -->
+  <!-- Posts da Comunidade - SISTEMA FUNCIONAL COMPLETO -->
   <div class="section posts-comunidade">
     <div class="posts-header">
       <h2>Posts da Comunidade</h2>
-      <ion-button size="small" (click)="abrirNovoPost()">
-        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-        Novo Post
-      </ion-button>
+      <div class="posts-actions">
+        <ion-select
+          [(ngModel)]="filtroPostCategoria"
+          placeholder="Filtrar"
+          interface="popover"
+          (ionChange)="filtrarPosts()">
+          <ion-select-option value="todos">Todos</ion-select-option>
+          <ion-select-option value="Comunidade Prêmios">Prêmios</ion-select-option>
+          <ion-select-option value="Investimentos">Investimentos</ion-select-option>
+          <ion-select-option value="Projetos Sustentáveis">Sustentáveis</ion-select-option>
+        </ion-select>
+        <ion-button size="small" (click)="abrirNovoPost()">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Novo Post
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Skeleton Loading Posts -->
+    <div class="posts-lista" *ngIf="loadingPosts">
+      <div class="post skeleton" *ngFor="let item of [1,2]">
+        <div class="post-header">
+          <ion-skeleton-text [animated]="true" style="width: 40px; height: 40px; border-radius: 50%;"></ion-skeleton-text>
+          <div style="flex: 1; margin-left: 12px;">
+            <ion-skeleton-text [animated]="true" style="width: 40%;"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 20%;"></ion-skeleton-text>
+          </div>
+        </div>
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 60px; margin-top: 12px;"></ion-skeleton-text>
+      </div>
     </div>
 
     <!-- Lista de Posts -->
-    <div class="posts-lista">
-      <div class="post" *ngFor="let post of posts">
+    <div class="posts-lista" *ngIf="!loadingPosts">
+      <div class="post" *ngFor="let post of postsFiltrados; trackBy: trackByPostId" [@fadeIn]>
         <div class="post-header">
           <ion-avatar>
             <ion-icon name="person-circle-outline"></ion-icon>
@@ -157,6 +169,15 @@
             <p class="post-autor">{{ post.autor }}</p>
             <p class="post-tempo">{{ post.tempo }}</p>
           </div>
+
+          <!-- Menu de opções (editar/deletar) se for post do usuário -->
+          <ion-button
+            *ngIf="post.autor === userName"
+            fill="clear"
+            size="small"
+            (click)="abrirMenuPost(post)">
+            <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+          </ion-button>
         </div>
 
         <div class="post-imagem" *ngIf="post.imagem">
@@ -171,15 +192,40 @@
 
         <div class="post-acoes">
           <ion-button fill="clear" size="small" (click)="curtirPost(post)">
-            <ion-icon slot="start" [name]="post.curtido ? 'thumbs-up' : 'thumbs-up-outline'"></ion-icon>
+            <ion-icon
+              slot="start"
+              [name]="post.curtido ? 'thumbs-up' : 'thumbs-up-outline'"
+              [style.color]="post.curtido ? 'var(--dourado)' : ''">
+            </ion-icon>
             {{ post.curtidas }}
           </ion-button>
-          <ion-button fill="clear" size="small">
+          <ion-button fill="clear" size="small" (click)="abrirComentarios(post)">
             <ion-icon slot="start" name="chatbubble-outline"></ion-icon>
             {{ post.comentarios }}
           </ion-button>
         </div>
       </div>
+    </div>
+
+    <!-- Paginação -->
+    <div class="paginacao" *ngIf="totalPaginasPosts > 1">
+      <ion-button
+        fill="outline"
+        size="small"
+        [disabled]="paginaAtualPosts === 1"
+        (click)="mudarPaginaPosts(paginaAtualPosts - 1)">
+        <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+      </ion-button>
+
+      <span class="pagina-info">{{ paginaAtualPosts }} / {{ totalPaginasPosts }}</span>
+
+      <ion-button
+        fill="outline"
+        size="small"
+        [disabled]="paginaAtualPosts === totalPaginasPosts"
+        (click)="mudarPaginaPosts(paginaAtualPosts + 1)">
+        <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+      </ion-button>
     </div>
   </div>
 
@@ -214,7 +260,7 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-title>Novo Post</ion-title>
+          <ion-title>{{ editandoPost ? 'Editar Post' : 'Novo Post' }}</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="fecharNovoPost()">
               <ion-icon name="close"></ion-icon>
@@ -242,10 +288,158 @@
           </ion-select>
         </ion-item>
 
-        <ion-button expand="block" (click)="publicarPost()" class="btn-publicar">
+        <!-- Upload de imagem (futuro) -->
+        <ion-item button (click)="selecionarImagem()" lines="none" class="upload-imagem">
+          <ion-icon slot="start" name="image-outline"></ion-icon>
+          <ion-label>Adicionar Imagem (em breve)</ion-label>
+        </ion-item>
+
+        <ion-button
+          expand="block"
+          (click)="publicarPost()"
+          class="btn-publicar"
+          [disabled]="!novoPost.texto.trim()">
           <ion-icon slot="start" name="send-outline"></ion-icon>
-          Publicar
+          {{ editandoPost ? 'Atualizar' : 'Publicar' }}
         </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Modal Comentários -->
+  <ion-modal [isOpen]="isComentariosModalOpen" (didDismiss)="fecharComentarios()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Comentários</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="fecharComentarios()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div class="comentarios-lista">
+          <div class="comentario" *ngFor="let comentario of comentariosAtual">
+            <div class="comentario-header">
+              <ion-avatar>
+                <ion-icon name="person-circle-outline"></ion-icon>
+              </ion-avatar>
+              <div>
+                <p class="comentario-autor">{{ comentario.autor }}</p>
+                <p class="comentario-data">{{ comentario.data }}</p>
+              </div>
+            </div>
+            <p class="comentario-texto">{{ comentario.texto }}</p>
+          </div>
+
+          <div class="empty-state" *ngIf="comentariosAtual.length === 0">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <p>Seja o primeiro a comentar!</p>
+          </div>
+        </div>
+
+        <div class="adicionar-comentario">
+          <ion-item>
+            <ion-textarea
+              [(ngModel)]="novoComentario"
+              rows="2"
+              placeholder="Escreva um comentário...">
+            </ion-textarea>
+          </ion-item>
+          <ion-button
+            expand="block"
+            (click)="adicionarComentario()"
+            [disabled]="!novoComentario.trim()">
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            Comentar
+          </ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Modal Investir - PROTÓTIPO -->
+  <ion-modal
+    [isOpen]="isInvestirModalOpen"
+    (didDismiss)="fecharModalInvestir()"
+    [initialBreakpoint]="0.75"
+    [breakpoints]="[0, 0.75, 1]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Investir em Projeto</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="fecharModalInvestir()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding investir-content">
+        <div class="projeto-info" *ngIf="projetoSelecionado">
+          <div class="projeto-imagem">
+            <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+          </div>
+
+          <h2>{{ projetoSelecionado.nome }}</h2>
+          <p class="projeto-categoria">{{ projetoSelecionado.categoria }}</p>
+
+          <div class="projeto-detalhes">
+            <div class="detalhe-item">
+              <ion-icon name="cash-outline"></ion-icon>
+              <div>
+                <p class="detalhe-label">Meta</p>
+                <p class="detalhe-valor">R$ {{ projetoSelecionado.meta || '50.000,00' }}</p>
+              </div>
+            </div>
+
+            <div class="detalhe-item">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <div>
+                <p class="detalhe-label">Previsão</p>
+                <p class="detalhe-valor">{{ projetoSelecionado.previsao || 'Dez/2025' }}</p>
+              </div>
+            </div>
+
+            <div class="detalhe-item">
+              <ion-icon name="location-outline"></ion-icon>
+              <div>
+                <p class="detalhe-label">Local</p>
+                <p class="detalhe-valor">{{ projetoSelecionado.local || 'São Paulo, SP' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="projeto-descricao">{{ projetoSelecionado.descricao }}</p>
+
+          <ion-item class="valor-investimento">
+            <ion-label position="stacked">Valor do Investimento (R$)</ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="valorInvestimento"
+              placeholder="0,00"
+              min="10">
+            </ion-input>
+          </ion-item>
+
+          <div class="tokens-info" *ngIf="valorInvestimento > 0">
+            <ion-icon name="star-outline"></ion-icon>
+            <p>Você receberá aproximadamente <strong>{{ calcularTokens() }} tokens</strong></p>
+          </div>
+
+          <ion-button
+            expand="block"
+            class="btn-confirmar-investimento"
+            [disabled]="!valorInvestimento || valorInvestimento < 10"
+            (click)="confirmarInvestimento()">
+            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+            Confirmar Investimento
+          </ion-button>
+        </div>
       </ion-content>
     </ng-template>
   </ion-modal>

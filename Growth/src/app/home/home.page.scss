@@ -67,11 +67,10 @@ h2 {
 
 .destaques-grid {
   display: grid;
-  grid-template-columns: 1fr; // 1 coluna em mobile
+  grid-template-columns: 1fr;
   gap: 16px;
   padding: 0 16px;
 
-  // Telas médias e grandes: 2 colunas
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -118,9 +117,30 @@ h2 {
 }
 
 // ==========================================
-// GRID DE PROJETOS COM AVALIAÇÕES
+// GRID DE PROJETOS COM FILTROS E AVALIAÇÕES
 // ==========================================
 .projetos-sustaveis {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 16px 16px 16px;
+
+    h2 {
+      margin: 0;
+      flex: 1;
+    }
+
+    .filtros {
+      ion-select {
+        max-width: 150px;
+        font-size: 13px;
+        --padding-start: 8px;
+        --padding-end: 8px;
+      }
+    }
+  }
+
   h2 {
     font-size: 20px;
     margin: 16px;
@@ -142,6 +162,10 @@ h2 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
+
+  &.skeleton {
+    padding: 12px;
+  }
 
   .imagem {
     background-color: #23252480;
@@ -167,21 +191,35 @@ h2 {
     line-height: 1.4;
   }
 
-  // Avaliação dentro do card
+  // Container de múltiplas avaliações
+  .avaliacoes-container {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
   .avaliacao-card {
     background-color: rgba(255, 255, 255, 0.05);
     border-left: 3px solid var(--dourado);
     padding: 8px;
-    margin-bottom: 12px;
     border-radius: 4px;
 
     .avaliador {
       margin: 0 0 4px 0;
       font-size: 12px;
       color: var(--ion-text-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
       strong {
         font-weight: 600;
+      }
+
+      .estrelas {
+        font-size: 11px;
+        color: var(--dourado);
       }
     }
 
@@ -193,10 +231,34 @@ h2 {
       line-height: 1.3;
     }
   }
+
+  .ver-mais-avaliacoes {
+    --color: var(--dourado);
+    font-size: 11px;
+    margin: 0;
+    height: 24px;
+  }
+}
+
+// Estado vazio
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(227, 227, 227, 0.5);
+
+  ion-icon {
+    font-size: 60px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
+  }
 }
 
 // ==========================================
-// POSTS DA COMUNIDADE - SISTEMA FUNCIONAL
+// POSTS DA COMUNIDADE - COMPLETO
 // ==========================================
 .posts-comunidade {
   .posts-header {
@@ -204,15 +266,30 @@ h2 {
     justify-content: space-between;
     align-items: center;
     margin: 0 16px 16px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
 
     h2 {
       margin: 0;
+      flex: 1;
+      min-width: 150px;
     }
 
-    ion-button {
-      --background: var(--dourado);
-      --color: var(--ion-text-color);
-      font-size: 13px;
+    .posts-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      ion-select {
+        max-width: 120px;
+        font-size: 12px;
+      }
+
+      ion-button {
+        --background: var(--dourado);
+        --color: var(--ion-text-color);
+        font-size: 13px;
+      }
     }
   }
 
@@ -228,6 +305,10 @@ h2 {
     border-radius: 8px;
     padding: 16px;
     border: 1px solid rgba(227, 227, 227, 0.1);
+
+    &.skeleton {
+      padding: 12px;
+    }
 
     .post-header {
       display: flex;
@@ -317,6 +398,27 @@ h2 {
       }
     }
   }
+
+  // Paginação
+  .paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 16px;
+
+    .pagina-info {
+      font-size: 14px;
+      color: var(--ion-text-color);
+    }
+
+    ion-button {
+      --background: transparent;
+      --border-color: var(--dourado);
+      --color: var(--dourado);
+    }
+  }
 }
 
 // Modal Novo Post
@@ -326,6 +428,201 @@ h2 {
   margin-top: 16px;
 }
 
+.upload-imagem {
+  margin-top: 12px;
+  --background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+
+  ion-icon {
+    color: var(--dourado);
+  }
+}
+
+// Modal Comentários
+.comentarios-lista {
+  margin-bottom: 80px;
+
+  .comentario {
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+
+    .comentario-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+
+      ion-avatar {
+        width: 32px;
+        height: 32px;
+
+        ion-icon {
+          font-size: 32px;
+          color: var(--dourado);
+        }
+      }
+
+      .comentario-autor {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ion-text-color);
+      }
+
+      .comentario-data {
+        margin: 0;
+        font-size: 11px;
+        color: rgba(227, 227, 227, 0.6);
+      }
+    }
+
+    .comentario-texto {
+      margin: 0 0 0 44px;
+      font-size: 13px;
+      color: rgba(227, 227, 227, 0.9);
+      line-height: 1.4;
+    }
+  }
+}
+
+.adicionar-comentario {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--ion-background-color);
+  padding: 12px;
+  border-top: 1px solid rgba(227, 227, 227, 0.1);
+
+  ion-button {
+    --background: var(--dourado);
+    --color: var(--ion-text-color);
+    margin-top: 8px;
+  }
+}
+
+// ==========================================
+// MODAL INVESTIR
+// ==========================================
+.investir-content {
+  .projeto-info {
+    .projeto-imagem {
+      background-color: #23252480;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      margin-bottom: 16px;
+
+      .placeholder-icon {
+        font-size: 64px;
+      }
+    }
+
+    h2 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+      color: var(--ion-text-color);
+    }
+
+    .projeto-categoria {
+      margin: 0 0 16px 0;
+      font-size: 13px;
+      color: var(--dourado);
+      font-weight: 600;
+    }
+
+    .projeto-detalhes {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .detalhe-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        ion-icon {
+          font-size: 24px;
+          color: var(--dourado);
+        }
+
+        .detalhe-label {
+          margin: 0;
+          font-size: 12px;
+          color: rgba(227, 227, 227, 0.7);
+        }
+
+        .detalhe-valor {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--ion-text-color);
+        }
+      }
+    }
+
+    .projeto-descricao {
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      color: rgba(227, 227, 227, 0.8);
+      line-height: 1.6;
+    }
+
+    .valor-investimento {
+      --background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 16px;
+
+      ion-input {
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--dourado);
+      }
+    }
+
+    .tokens-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(168, 143, 95, 0.1);
+      border: 1px solid var(--dourado);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+
+      ion-icon {
+        font-size: 24px;
+        color: var(--dourado);
+      }
+
+      p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--ion-text-color);
+
+        strong {
+          color: var(--dourado);
+        }
+      }
+    }
+
+    .btn-confirmar-investimento {
+      --background: var(--dourado);
+      --color: var(--ion-text-color);
+      height: 48px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  }
+}
+
 // ==========================================
 // OUTROS ESTILOS
 // ==========================================
@@ -333,7 +630,7 @@ h2 {
   --background: var(--dourado);
   --color: var(--ion-text-color);
   font-size: 14px;
-  margin-top: auto; // Empurra o botão para o fim do card
+  margin-top: auto;
 }
 
 .fixed-button {
@@ -384,15 +681,6 @@ ion-content.addproj-content {
   }
 }
 
-@keyframes slide-down {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
 ::ng-deep {
   .alert-radio-label {
     color: var(--ion-text-color) !important;
@@ -414,4 +702,13 @@ ion-content.addproj-content {
     }
   }
 
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }

@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { HomePageRoutingModule } from './home-routing.module';
 import { HomePage } from './home.page';
-import { AddprojPageModule } from '../addproj/addproj.module'; 
-import { NotificacoesPageModule } from '../notificacoes/notificacoes.module'; 
+import { AddprojPageModule } from '../addproj/addproj.module';
+import { NotificacoesPageModule } from '../notificacoes/notificacoes.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -14,7 +16,8 @@ import { NotificacoesPageModule } from '../notificacoes/notificacoes.module';
     HomePageRoutingModule,
     AddprojPageModule,
     NotificacoesPageModule,
+    // BrowserAnimationsModule já está no app.module.ts
   ],
-  declarations: [HomePage,], 
+  declarations: [HomePage],
 })
 export class HomePageModule {}
