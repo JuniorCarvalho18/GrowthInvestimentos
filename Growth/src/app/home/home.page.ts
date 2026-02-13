@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService, User } from '../services/auth.service';
 import { ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { PostsService } from '../services/posts.service';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+
 interface Avaliacao {
   autor: string;
   nota: number;
@@ -177,39 +178,6 @@ export class HomePage implements OnInit {
       curtidas: 15,
       comentarios: 5,
       curtido: false
-    },
-    {
-      id: 4,
-      autor: 'PlantadorArvores',
-      tempo: '2d',
-      texto: 'Participei do projeto de reflorestamento no fim de semana. Experiência incrível!',
-      categoria: 'Projetos Sustentáveis',
-      imagem: '',
-      curtidas: 42,
-      comentarios: 12,
-      curtido: false
-    },
-    {
-      id: 5,
-      autor: 'CotistaFeliz99',
-      tempo: '3d',
-      texto: 'Meus tokens já renderam um desconto incrível no marketplace!',
-      categoria: 'Comunidade Prêmios',
-      imagem: '',
-      curtidas: 19,
-      comentarios: 4,
-      curtido: false
-    },
-    {
-      id: 6,
-      autor: 'SustentavelPro',
-      tempo: '4d',
-      texto: 'A horta comunitária que apoiei está produzindo alimentos orgânicos para 50 famílias!',
-      categoria: 'Projetos Sustentáveis',
-      imagem: '',
-      curtidas: 67,
-      comentarios: 18,
-      curtido: false
     }
   ];
 
@@ -223,11 +191,22 @@ export class HomePage implements OnInit {
   // Formulário Novo Post
   novoPost = {
     texto: '',
-    categoria: 'Comunidade Prêmios'
+    categoria: 'Comunidade Prêmios',
+    imagem: ''
   };
   editandoPost: Post | null = null;
 
-  // Comentários
+  // Comentários (armazenamento local por post)
+  comentariosPorPost: { [postId: number]: Comentario[] } = {
+    1: [
+      { id: 1, autor: 'ComentaristaAtivo', texto: 'Concordo totalmente!', data: '1h' },
+      { id: 2, autor: 'OutroUsuario', texto: 'Parabéns pelo post!', data: '2h' }
+    ],
+    2: [
+      { id: 1, autor: 'FãDeEnergia', texto: 'Quanto rendeu?', data: '3h' }
+    ]
+  };
+
   comentariosAtual: Comentario[] = [];
   postSelecionadoComentarios: Post | null = null;
   novoComentario = '';
@@ -241,14 +220,12 @@ export class HomePage implements OnInit {
     private authService: AuthService,
     private toastController: ToastController,
     private alertController: AlertController,
-    private postsService: PostsService,
     private actionSheetController: ActionSheetController
   ) {}
 
   ngOnInit() {
     this.authService.currentUser.subscribe(user => {
       this.currentUser = user;
-      this.carregarPosts();
     });
 
     // Simular carregamento
@@ -258,10 +235,38 @@ export class HomePage implements OnInit {
       this.filtrarProjetos();
       this.filtrarPosts();
     }, 800);
+
+    // Carregar posts/comentários do localStorage
+    this.carregarDadosLocais();
   }
 
   get userName(): string {
     return this.currentUser?.nome || 'Usuário';
+  }
+
+  // ==========================================
+  // PERSISTÊNCIA LOCAL
+  // ==========================================
+
+  carregarDadosLocais() {
+    const postsGuardados = localStorage.getItem('growth_posts');
+    const comentariosGuardados = localStorage.getItem('growth_comentarios');
+
+    if (postsGuardados) {
+      this.posts = JSON.parse(postsGuardados);
+    }
+
+    if (comentariosGuardados) {
+      this.comentariosPorPost = JSON.parse(comentariosGuardados);
+    }
+  }
+
+  salvarPosts() {
+    localStorage.setItem('growth_posts', JSON.stringify(this.posts));
+  }
+
+  salvarComentarios() {
+    localStorage.setItem('growth_comentarios', JSON.stringify(this.comentariosPorPost));
   }
 
   // ==========================================
@@ -305,12 +310,20 @@ export class HomePage implements OnInit {
   async verTodasAvaliacoes(projeto: Projeto) {
     if (!projeto.avaliacoes) return;
 
+    // Criar lista de avaliações em texto puro (sem HTML)
+    let listaAvaliacoes = '';
+    projeto.avaliacoes.forEach((av, index) => {
+      listaAvaliacoes += `${av.autor} ${this.getEstrelas(av.nota)}\n`;
+      listaAvaliacoes += `"${av.comentario}"\n`;
+      if (index < projeto.avaliacoes!.length - 1) {
+        listaAvaliacoes += '\n';
+      }
+    });
+
     const alert = await this.alertController.create({
       header: `Avaliações - ${projeto.nome}`,
-      message: projeto.avaliacoes.map(av =>
-        `<strong>${av.autor}</strong> ${this.getEstrelas(av.nota)}<br>
-        <em>${av.comentario}</em>`
-      ).join('<br><br>'),
+      message: listaAvaliacoes,
+      cssClass: 'avaliacoes-alert',
       buttons: ['Fechar']
     });
 
@@ -352,7 +365,8 @@ export class HomePage implements OnInit {
     this.editandoPost = null;
     this.novoPost = {
       texto: '',
-      categoria: 'Comunidade Prêmios'
+      categoria: 'Comunidade Prêmios',
+      imagem: ''
     };
     this.isNovoPostModalOpen = true;
   }
@@ -362,7 +376,8 @@ export class HomePage implements OnInit {
     this.editandoPost = null;
     this.novoPost = {
       texto: '',
-      categoria: 'Comunidade Prêmios'
+      categoria: 'Comunidade Prêmios',
+      imagem: ''
     };
   }
 
@@ -384,6 +399,7 @@ export class HomePage implements OnInit {
       if (index !== -1) {
         this.posts[index].texto = this.novoPost.texto;
         this.posts[index].categoria = this.novoPost.categoria;
+        this.posts[index].imagem = this.novoPost.imagem;
       }
 
       const toast = await this.toastController.create({
@@ -402,7 +418,7 @@ export class HomePage implements OnInit {
         tempo: 'agora',
         texto: this.novoPost.texto,
         categoria: this.novoPost.categoria,
-        imagem: '',
+        imagem: this.novoPost.imagem,
         curtidas: 0,
         comentarios: 0,
         curtido: false
@@ -420,6 +436,7 @@ export class HomePage implements OnInit {
       await toast.present();
     }
 
+    this.salvarPosts(); // PERSISTIR
     this.filtrarPosts();
     this.fecharNovoPost();
   }
@@ -432,6 +449,7 @@ export class HomePage implements OnInit {
       post.curtidas++;
       post.curtido = true;
     }
+    this.salvarPosts(); // PERSISTIR
   }
 
   async abrirMenuPost(post: Post) {
@@ -468,7 +486,8 @@ export class HomePage implements OnInit {
     this.editandoPost = post;
     this.novoPost = {
       texto: post.texto,
-      categoria: post.categoria
+      categoria: post.categoria,
+      imagem: post.imagem || ''
     };
     this.isNovoPostModalOpen = true;
   }
@@ -489,6 +508,7 @@ export class HomePage implements OnInit {
             const index = this.posts.findIndex(p => p.id === post.id);
             if (index !== -1) {
               this.posts.splice(index, 1);
+              this.salvarPosts(); // PERSISTIR
               this.filtrarPosts();
 
               const toast = await this.toastController.create({
@@ -511,9 +531,26 @@ export class HomePage implements OnInit {
     return post.id;
   }
 
-  selecionarImagem() {
-    // TODO: Implementar upload de imagem
-    this.showToast('Upload de imagem em desenvolvimento!', 'warning');
+  async selecionarImagem() {
+    try {
+      const imagem = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: true,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Prompt,
+        promptLabelHeader: 'Selecionar Imagem',
+        promptLabelPhoto: 'Galeria',
+        promptLabelPicture: 'Câmera'
+      });
+
+      if (imagem.dataUrl) {
+        this.novoPost.imagem = imagem.dataUrl;
+        await this.showToast('Imagem adicionada!', 'success');
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar imagem:', error);
+      await this.showToast('Erro ao selecionar imagem', 'danger');
+    }
   }
 
   // ==========================================
@@ -524,21 +561,8 @@ export class HomePage implements OnInit {
     this.postSelecionadoComentarios = post;
     this.novoComentario = '';
 
-    // Simular comentários (depois virá do backend)
-    this.comentariosAtual = [
-      {
-        id: 1,
-        autor: 'ComentaristaAtivo',
-        texto: 'Concordo totalmente!',
-        data: '1h'
-      },
-      {
-        id: 2,
-        autor: 'OutroUsuario',
-        texto: 'Parabéns pelo post!',
-        data: '2h'
-      }
-    ];
+    // Carregar comentários deste post
+    this.comentariosAtual = this.comentariosPorPost[post.id] || [];
 
     this.isComentariosModalOpen = true;
   }
@@ -552,15 +576,26 @@ export class HomePage implements OnInit {
   async adicionarComentario() {
     if (!this.novoComentario.trim() || !this.postSelecionadoComentarios) return;
 
+    const postId = this.postSelecionadoComentarios.id;
+
+    // Garantir que o array existe
+    if (!this.comentariosPorPost[postId]) {
+      this.comentariosPorPost[postId] = [];
+    }
+
     const novoComent: Comentario = {
-      id: this.comentariosAtual.length + 1,
+      id: this.comentariosPorPost[postId].length + 1,
       autor: this.userName,
       texto: this.novoComentario,
       data: 'agora'
     };
 
-    this.comentariosAtual.push(novoComent);
+    this.comentariosPorPost[postId].push(novoComent);
+    this.comentariosAtual = this.comentariosPorPost[postId];
     this.postSelecionadoComentarios.comentarios++;
+
+    this.salvarComentarios(); // PERSISTIR
+    this.salvarPosts(); // PERSISTIR contador
 
     this.novoComentario = '';
 
@@ -590,7 +625,6 @@ export class HomePage implements OnInit {
   }
 
   calcularTokens(): number {
-    // 1 real = 0.1 token (10% em tokens)
     return Math.floor(this.valorInvestimento * 0.1);
   }
 
@@ -602,13 +636,7 @@ export class HomePage implements OnInit {
 
     const alert = await this.alertController.create({
       header: 'Confirmar Investimento',
-      message: `
-        <p>Projeto: <strong>${this.projetoSelecionado?.nome}</strong></p>
-        <p>Valor: <strong>R$ ${this.valorInvestimento.toFixed(2)}</strong></p>
-        <p>Tokens: <strong>${this.calcularTokens()} tokens</strong></p>
-        <br>
-        <p>Deseja confirmar o investimento?</p>
-      `,
+      message: `Projeto: ${this.projetoSelecionado?.nome}\n\nValor: R$ ${this.valorInvestimento.toFixed(2)}\n\nTokens: ${this.calcularTokens()} tokens\n\nDeseja confirmar o investimento?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -617,7 +645,6 @@ export class HomePage implements OnInit {
         {
           text: 'Confirmar',
           handler: async () => {
-            // TODO: Integrar com backend
             await this.showToast('Investimento realizado com sucesso!', 'success');
             this.fecharModalInvestir();
           }
@@ -642,21 +669,4 @@ export class HomePage implements OnInit {
     });
     await toast.present();
   }
-
-  carregarPosts() {
-  this.loadingPosts = true;
-  this.postsService.listarPosts().subscribe({
-    next: (res) => {
-      this.loadingPosts = false;
-      if (res.success) {
-        this.posts = res.posts;
-        this.filtrarPosts();
-      }
-    },
-    error: (err) => {
-      this.loadingPosts = false;
-      console.error('Erro ao carregar posts:', err);
-    }
-  });
-}
 }

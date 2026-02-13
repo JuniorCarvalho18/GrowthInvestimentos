@@ -288,11 +288,23 @@
           </ion-select>
         </ion-item>
 
-        <!-- Upload de imagem (futuro) -->
+        <!-- Upload de imagem -->
         <ion-item button (click)="selecionarImagem()" lines="none" class="upload-imagem">
           <ion-icon slot="start" name="image-outline"></ion-icon>
-          <ion-label>Adicionar Imagem (em breve)</ion-label>
+          <ion-label>Adicionar Imagem</ion-label>
         </ion-item>
+
+        <!-- Preview da imagem -->
+        <div *ngIf="novoPost.imagem" style="position: relative; margin-top: 12px;">
+          <img [src]="novoPost.imagem" alt="Preview" style="width: 100%; border-radius: 8px;" />
+          <ion-button
+            (click)="novoPost.imagem = ''"
+            fill="clear"
+            size="small"
+            style="position: absolute; top: 8px; right: 8px; --background: rgba(0,0,0,0.7); --color: white;">
+            <ion-icon slot="icon-only" name="close-circle"></ion-icon>
+          </ion-button>
+        </div>
 
         <ion-button
           expand="block"
@@ -365,8 +377,7 @@
   <ion-modal
     [isOpen]="isInvestirModalOpen"
     (didDismiss)="fecharModalInvestir()"
-    [initialBreakpoint]="0.75"
-    [breakpoints]="[0, 0.75, 1]">
+    class="modal-investir">
     <ng-template>
       <ion-header>
         <ion-toolbar>
