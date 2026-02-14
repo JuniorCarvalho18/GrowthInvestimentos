@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ImageUploadService } from '../services/image-upload.service';
+import { ImageUploadService } from '../services/image.upload.service';
 import { ToastController } from '@ionic/angular';
 
 @Component({
