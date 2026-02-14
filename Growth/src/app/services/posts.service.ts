@@ -6,13 +6,13 @@ export interface Post {
   id?: number;
   usuario_id?: number;
   autor: string;
-  tempo: string;
+  tempo?: string;
   texto: string;
   categoria: string;
   imagem?: string;
   curtidas: number;
   comentarios: number;
-  curtido: boolean;
+  curtido?: boolean;
   data_criacao?: string;
 }
 
@@ -29,12 +29,10 @@ export interface Comentario {
   providedIn: 'root'
 })
 export class PostsService {
-  // TODO: Ajustar URL quando criar a API
   private apiUrl = 'http://localhost/GrowthInvestimentos/apiPortal/posts.php';
 
   constructor(private http: HttpClient) {}
 
-  // Métodos para quando houver backend
   listarPosts(): Observable<any> {
     return this.http.post<any>(this.apiUrl, {
       requisicao: 'listar'
@@ -56,10 +54,11 @@ export class PostsService {
     });
   }
 
-  deletarPost(postId: number): Observable<any> {
+  deletarPost(postId: number, usuarioId: number): Observable<any> {
     return this.http.post<any>(this.apiUrl, {
       requisicao: 'deletar',
-      id: postId
+      id: postId,
+      usuario_id: usuarioId
     });
   }
 

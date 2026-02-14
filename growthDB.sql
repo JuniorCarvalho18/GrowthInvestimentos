@@ -106,8 +106,6 @@ CREATE TABLE IF NOT EXISTS posts (
     texto TEXT NOT NULL,
     categoria VARCHAR(50),
     imagem VARCHAR(255),
-    curtidas INT DEFAULT 0,
-    comentarios INT DEFAULT 0,
     data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );

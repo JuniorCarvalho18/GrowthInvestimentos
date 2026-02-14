@@ -162,6 +162,26 @@ ion-input, ion-textarea {
 
 }
 
+/* Texto dos botões normais */
+.action-sheet-button {
+  color: var(--ion-text-color) !important; /* Mude aqui */
+}
+
+/* Ícones dos botões */
+.action-sheet-icon {
+  color: var(--dourado) !important; /* Ou outra cor */
+}
+
+/* Botão Deletar (vermelho) */
+.action-sheet-destructive {
+  color: #eb445a !important; /* Vermelho padrão */
+}
+
+/* Botão Cancelar */
+.action-sheet-cancel {
+  color: rgba(227, 227, 227, 0.7) !important; /* Cinza claro */
+}
+
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 

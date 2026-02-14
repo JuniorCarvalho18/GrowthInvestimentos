@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../services/auth.service';
+import { PostsService, Post, Comentario } from '../services/posts.service';
+import { ImageUploadService } from '../services/image-upload.service';
 import { ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 interface Avaliacao {
   autor: string;
@@ -21,25 +22,6 @@ interface Projeto {
   previsao?: string;
   local?: string;
   avaliacoes?: Avaliacao[];
-}
-
-interface Post {
-  id: number;
-  autor: string;
-  tempo: string;
-  texto: string;
-  categoria: string;
-  imagem?: string;
-  curtidas: number;
-  comentarios: number;
-  curtido: boolean;
-}
-
-interface Comentario {
-  id: number;
-  autor: string;
-  texto: string;
-  data: string;
 }
 
 @Component({
@@ -145,41 +127,7 @@ export class HomePage implements OnInit {
   projetosFiltrados: Projeto[] = [];
 
   // Sistema de Posts
-  posts: Post[] = [
-    {
-      id: 1,
-      autor: 'ApoiadorSocial1',
-      tempo: '2h',
-      texto: 'Empolgado com minha nova aquisição!',
-      categoria: 'Comunidade Prêmios',
-      imagem: '',
-      curtidas: 12,
-      comentarios: 3,
-      curtido: false
-    },
-    {
-      id: 2,
-      autor: 'InvestidorVerde',
-      tempo: '5h',
-      texto: 'Meu investimento no projeto de energia solar está dando ótimos resultados! 🌞',
-      categoria: 'Investimentos',
-      imagem: '',
-      curtidas: 28,
-      comentarios: 7,
-      curtido: false
-    },
-    {
-      id: 3,
-      autor: 'EcoWarrior',
-      tempo: '1d',
-      texto: 'Acabei de resgatar um curso de sustentabilidade com meus tokens. Vale muito a pena!',
-      categoria: 'Comunidade Prêmios',
-      imagem: '',
-      curtidas: 15,
-      comentarios: 5,
-      curtido: false
-    }
-  ];
+  posts: Post[] = [];
 
   // Filtros e Paginação - Posts
   filtroPostCategoria = 'todos';
@@ -196,17 +144,7 @@ export class HomePage implements OnInit {
   };
   editandoPost: Post | null = null;
 
-  // Comentários (armazenamento local por post)
-  comentariosPorPost: { [postId: number]: Comentario[] } = {
-    1: [
-      { id: 1, autor: 'ComentaristaAtivo', texto: 'Concordo totalmente!', data: '1h' },
-      { id: 2, autor: 'OutroUsuario', texto: 'Parabéns pelo post!', data: '2h' }
-    ],
-    2: [
-      { id: 1, autor: 'FãDeEnergia', texto: 'Quanto rendeu?', data: '3h' }
-    ]
-  };
-
+  // Comentários (agora vem da API)
   comentariosAtual: Comentario[] = [];
   postSelecionadoComentarios: Post | null = null;
   novoComentario = '';
@@ -218,6 +156,8 @@ export class HomePage implements OnInit {
   constructor(
     private rota: Router,
     private authService: AuthService,
+    private postsService: PostsService,
+    private imageUploadService: ImageUploadService,
     private toastController: ToastController,
     private alertController: AlertController,
     private actionSheetController: ActionSheetController
@@ -228,69 +168,252 @@ export class HomePage implements OnInit {
       this.currentUser = user;
     });
 
-    // Simular carregamento
+    // Simular carregamento de projetos
     setTimeout(() => {
       this.loadingProjetos = false;
-      this.loadingPosts = false;
       this.filtrarProjetos();
-      this.filtrarPosts();
     }, 800);
 
-    // Carregar posts/comentários do localStorage
-    this.carregarDadosLocais();
+    // Carregar posts da API
+    this.carregarPosts();
   }
 
   get userName(): string {
     return this.currentUser?.nome || 'Usuário';
   }
 
+  get userId(): number {
+    return this.currentUser?.id || 0;
+  }
+
   // ==========================================
-  // PERSISTÊNCIA LOCAL
+  // POSTS - INTEGRAÇÃO COM API
   // ==========================================
 
-  carregarDadosLocais() {
-    const postsGuardados = localStorage.getItem('growth_posts');
-    const comentariosGuardados = localStorage.getItem('growth_comentarios');
+  async carregarPosts() {
+    this.loadingPosts = true;
 
-    if (postsGuardados) {
-      this.posts = JSON.parse(postsGuardados);
+    this.postsService.listarPosts().subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Processa os posts vindos da API
+          this.posts = response.posts.map((p: any) => ({
+            ...p,
+            tempo: this.calcularTempo(p.data_criacao),
+            curtido: false // TODO: verificar se usuário curtiu
+          }));
+          this.filtrarPosts();
+        }
+        this.loadingPosts = false;
+      },
+      error: async (error) => {
+        console.error('Erro ao carregar posts:', error);
+        this.loadingPosts = false;
+        await this.showToast('Erro ao carregar posts', 'danger');
+      }
+    });
+  }
+
+  calcularTempo(dataString: string): string {
+    const now = new Date();
+    const data = new Date(dataString);
+    const diff = Math.floor((now.getTime() - data.getTime()) / 1000); // segundos
+
+    if (diff < 60) return 'agora';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
+    return data.toLocaleDateString('pt-BR');
+  }
+
+  async publicarPost() {
+    if (!this.novoPost.texto.trim()) {
+      await this.showToast('Por favor, escreva algo no post!', 'warning');
+      return;
     }
 
-    if (comentariosGuardados) {
-      this.comentariosPorPost = JSON.parse(comentariosGuardados);
+    const postData: Post = {
+      usuario_id: this.userId,
+      autor: this.userName,
+      texto: this.novoPost.texto,
+      categoria: this.novoPost.categoria,
+      imagem: this.novoPost.imagem,
+      curtidas: 0,
+      comentarios: 0
+    };
+
+    if (this.editandoPost) {
+      // Editar
+      postData.id = this.editandoPost.id;
+
+      this.postsService.editarPost(postData).subscribe({
+        next: async (response) => {
+          if (response.success) {
+            await this.showToast('Post atualizado!', 'success');
+            this.carregarPosts();
+            this.fecharNovoPost();
+          } else {
+            await this.showToast('Erro ao atualizar post', 'danger');
+          }
+        },
+        error: async () => {
+          await this.showToast('Erro ao conectar ao servidor', 'danger');
+        }
+      });
+    } else {
+      // Criar
+      this.postsService.criarPost(postData).subscribe({
+        next: async (response) => {
+          if (response.success) {
+            await this.showToast('Post publicado!', 'success');
+            this.carregarPosts();
+            this.fecharNovoPost();
+          } else {
+            await this.showToast('Erro ao publicar post', 'danger');
+          }
+        },
+        error: async () => {
+          await this.showToast('Erro ao conectar ao servidor', 'danger');
+        }
+      });
     }
   }
 
-  salvarPosts() {
-    localStorage.setItem('growth_posts', JSON.stringify(this.posts));
+  curtirPost(post: Post) {
+    if (!post.id) return;
+
+    this.postsService.curtirPost(post.id, this.userId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          if (response.curtido) {
+            post.curtidas++;
+            post.curtido = true;
+          } else {
+            post.curtidas--;
+            post.curtido = false;
+          }
+        }
+      },
+      error: async () => {
+        await this.showToast('Erro ao curtir post', 'danger');
+      }
+    });
   }
 
-  salvarComentarios() {
-    localStorage.setItem('growth_comentarios', JSON.stringify(this.comentariosPorPost));
+  async deletarPost(post: Post) {
+    if (!post.id) return;
+
+    const alert = await this.alertController.create({
+      header: 'Confirmar Exclusão',
+      message: 'Deseja realmente excluir este post?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Excluir',
+          role: 'destructive',
+          handler: async () => {
+            this.postsService.deletarPost(post.id!, this.userId).subscribe({
+              next: async (response) => {
+                if (response.success) {
+                  await this.showToast('Post excluído!', 'success');
+                  this.carregarPosts();
+                } else {
+                  await this.showToast('Erro ao excluir post', 'danger');
+                }
+              },
+              error: async () => {
+                await this.showToast('Erro ao conectar ao servidor', 'danger');
+              }
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   // ==========================================
-  // NAVEGAÇÃO E MODAIS BÁSICOS
+  // COMENTÁRIOS - INTEGRAÇÃO COM API
   // ==========================================
 
-  openAddProjectModal() {
-    this.isModalOpen = true;
+  abrirComentarios(post: Post) {
+    this.postSelecionadoComentarios = post;
+    this.novoComentario = '';
+
+    if (!post.id) return;
+
+    // Carregar comentários da API
+    this.postsService.listarComentarios(post.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.comentariosAtual = response.comentarios.map((c: any) => ({
+            ...c,
+            data: this.calcularTempo(c.data)
+          }));
+        }
+        this.isComentariosModalOpen = true;
+      },
+      error: async () => {
+        await this.showToast('Erro ao carregar comentários', 'danger');
+      }
+    });
   }
 
-  closeModal() {
-    this.isModalOpen = false;
-  }
+  async adicionarComentario() {
+    if (!this.novoComentario.trim() || !this.postSelecionadoComentarios?.id) return;
 
-  openNotificationsModal() {
-    this.isNotificationsModalOpen = true;
-  }
+    const comentario: Comentario = {
+      post_id: this.postSelecionadoComentarios.id,
+      usuario_id: this.userId,
+      autor: this.userName,
+      texto: this.novoComentario,
+      data: new Date().toISOString()
+    };
 
-  closeNotificationsModal() {
-    this.isNotificationsModalOpen = false;
+    this.postsService.adicionarComentario(comentario).subscribe({
+      next: async (response) => {
+        if (response.success) {
+          this.novoComentario = '';
+          this.postSelecionadoComentarios!.comentarios++;
+          await this.showToast('Comentário adicionado!', 'success');
+
+          // Recarregar comentários
+          if (this.postSelecionadoComentarios?.id) {
+            this.postsService.listarComentarios(this.postSelecionadoComentarios.id).subscribe({
+              next: (res) => {
+                if (res.success) {
+                  this.comentariosAtual = res.comentarios.map((c: any) => ({
+                    ...c,
+                    data: this.calcularTempo(c.data)
+                  }));
+                }
+              }
+            });
+          }
+        }
+      },
+      error: async () => {
+        await this.showToast('Erro ao adicionar comentário', 'danger');
+      }
+    });
   }
 
   // ==========================================
-  // PROJETOS - FILTROS E AVALIAÇÕES
+  // UPLOAD DE IMAGENS ADAPTATIVO
+  // ==========================================
+
+  async selecionarImagem() {
+    const imagemBase64 = await this.imageUploadService.selecionarImagem();
+
+    if (imagemBase64) {
+      this.novoPost.imagem = imagemBase64;
+      await this.showToast('Imagem adicionada!', 'success');
+    }
+  }
+
+  // ==========================================
+  // MÉTODOS MANTIDOS DO CÓDIGO ORIGINAL
   // ==========================================
 
   filtrarProjetos() {
@@ -303,6 +426,27 @@ export class HomePage implements OnInit {
     }
   }
 
+  filtrarPosts() {
+    let postsFiltrados = [...this.posts];
+
+    if (this.filtroPostCategoria !== 'todos') {
+      postsFiltrados = postsFiltrados.filter(
+        p => p.categoria === this.filtroPostCategoria
+      );
+    }
+
+    this.totalPaginasPosts = Math.ceil(postsFiltrados.length / this.itensPorPagina);
+    const inicio = (this.paginaAtualPosts - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+
+    this.postsFiltrados = postsFiltrados.slice(inicio, fim);
+  }
+
+  mudarPaginaPosts(novaPagina: number) {
+    this.paginaAtualPosts = novaPagina;
+    this.filtrarPosts();
+  }
+
   getEstrelas(nota: number): string {
     return '⭐'.repeat(nota);
   }
@@ -310,7 +454,6 @@ export class HomePage implements OnInit {
   async verTodasAvaliacoes(projeto: Projeto) {
     if (!projeto.avaliacoes) return;
 
-    // Criar lista de avaliações em texto puro (sem HTML)
     let listaAvaliacoes = '';
     projeto.avaliacoes.forEach((av, index) => {
       listaAvaliacoes += `${av.autor} ${this.getEstrelas(av.nota)}\n`;
@@ -334,31 +477,8 @@ export class HomePage implements OnInit {
     return projeto.id || index;
   }
 
-  // ==========================================
-  // SISTEMA DE POSTS COMPLETO
-  // ==========================================
-
-  filtrarPosts() {
-    let postsFiltrados = [...this.posts];
-
-    // Filtro por categoria
-    if (this.filtroPostCategoria !== 'todos') {
-      postsFiltrados = postsFiltrados.filter(
-        p => p.categoria === this.filtroPostCategoria
-      );
-    }
-
-    // Paginação
-    this.totalPaginasPosts = Math.ceil(postsFiltrados.length / this.itensPorPagina);
-    const inicio = (this.paginaAtualPosts - 1) * this.itensPorPagina;
-    const fim = inicio + this.itensPorPagina;
-
-    this.postsFiltrados = postsFiltrados.slice(inicio, fim);
-  }
-
-  mudarPaginaPosts(novaPagina: number) {
-    this.paginaAtualPosts = novaPagina;
-    this.filtrarPosts();
+  trackByPostId(index: number, post: Post): number {
+    return post.id || index;
   }
 
   abrirNovoPost() {
@@ -381,75 +501,10 @@ export class HomePage implements OnInit {
     };
   }
 
-  async publicarPost() {
-    if (!this.novoPost.texto.trim()) {
-      const toast = await this.toastController.create({
-        message: 'Por favor, escreva algo no post!',
-        duration: 2000,
-        color: 'warning',
-        position: 'top'
-      });
-      await toast.present();
-      return;
-    }
-
-    if (this.editandoPost) {
-      // Editar post existente
-      const index = this.posts.findIndex(p => p.id === this.editandoPost!.id);
-      if (index !== -1) {
-        this.posts[index].texto = this.novoPost.texto;
-        this.posts[index].categoria = this.novoPost.categoria;
-        this.posts[index].imagem = this.novoPost.imagem;
-      }
-
-      const toast = await this.toastController.create({
-        message: 'Post atualizado com sucesso!',
-        duration: 2000,
-        color: 'success',
-        position: 'top',
-        icon: 'checkmark-circle-outline'
-      });
-      await toast.present();
-    } else {
-      // Criar novo post
-      const novoPostObj: Post = {
-        id: this.posts.length + 1,
-        autor: this.userName,
-        tempo: 'agora',
-        texto: this.novoPost.texto,
-        categoria: this.novoPost.categoria,
-        imagem: this.novoPost.imagem,
-        curtidas: 0,
-        comentarios: 0,
-        curtido: false
-      };
-
-      this.posts.unshift(novoPostObj);
-
-      const toast = await this.toastController.create({
-        message: 'Post publicado com sucesso!',
-        duration: 2000,
-        color: 'success',
-        position: 'top',
-        icon: 'checkmark-circle-outline'
-      });
-      await toast.present();
-    }
-
-    this.salvarPosts(); // PERSISTIR
-    this.filtrarPosts();
-    this.fecharNovoPost();
-  }
-
-  curtirPost(post: Post) {
-    if (post.curtido) {
-      post.curtidas--;
-      post.curtido = false;
-    } else {
-      post.curtidas++;
-      post.curtido = true;
-    }
-    this.salvarPosts(); // PERSISTIR
+  fecharComentarios() {
+    this.isComentariosModalOpen = false;
+    this.postSelecionadoComentarios = null;
+    this.comentariosAtual = [];
   }
 
   async abrirMenuPost(post: Post) {
@@ -492,125 +547,21 @@ export class HomePage implements OnInit {
     this.isNovoPostModalOpen = true;
   }
 
-  async deletarPost(post: Post) {
-    const alert = await this.alertController.create({
-      header: 'Confirmar Exclusão',
-      message: 'Deseja realmente excluir este post?',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Excluir',
-          role: 'destructive',
-          handler: async () => {
-            const index = this.posts.findIndex(p => p.id === post.id);
-            if (index !== -1) {
-              this.posts.splice(index, 1);
-              this.salvarPosts(); // PERSISTIR
-              this.filtrarPosts();
-
-              const toast = await this.toastController.create({
-                message: 'Post excluído com sucesso!',
-                duration: 2000,
-                color: 'success',
-                position: 'top'
-              });
-              await toast.present();
-            }
-          }
-        }
-      ]
-    });
-
-    await alert.present();
+  openAddProjectModal() {
+    this.isModalOpen = true;
   }
 
-  trackByPostId(index: number, post: Post): number {
-    return post.id;
+  closeModal() {
+    this.isModalOpen = false;
   }
 
-  async selecionarImagem() {
-    try {
-      const imagem = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: true,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Prompt,
-        promptLabelHeader: 'Selecionar Imagem',
-        promptLabelPhoto: 'Galeria',
-        promptLabelPicture: 'Câmera'
-      });
-
-      if (imagem.dataUrl) {
-        this.novoPost.imagem = imagem.dataUrl;
-        await this.showToast('Imagem adicionada!', 'success');
-      }
-    } catch (error) {
-      console.error('Erro ao selecionar imagem:', error);
-      await this.showToast('Erro ao selecionar imagem', 'danger');
-    }
+  openNotificationsModal() {
+    this.isNotificationsModalOpen = true;
   }
 
-  // ==========================================
-  // SISTEMA DE COMENTÁRIOS
-  // ==========================================
-
-  abrirComentarios(post: Post) {
-    this.postSelecionadoComentarios = post;
-    this.novoComentario = '';
-
-    // Carregar comentários deste post
-    this.comentariosAtual = this.comentariosPorPost[post.id] || [];
-
-    this.isComentariosModalOpen = true;
+  closeNotificationsModal() {
+    this.isNotificationsModalOpen = false;
   }
-
-  fecharComentarios() {
-    this.isComentariosModalOpen = false;
-    this.postSelecionadoComentarios = null;
-    this.comentariosAtual = [];
-  }
-
-  async adicionarComentario() {
-    if (!this.novoComentario.trim() || !this.postSelecionadoComentarios) return;
-
-    const postId = this.postSelecionadoComentarios.id;
-
-    // Garantir que o array existe
-    if (!this.comentariosPorPost[postId]) {
-      this.comentariosPorPost[postId] = [];
-    }
-
-    const novoComent: Comentario = {
-      id: this.comentariosPorPost[postId].length + 1,
-      autor: this.userName,
-      texto: this.novoComentario,
-      data: 'agora'
-    };
-
-    this.comentariosPorPost[postId].push(novoComent);
-    this.comentariosAtual = this.comentariosPorPost[postId];
-    this.postSelecionadoComentarios.comentarios++;
-
-    this.salvarComentarios(); // PERSISTIR
-    this.salvarPosts(); // PERSISTIR contador
-
-    this.novoComentario = '';
-
-    const toast = await this.toastController.create({
-      message: 'Comentário adicionado!',
-      duration: 1500,
-      color: 'success',
-      position: 'bottom'
-    });
-    await toast.present();
-  }
-
-  // ==========================================
-  // MODAL INVESTIR
-  // ==========================================
 
   abrirModalInvestir(projeto: Projeto) {
     this.projetoSelecionado = projeto;
@@ -638,10 +589,7 @@ export class HomePage implements OnInit {
       header: 'Confirmar Investimento',
       message: `Projeto: ${this.projetoSelecionado?.nome}\n\nValor: R$ ${this.valorInvestimento.toFixed(2)}\n\nTokens: ${this.calcularTokens()} tokens\n\nDeseja confirmar o investimento?`,
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Confirmar',
           handler: async () => {
@@ -654,10 +602,6 @@ export class HomePage implements OnInit {
 
     await alert.present();
   }
-
-  // ==========================================
-  // UTILS
-  // ==========================================
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastController.create({
