@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -29,7 +30,7 @@ export interface Comentario {
   providedIn: 'root'
 })
 export class PostsService {
-  private apiUrl = 'http://localhost/GrowthInvestimentos/apiPortal/posts.php';
+  private apiUrl = environment.apiUrl.replace('crud1.php', 'posts.php');
 
   constructor(private http: HttpClient) {}
 

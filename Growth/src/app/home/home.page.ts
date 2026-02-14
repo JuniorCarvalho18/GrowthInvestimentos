@@ -5,7 +5,7 @@ import { PostsService, Post, Comentario } from '../services/posts.service';
 import { ImageUploadService } from '../services/image.upload.service';
 import { ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 import { trigger, transition, style, animate } from '@angular/animations';
-
+import { ProjetosService } from '../services/projetos.service';
 interface Avaliacao {
   autor: string;
   nota: number;
@@ -136,6 +136,7 @@ export class HomePage implements OnInit {
     private rota: Router,
     private authService: AuthService,
     private postsService: PostsService,
+    private projetosService: ProjetosService,
     private imageUploadService: ImageUploadService,
     private toastController: ToastController,
     private alertController: AlertController,
@@ -143,13 +144,56 @@ export class HomePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.authService.currentUser.subscribe(user => { this.currentUser = user; });
-    setTimeout(() => { this.loadingProjetos = false; this.filtrarProjetos(); }, 800);
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
+
+    // Carrega projetos da API
+    this.carregarProjetos();
+
+    // Carrega posts
     this.carregarPosts();
   }
 
   get userName(): string { return this.currentUser?.nome || 'Usuário'; }
   get userId(): number { return this.currentUser?.id || 0; }
+
+  async carregarProjetos() {
+  this.loadingProjetos = true;
+
+  this.projetosService.listarProjetos().subscribe({
+    next: (response) => {
+      if (response.success && response.projetos) {
+        // Mapeia os projetos da API para o formato esperado
+        this.projetosSustentaveis = response.projetos.map((p: any) => ({
+          id: p.id,
+          nome: p.nome,
+          descricao: p.descricao,
+          categoria: p.categoria || 'Sustentável',
+          dataInicio: p.data_criacao ? new Date(p.data_criacao).toLocaleDateString('pt-BR') : '',
+          meta: p.meta ? p.meta.toString() : '0',
+          previsao: p.previsao || '',
+          local: p.local || '',
+          avaliacoes: [] // Você pode adicionar avaliações depois
+        }));
+
+        // Pega os 2 primeiros para destaques
+        this.projetosDestaque = this.projetosSustentaveis.slice(0, 2);
+      }
+
+      this.loadingProjetos = false;
+      this.filtrarProjetos();
+    },
+    error: async (error) => {
+      this.loadingProjetos = false;
+      console.error('Erro ao carregar projetos:', error);
+      await this.showToast('Erro ao carregar projetos. Usando dados de exemplo.', 'warning');
+
+      // Em caso de erro, mantém os dados estáticos
+      this.filtrarProjetos();
+    }
+  });
+}
 
   async carregarPosts() {
     this.loadingPosts = true;

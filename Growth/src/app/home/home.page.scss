@@ -262,6 +262,7 @@ h2 {
 // ==========================================
 .posts-comunidade {
   .posts-header {
+    color: var(--ion-text-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -276,6 +277,7 @@ h2 {
     }
 
     .posts-actions {
+      color: var(--ion-text-color);
       display: flex;
       gap: 8px;
       align-items: center;
