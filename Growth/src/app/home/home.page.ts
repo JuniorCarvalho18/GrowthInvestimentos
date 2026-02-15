@@ -6,6 +6,7 @@ import { ImageUploadService } from '../services/image.upload.service';
 import { ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ProjetosService } from '../services/projetos.service';
+import { AvaliacoesService } from '../services/avaliacoes.service';
 interface Avaliacao {
   autor: string;
   nota: number;
@@ -140,7 +141,8 @@ export class HomePage implements OnInit {
     private imageUploadService: ImageUploadService,
     private toastController: ToastController,
     private alertController: AlertController,
-    private actionSheetController: ActionSheetController
+    private actionSheetController: ActionSheetController,
+    private avaliacoesService: AvaliacoesService
   ) {}
 
   ngOnInit() {
@@ -158,13 +160,12 @@ export class HomePage implements OnInit {
   get userName(): string { return this.currentUser?.nome || 'Usuário'; }
   get userId(): number { return this.currentUser?.id || 0; }
 
-  async carregarProjetos() {
+async carregarProjetos() {
   this.loadingProjetos = true;
 
   this.projetosService.listarProjetos().subscribe({
     next: (response) => {
       if (response.success && response.projetos) {
-        // Mapeia os projetos da API para o formato esperado
         this.projetosSustentaveis = response.projetos.map((p: any) => ({
           id: p.id,
           nome: p.nome,
@@ -174,10 +175,22 @@ export class HomePage implements OnInit {
           meta: p.meta ? p.meta.toString() : '0',
           previsao: p.previsao || '',
           local: p.local || '',
-          avaliacoes: [] // Você pode adicionar avaliações depois
+          avaliacoes: []
         }));
 
-        // Pega os 2 primeiros para destaques
+        // Busca avaliações para cada projeto
+        this.projetosSustentaveis.forEach(projeto => {
+          if (projeto.id) {
+            this.avaliacoesService.listarAvaliacoes(projeto.id).subscribe({
+              next: (res) => {
+                if (res.success) {
+                  projeto.avaliacoes = res.avaliacoes;
+                }
+              }
+            });
+          }
+        });
+
         this.projetosDestaque = this.projetosSustentaveis.slice(0, 2);
       }
 
@@ -187,9 +200,7 @@ export class HomePage implements OnInit {
     error: async (error) => {
       this.loadingProjetos = false;
       console.error('Erro ao carregar projetos:', error);
-      await this.showToast('Erro ao carregar projetos. Usando dados de exemplo.', 'warning');
-
-      // Em caso de erro, mantém os dados estáticos
+      await this.showToast('Erro ao carregar projetos.', 'warning');
       this.filtrarProjetos();
     }
   });

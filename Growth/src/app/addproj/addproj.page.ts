@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ImageUploadService } from '../services/image.upload.service';
-import { ToastController } from '@ionic/angular';
+import { ToastController, LoadingController, ModalController } from '@ionic/angular';
+import { ProjetosService } from '../services/projetos.service';
 
 @Component({
   selector: 'app-addproj',
@@ -16,13 +17,30 @@ export class AddprojPage implements OnInit {
     previsao: '',
     local: '',
     descricao: '',
-    imagem: '' // Nova propriedade para imagem
+    categoria: 'Energia Renovável', // Categoria padrão
+    imagem: ''
   };
+
+  categorias = [
+    'Energia Renovável',
+    'Reflorestamento',
+    'Reciclagem',
+    'Tratamento de Água',
+    'Agricultura Sustentável',
+    'Mobilidade Verde',
+    'Educação Ambiental',
+    'Outro'
+  ];
+
+  loading: HTMLIonLoadingElement | null = null;
 
   constructor(
     private rota: Router,
     private imageUploadService: ImageUploadService,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private loadingController: LoadingController,
+    private projetosService: ProjetosService,
+    private modalController: ModalController
   ) {}
 
   ngOnInit() {}
@@ -52,20 +70,76 @@ export class AddprojPage implements OnInit {
       return;
     }
 
-    // TODO: Integrar com API para salvar o projeto
-    console.log('Projeto a ser salvo:', this.projeto);
+    if (!this.projeto.local.trim()) {
+      await this.showToast('Local é obrigatório!', 'warning');
+      return;
+    }
 
-    await this.showToast('Projeto adicionado com sucesso!', 'success');
+    if (!this.projeto.descricao.trim()) {
+      await this.showToast('Descrição é obrigatória!', 'warning');
+      return;
+    }
 
-    // Limpar formulário
-    this.projeto = {
-      nome: '',
-      meta: '',
-      previsao: '',
-      local: '',
-      descricao: '',
-      imagem: ''
+    // Mostra loading
+    await this.showLoading('Salvando projeto...');
+
+    // Prepara dados para enviar à API
+    const projetoData = {
+      nome: this.projeto.nome,
+      descricao: this.projeto.descricao,
+      meta: parseFloat(this.projeto.meta.replace(/[^\d,.-]/g, '').replace(',', '.')),
+      previsao: this.projeto.previsao,
+      local: this.projeto.local,
+      categoria: this.projeto.categoria,
+      imagem: this.projeto.imagem
     };
+
+    // Salva na API
+    this.projetosService.salvarProjeto(projetoData).subscribe({
+      next: async (response) => {
+        await this.hideLoading();
+
+        if (response.success) {
+          await this.showToast('Projeto criado com sucesso!', 'success');
+
+          // Limpa formulário
+          this.projeto = {
+            nome: '',
+            meta: '',
+            previsao: '',
+            local: '',
+            descricao: '',
+            categoria: 'Energia Renovável',
+            imagem: ''
+          };
+
+          // Fecha o modal se estiver em um modal
+          this.modalController.dismiss({ success: true });
+        } else {
+          await this.showToast('Erro ao criar projeto!', 'danger');
+        }
+      },
+      error: async (error) => {
+        await this.hideLoading();
+        console.error('Erro ao salvar projeto:', error);
+        await this.showToast('Erro ao conectar ao servidor!', 'danger');
+      }
+    });
+  }
+
+  async showLoading(message: string = 'Carregando...') {
+    this.loading = await this.loadingController.create({
+      message,
+      spinner: 'crescent'
+    });
+    await this.loading.present();
+  }
+
+  async hideLoading() {
+    if (this.loading) {
+      await this.loading.dismiss();
+      this.loading = null;
+    }
   }
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {

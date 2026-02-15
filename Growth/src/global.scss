@@ -30,6 +30,7 @@
     --border: none;
     --border-radius: 8px;
     font-weight: bold;
+    color: var(--ion-text-color);
   }
   ion-button:active {
     transition: 100ms;
@@ -165,6 +166,7 @@ ion-input, ion-textarea {
 /* Action Sheet */
 .action-sheet-button { --color: var(--ion-text-color); }
 span { color: var(--ion-text-color); }
+.action-sheet-wrapper { --color: var(--ion-text-color);}
 .action-sheet-icon { color: var(--dourado); }
 .action-sheet-destructive { --color: #eb445a; }
 .action-sheet-cancel { --color: rgba(227, 227, 227, 0.7); }

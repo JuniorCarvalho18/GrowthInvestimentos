@@ -28,6 +28,17 @@
     </ion-item>
 
     <ion-item>
+      <ion-label position="stacked">Categoria:</ion-label>
+      <ion-select
+        placeholder="Selecione a categoria"
+        [(ngModel)]="projeto.categoria">
+        <ion-select-option *ngFor="let cat of categorias" [value]="cat">
+          {{ cat }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
       <ion-label position="stacked">Meta:</ion-label>
       <ion-input
         placeholder="Ex: R$ 50.000,00"

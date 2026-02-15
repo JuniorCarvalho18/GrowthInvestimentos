@@ -1,0 +1,106 @@
+<?php
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
+
+include_once 'db.php';
+
+$method = $_SERVER['REQUEST_METHOD'];
+$data = json_decode(file_get_contents("php://input"), true);
+
+// GET - Listar avaliações ou calcular média
+if ($method === 'GET') {
+    $acao = $_GET['acao'] ?? '';
+    $projeto_id = $_GET['projeto_id'] ?? 0;
+    
+    if ($acao === 'listar' && $projeto_id > 0) {
+        $stmt = $conn->prepare("
+            SELECT a.*, u.nome as autor_nome
+            FROM projeto_avaliacoes a
+            LEFT JOIN usuarios u ON a.usuario_id = u.id
+            WHERE a.projeto_id = ?
+            ORDER BY a.data DESC
+        ");
+        $stmt->bind_param("i", $projeto_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $avaliacoes = $result->fetch_all(MYSQLI_ASSOC);
+        
+        echo json_encode([
+            'success' => true,
+            'avaliacoes' => $avaliacoes
+        ]);
+        
+    } elseif ($acao === 'media' && $projeto_id > 0) {
+        $stmt = $conn->prepare("
+            SELECT 
+                AVG(nota) as media,
+                COUNT(*) as total
+            FROM projeto_avaliacoes
+            WHERE projeto_id = ?
+        ");
+        $stmt->bind_param("i", $projeto_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stats = $result->fetch_assoc();
+        
+        echo json_encode([
+            'success' => true,
+            'media' => round($stats['media'], 1),
+            'total' => $stats['total']
+        ]);
+    }
+}
+
+// POST - Criar avaliação
+if ($method === 'POST') {
+    $acao = $data['acao'] ?? '';
+    
+    if ($acao === 'criar') {
+        $projeto_id = $data['projeto_id'];
+        $usuario_id = $data['usuario_id'];
+        $autor = $data['autor'];
+        $nota = $data['nota'];
+        $comentario = $data['comentario'] ?? '';
+        
+        // Verifica se já avaliou
+        $check = $conn->prepare("
+            SELECT id FROM projeto_avaliacoes 
+            WHERE projeto_id = ? AND usuario_id = ?
+        ");
+        $check->bind_param("ii", $projeto_id, $usuario_id);
+        $check->execute();
+        
+        if ($check->get_result()->num_rows > 0) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Você já avaliou este projeto'
+            ]);
+            exit;
+        }
+        
+        $stmt = $conn->prepare("
+            INSERT INTO projeto_avaliacoes 
+            (projeto_id, usuario_id, autor, nota, comentario)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $stmt->bind_param("iisis", $projeto_id, $usuario_id, $autor, $nota, $comentario);
+        
+        if ($stmt->execute()) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Avaliação criada com sucesso',
+                'id' => $conn->insert_id
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao criar avaliação'
+            ]);
+        }
+    }
+}
+
+$conn->close();
+?>

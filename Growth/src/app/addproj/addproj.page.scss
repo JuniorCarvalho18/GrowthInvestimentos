@@ -3,17 +3,6 @@ ion-title {
   margin: 16px 0;
 }
 
-ion-content {
-  --overflow: hidden;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
 .addproj-content {
   --display: block;
   --background: var(--ion-background-color);

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { EventEmitter } from '@angular/core';
 
 export interface Projeto {
   id?: number;
@@ -23,6 +24,7 @@ export interface Projeto {
 export class ProjetosService {
   // AJUSTE AQUI COM O NOME DA SUA PASTA NO HTDOCS
   private apiUrl = 'http://localhost/GrowthInvestimentos/apiPortal/projetos.php';
+  projetosCriados = new EventEmitter<void>();
 
   constructor(private http: HttpClient) {}
 

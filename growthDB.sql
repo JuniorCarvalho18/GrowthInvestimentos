@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS projeto_avaliacoes (
     data DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (projeto_id) REFERENCES projetos(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    UNIQUE KEY (projeto_id, usuario_id)
+    UNIQUE KEY unique_projeto_usuario (projeto_id, usuario_id)
 );
 
 -- Inserir alguns dados de exemplo (OPCIONAL)
@@ -154,3 +154,17 @@ INSERT INTO marketplace (nome_item, descricao, tokens_necessarios, categoria, di
 ('Curso de Energia Solar', 'Curso completo sobre instalação de painéis solares', 100.00, 'Educação', TRUE, 50),
 ('Kit de Compostagem', 'Kit completo para compostagem doméstica', 200.00, 'Equipamentos', TRUE, 30),
 ('Desconto em Produtos Sustentáveis', '20% de desconto em produtos ecológicos', 50.00, 'Descontos', TRUE, 100);
+
+INSERT INTO projeto_avaliacoes (projeto_id, usuario_id, autor, nota, comentario) VALUES
+-- Projeto 1
+(1, 1, 'João Silva', 5, 'Excelente projeto! Resultados acima do esperado.'),
+(1, 2, 'Maria Santos', 4, 'Muito bom, recomendo. Gestão transparente.'),
+(1, 3, 'Carlos Oliveira', 5, 'Impacto real na comunidade!'),
+
+-- Projeto 2
+(2, 1, 'Ana Paula', 4, 'Ótima iniciativa sustentável!'),
+(2, 4, 'Pedro Costa', 5, 'Transformou nossa região!'),
+
+-- Projeto 3
+(3, 2, 'Lucas Mendes', 5, 'Impacto ambiental visível!'),
+(3, 5, 'Fernanda Lima', 4, 'Projeto bem estruturado.');
