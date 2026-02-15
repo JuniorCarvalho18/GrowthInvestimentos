@@ -40,4 +40,11 @@ export class AvaliacoesService {
   calcularMedia(projetoId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}?acao=media&projeto_id=${projetoId}`);
   }
+
+  deletarAvaliacao(id: number): Observable<any> {
+  return this.http.post(this.apiUrl, {
+    acao: 'deletar',
+    id: id
+  });
+}
 }

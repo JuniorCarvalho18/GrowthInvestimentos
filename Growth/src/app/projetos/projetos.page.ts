@@ -14,6 +14,7 @@ export class ProjetosPage implements OnInit, OnDestroy {
   projetos: Projeto[] = [];
   projeto: Projeto = this.limparFormulario();
   loading: HTMLIonLoadingElement | null = null;
+  private refreshSubscription?: Subscription;
 
   categorias = [
     'Energia Renovável',
@@ -38,7 +39,6 @@ export class ProjetosPage implements OnInit, OnDestroy {
     private toast: ToastController,
     private alert: AlertController,
     private loadingController: LoadingController,
-    private refreshSubscription?: Subscription
   ) {}
 
   ngOnInit() {

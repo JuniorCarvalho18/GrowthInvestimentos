@@ -122,6 +122,25 @@ if ($method === 'POST') {
             }
         }
     }
+
+    elseif ($acao === 'deletar') {
+        $id = (int)$data['id'];
+        
+        $stmt = $conn->prepare("DELETE FROM projeto_avaliacoes WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        
+        if ($stmt->execute()) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Avaliação excluída com sucesso'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Erro ao excluir'
+            ]);
+        }
+    }
 }
 
 $conn->close();

@@ -14,6 +14,7 @@ export class UsuariosPage implements OnInit, OnDestroy {
   usuarios: Usuario[] = [];
   usuario: Usuario = this.limparFormulario();
   loading: HTMLIonLoadingElement | null = null;
+  private refreshSubscription?: Subscription;
 
   constructor(
     private rota: Router,
@@ -21,7 +22,6 @@ export class UsuariosPage implements OnInit, OnDestroy {
     private toast: ToastController,
     private alert: AlertController,
     private loadingController: LoadingController,
-    private refreshSubscription?: Subscription
   ) {}
 
   ngOnInit() {

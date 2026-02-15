@@ -151,6 +151,25 @@ else if ($postjson['requisicao'] == 'listar_comentarios') {
     }
 }
 
+// ✅ DELETAR COMENTÁRIO
+else if ($postjson['requisicao'] == 'deletar_comentario') {
+    try {
+        $query = $pdo->prepare("DELETE FROM post_comentarios WHERE id = :id");
+        $query->bindValue(':id', $postjson['id']);
+        $query->execute();
+
+        echo json_encode([
+            'success' => $query->rowCount() > 0, 
+            'message' => 'Comentário deletado!'
+        ]);
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Erro ao deletar comentário: ' . $e->getMessage()
+        ]);
+    }
+}
+
 else {
     echo json_encode(['success' => false, 'message' => 'Requisição inválida']);
 }

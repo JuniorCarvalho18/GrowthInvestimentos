@@ -151,12 +151,22 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
           handler: async () => {
             await this.showLoading('Excluindo...');
 
-            // Nota: Você precisará implementar este método no avaliacoes.service.ts
-            await this.hideLoading();
-            await this.presentToast('Função de exclusão em desenvolvimento', 'warning');
-
-            // Quando implementar, use:
-            // this.avaliacoesService.deletarAvaliacao(id).subscribe(...)
+            this.avaliacoesService.deletarAvaliacao(id).subscribe({
+              next: async (res) => {
+                await this.hideLoading();
+                if (res.success) {
+                  await this.presentToast('Avaliação excluída!', 'success');
+                  this.carregarDados(); // Recarrega a lista
+                } else {
+                  await this.presentToast('Erro ao excluir avaliação', 'danger');
+                }
+              },
+              error: async (error) => {
+                await this.hideLoading();
+                console.error('Erro:', error);
+                await this.presentToast('Erro ao conectar ao servidor', 'danger');
+              }
+            });
           }
         }
       ]

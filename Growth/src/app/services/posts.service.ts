@@ -83,4 +83,11 @@ export class PostsService {
       post_id: postId
     });
   }
+
+  deletarComentario(id: number): Observable<any> {
+  return this.http.post<any>(this.apiUrl, {
+    requisicao: 'deletar_comentario',
+    id: id
+  });
+}
 }
