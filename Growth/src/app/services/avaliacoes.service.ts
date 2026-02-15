@@ -8,7 +8,8 @@ export interface Avaliacao {
   projeto_id: number;
   usuario_id: number; // Removido '?' para forçar a existência do ID e tipo Number
   autor: string;
-  autor_nome?: string; // Adicionado para bater com o retorno do SQL
+  autor_nome?: string;
+  autor_foto?: string;
   nota: number;
   comentario: string;
   data?: string;

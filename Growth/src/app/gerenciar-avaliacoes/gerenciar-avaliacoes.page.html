@@ -80,13 +80,19 @@
     <ion-item *ngFor="let a of avaliacoesFiltradas" class="post-card">
       <div class="post-info">
         <div class="post-header">
-          <h3>{{ a.autor }}</h3>
+          <ion-avatar style="width: 40px; height: 40px; margin-right: 10px;">
+            <img *ngIf="a.autor_foto" [src]="a.autor_foto">
+            <ion-icon *ngIf="!a.autor_foto" name="person-circle-outline" style="font-size: 40px; color: #ccc;"></ion-icon>
+          </ion-avatar>
 
-          <div style="display: flex; gap: 2px;">
-             <ion-icon *ngFor="let s of [1,2,3,4,5]"
-               [name]="s <= a.nota ? 'star' : 'star-outline'"
-               style="color: var(--dourado); font-size: 14px;">
-             </ion-icon>
+          <div style="flex: 1;">
+            <h3>{{ a.autor }}</h3>
+            <div style="display: flex; gap: 2px;">
+              <ion-icon *ngFor="let s of [1,2,3,4,5]"
+                [name]="s <= a.nota ? 'star' : 'star-outline'"
+                style="color: var(--dourado); font-size: 14px;">
+              </ion-icon>
+            </div>
           </div>
         </div>
 

@@ -33,8 +33,8 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'configaracao',
-    loadChildren: () => import('./configaracao/configaracao.module').then( m => m.ConfigaracaoPageModule),
+    path: 'configuracao',
+    loadChildren: () => import('./configuracao/configuracao.module').then( m => m.ConfiguracaoPageModule),
     canActivate: [AuthGuard]
   },
   {

@@ -6,6 +6,13 @@
           <ion-list-header>Menu</ion-list-header>
           <br>
 
+          <div class="menu-header" *ngIf="user" style="text-align: center;">
+            <ion-avatar style="width: 80px; height: 80px; margin: 0 auto 10px;">
+              <img [src]="user.foto || 'assets/img/icon-only.png'">
+            </ion-avatar>
+            <h3>{{ user.nome }}</h3>
+          </div>
+
           <div id="Contas" style="text-align: center;cursor: pointer;" [ngClass]="{ 'ativo': isContasAtivo }" (click)="toggleContas($event);">
             <ion-label style="display: flex; font-size: 14px;text-align: left;font-weight: bold;color: var(--ion-text-color); margin-bottom: 10px;">Saldo</ion-label>
             <div style="display: flex; justify-content: space-between; align-items: center;">

@@ -108,11 +108,18 @@
             </div>
 
             <div class="avaliacao-card" *ngFor="let avaliacao of projeto.avaliacoesOutros?.slice(0, 2)">
-              <p class="avaliador">
-                <strong>{{ avaliacao.autor }}</strong>
-                <span class="estrelas">{{ getEstrelas(avaliacao.nota) }}</span>
-              </p>
-              <p class="comentario">{{ avaliacao.comentario }}</p>
+              <div class="avaliador-info" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <ion-avatar style="width: 24px; height: 24px;">
+                  <img *ngIf="avaliacao.autor_foto" [src]="avaliacao.autor_foto">
+                  <ion-icon *ngIf="!avaliacao.autor_foto" name="person-circle-outline" style="font-size: 24px; color: #ccc;"></ion-icon>
+                </ion-avatar>
+
+                <p class="avaliador" style="margin: 0;">
+                  <strong>{{ avaliacao.autor }}</strong>
+                  <span class="estrelas" style="margin-left: 5px;">{{ getEstrelas(avaliacao.nota) }}</span>
+                </p>
+              </div>
+              <p class="comentario" style="margin-top: 4px;">{{ avaliacao.comentario }}</p>
             </div>
 
             <ion-button
@@ -245,8 +252,11 @@
       <div class="post" *ngFor="let post of postsFiltrados; trackBy: trackByPostId" [@fadeIn]>
         <div class="post-header">
           <ion-avatar>
-            <ion-icon name="person-circle-outline"></ion-icon>
+            <img *ngIf="post.autor_foto" [src]="post.autor_foto" style="object-fit: cover; width: 100%; height: 100%;" />
+
+            <ion-icon *ngIf="!post.autor_foto" name="person-circle-outline"></ion-icon>
           </ion-avatar>
+
           <div class="post-info">
             <p class="post-autor">{{ post.autor }}</p>
             <p class="post-tempo">{{ post.tempo }}</p>
@@ -410,14 +420,15 @@
           <div class="comentario" *ngFor="let comentario of comentariosAtual">
             <div class="comentario-header">
               <ion-avatar>
-                <ion-icon name="person-circle-outline"></ion-icon>
+                <img *ngIf="comentario.autor_foto" [src]="comentario.autor_foto">
+                <ion-icon *ngIf="!comentario.autor_foto" name="person-circle-outline"></ion-icon>
               </ion-avatar>
               <div>
                 <p class="comentario-autor">{{ comentario.autor }}</p>
                 <p class="comentario-data">{{ comentario.data }}</p>
               </div>
             </div>
-            <p class="comentario-texto">{{ comentario.texto }}</p>
+              <p class="comentario-texto">{{ comentario.texto }}</p>
           </div>
 
           <div class="empty-state" *ngIf="comentariosAtual.length === 0">

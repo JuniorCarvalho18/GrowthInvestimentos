@@ -38,29 +38,60 @@ if ($postjson['requisicao'] == 'salvar') {
     echo json_encode(['success' => $query->rowCount() > 0, 'id' => $id]);
 }
 
-// ✅ LOGIN - COM VERIFICAÇÃO SEGURA
+// ✅ LOGIN - AGORA SUPORTA ADMIN
 else if ($postjson['requisicao'] == 'login') {
-    $query = $pdo->prepare("SELECT * FROM usuarios WHERE (email = :emailCnpj OR cnpj = :emailCnpj)");
-    $query->bindValue(':emailCnpj', $postjson['emailCnpj']);
+    $loginInput = $postjson['emailCnpj'];
+    $senhaInput = $postjson['senha'];
+
+    // 1. TENTA COMO USUÁRIO COMUM (Email ou CNPJ)
+    $query = $pdo->prepare("SELECT * FROM usuarios WHERE (email = :login OR cnpj = :login)");
+    $query->bindValue(':login', $loginInput);
     $query->execute();
-    
     $usuario = $query->fetch(PDO::FETCH_ASSOC);
-    
-    if ($usuario && password_verify($postjson['senha'], $usuario['senha'])) {
-        // Remove a senha antes de enviar para o frontend
+
+    if ($usuario && password_verify($senhaInput, $usuario['senha'])) {
         unset($usuario['senha']);
+        $usuario['isAdmin'] = false; // Marca como usuário comum
         
         echo json_encode([
             'success' => true,
-            'message' => 'Login realizado com sucesso!',
+            'message' => 'Login realizado!',
             'user' => $usuario
         ]);
-    } else {
-        echo json_encode([
-            'success' => false,
-            'message' => 'E-mail/CNPJ ou senha inválidos!'
-        ]);
+        exit;
     }
+
+    // 2. SE FALHAR, TENTA COMO ADMIN (Nome de Usuário)
+    $queryAdmin = $pdo->prepare("SELECT * FROM admins WHERE usuario = :login");
+    $queryAdmin->bindValue(':login', $loginInput);
+    $queryAdmin->execute();
+    $admin = $queryAdmin->fetch(PDO::FETCH_ASSOC);
+
+    if ($admin && password_verify($senhaInput, $admin['senha'])) {
+        unset($admin['senha']);
+        
+        // Prepara objeto de retorno compatível com o User do frontend
+        $adminUser = [
+            'id' => $admin['id'],
+            'nome' => 'Administrador',
+            'email' => 'admin@sistema', // Placeholder
+            'cnpj' => '',
+            'isAdmin' => true // 🚨 A MÁGICA ACONTECE AQUI
+        ];
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Login de Administrador!',
+            'user' => $adminUser
+        ]);
+        exit;
+    }
+
+    // 3. SE FALHAR OS DOIS
+    echo json_encode([
+        'success' => false,
+        'message' => 'Dados incorretos!'
+    ]);
 }
 
 // ✅ LISTAR
@@ -74,10 +105,11 @@ else if ($postjson['requisicao'] == 'listar') {
 
 // ✅ EDITAR (sem alterar senha)
 else if ($postjson['requisicao'] == 'editar') {
-    $query = $pdo->prepare("UPDATE usuarios SET nome = :nome, email = :email, cnpj = :cnpj WHERE id = :id");
+    $query = $pdo->prepare("UPDATE usuarios SET nome = :nome, email = :email, cnpj = :cnpj, foto = :foto WHERE id = :id");
     $query->bindValue(':nome', $postjson['nome']);
     $query->bindValue(':email', $postjson['email']);
     $query->bindValue(':cnpj', $postjson['cnpj']);
+    $query->bindValue(':foto', $postjson['foto'] ?? '');
     $query->bindValue(':id', $postjson['id']);
     $query->execute();
 
@@ -142,7 +174,7 @@ else if ($postjson['requisicao'] == 'deletar') {
 
 // ✅ BUSCAR PERFIL
 else if ($postjson['requisicao'] == 'perfil') {
-    $query = $pdo->prepare("SELECT id, nome, email, cnpj, saldo, tokens FROM usuarios WHERE id = :id");
+    $query = $pdo->prepare("SELECT id, nome, email, cnpj, saldo, tokens, foto FROM usuarios WHERE id = :id");
     $query->bindValue(':id', $postjson['id']);
     $query->execute();
     

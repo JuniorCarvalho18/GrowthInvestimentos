@@ -25,10 +25,11 @@ $requisicao = $postjson['requisicao'] ?? '';
 // ✅ LISTAR POSTS
 if ($requisicao == 'listar') {
     try {
-        $query = $pdo->prepare("SELECT p.*, 
+        $query = $pdo->prepare("SELECT p.*, u.foto as autor_foto,
                                 (SELECT COUNT(*) FROM post_curtidas WHERE post_id = p.id) as curtidas,
                                 (SELECT COUNT(*) FROM post_comentarios WHERE post_id = p.id) as comentarios
                                 FROM posts p 
+                                LEFT JOIN usuarios u ON p.usuario_id = u.id
                                 ORDER BY p.data_criacao DESC");
         $query->execute();
         $posts = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -162,14 +163,20 @@ else if ($requisicao == 'editar_comentario') {
 // ✅ LISTAR COMENTÁRIOS DE UM POST
 else if ($requisicao == 'listar_comentarios') {
     try {
-        $query = $pdo->prepare("SELECT * FROM post_comentarios WHERE post_id = :post_id ORDER BY data ASC");
+        $query = $pdo->prepare("
+            SELECT c.*, u.foto as autor_foto 
+            FROM post_comentarios c
+            LEFT JOIN usuarios u ON c.usuario_id = u.id
+            WHERE c.post_id = :post_id 
+            ORDER BY c.data ASC
+        ");
         $query->bindValue(':post_id', $postjson['post_id']);
         $query->execute();
         $comentarios = $query->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode(['success' => true, 'comentarios' => $comentarios]);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Erro ao listar comentários: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
     }
 }
 

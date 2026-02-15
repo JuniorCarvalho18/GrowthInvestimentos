@@ -5,6 +5,7 @@ import { UtilsService } from '../services/utils.service';
 import { AlertController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { ImageUploadService } from '../services/image.upload.service';
 
 
 @Component({
@@ -20,7 +21,8 @@ export class ProfilePage implements OnInit {
     cnpj: '',
     email: '',
     saldo: 0,
-    tokens: 0
+    tokens: 0,
+    foto: ''
   };
 
   private apiUrl = environment.apiUrl;
@@ -30,6 +32,7 @@ export class ProfilePage implements OnInit {
     private authService: AuthService,
     private utils: UtilsService,
     private alertController: AlertController,
+    private imageService: ImageUploadService,
     private http: HttpClient
   ) {}
 
@@ -38,9 +41,20 @@ export class ProfilePage implements OnInit {
   }
 
   loadUserProfile() {
-    const currentUser = this.authService.currentUserValue;
-    if (currentUser) {
-      this.user = { ...currentUser };
+      const currentUser = this.authService.currentUserValue;
+      if (currentUser) {
+        this.user = {
+          ...currentUser,
+          saldo: Number(currentUser.saldo || 0),
+          tokens: Number(currentUser.tokens || 0)
+        };
+      }
+    }
+
+  async changePhoto() {
+    const imagemBase64 = await this.imageService.selecionarImagem();
+    if (imagemBase64) {
+      this.user.foto = imagemBase64;
     }
   }
 
@@ -66,13 +80,13 @@ export class ProfilePage implements OnInit {
       id: this.user.id,
       nome: this.user.nome,
       email: this.user.email,
-      cnpj: this.user.cnpj
+      cnpj: this.user.cnpj,
+      foto: this.user.foto
     }).subscribe({
       next: async (response) => {
         await this.utils.hideLoading();
 
         if (response.success) {
-          // Atualiza os dados localmente
           this.authService.updateUser(this.user);
           await this.utils.showSuccess('Perfil atualizado com sucesso!');
         } else {
@@ -164,5 +178,25 @@ export class ProfilePage implements OnInit {
         await this.utils.showError('Erro ao conectar ao servidor.');
       }
     });
+  }
+
+  async removePhoto(event: Event) {
+    event.stopPropagation(); // Evita abrir a galeria ao clicar na lixeira
+
+    const alert = await this.alertController.create({
+      header: 'Remover Foto',
+      message: 'Tem certeza que deseja remover sua foto de perfil?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Remover',
+          handler: () => {
+            this.user.foto = ''; // Limpa a foto localmente
+            this.saveProfile();  // Salva no banco imediatamente
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }

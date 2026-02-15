@@ -11,11 +11,22 @@ USE growth;
 -- TABELAS
 -- ============================================
 
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL
+);
+
+-- Insere o admin padrão (Senha 123456 já criptografada com BCRYPT)
+INSERT INTO admins (usuario, senha) VALUES 
+('admin', '$2y$10$YHtTDQEjxSIr.UCLmj/JD.VN7UD4hMBOtJNzfdjxW3s1TmcMyaOYK');
+
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cnpj VARCHAR(18) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
+    foto LONGTEXT,
     senha VARCHAR(255) NOT NULL,
     saldo DECIMAL(10,2) DEFAULT 0.00,
     tokens DECIMAL(10,2) DEFAULT 0.00,

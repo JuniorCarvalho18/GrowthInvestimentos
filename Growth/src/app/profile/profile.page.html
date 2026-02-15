@@ -1,26 +1,30 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+      <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
     <ion-title>Perfil do Usuário</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Perfil do Usuário</ion-title>
-    </ion-toolbar>
-  </ion-header>
 
   <div class="profile-container">
-    <!-- Foto do Usuário -->
-    <div class="profile-photo">
-      <ion-icon name="person-circle-outline"></ion-icon>
+    <div class="profile-photo-wrapper">
+      <div class="profile-photo" (click)="changePhoto()">
+        <img *ngIf="user.foto" [src]="user.foto" class="avatar-img">
+        <ion-icon *ngIf="!user.foto" name="person-circle-outline"></ion-icon>
+      </div>
+
+      <div class="edit-badge" (click)="changePhoto()">
+        <ion-icon name="camera"></ion-icon>
+      </div>
+
+      <div class="remove-badge" *ngIf="user.foto" (click)="removePhoto($event)">
+        <ion-icon name="trash"></ion-icon>
+      </div>
     </div>
 
-    <!-- Informações do Usuário -->
     <ion-item>
       <ion-label position="stacked">Nome:</ion-label>
       <ion-input [(ngModel)]="user.nome" placeholder="Digite seu nome"></ion-input>
@@ -36,7 +40,6 @@
       <ion-input [(ngModel)]="user.email" type="email" placeholder="Digite seu e-mail"></ion-input>
     </ion-item>
 
-    <!-- Saldo e Tokens (Somente Leitura) -->
     <ion-item>
       <ion-label position="stacked">Saldo:</ion-label>
       <ion-input [value]="'R$ ' + (user.saldo || 0).toFixed(2)" readonly></ion-input>
@@ -47,10 +50,16 @@
       <ion-input [value]="(user.tokens || 0).toFixed(2)" readonly></ion-input>
     </ion-item>
 
-    <!-- Botão para salvar alterações -->
-    <ion-button expand="block" (click)="saveProfile()">Salvar Alterações</ion-button>
+    <div class="actions">
+      <ion-button expand="block" (click)="saveProfile()">
+        <ion-icon slot="start" name="save-outline"></ion-icon>
+        Salvar Alterações
+      </ion-button>
 
-    <!-- Botão para alterar senha -->
-    <ion-button expand="block" fill="outline" (click)="changePassword()">Alterar Senha</ion-button>
+      <ion-button expand="block" fill="outline" color="medium" (click)="changePassword()">
+        <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+        Alterar Senha
+      </ion-button>
+    </div>
   </div>
 </ion-content>

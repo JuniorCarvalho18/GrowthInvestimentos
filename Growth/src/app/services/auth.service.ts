@@ -12,6 +12,8 @@ export interface User {
   cnpj: string;
   saldo?: number;
   tokens?: number;
+  isAdmin?: boolean;
+  foto?: string;
 }
 
 @Injectable({

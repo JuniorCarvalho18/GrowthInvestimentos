@@ -72,8 +72,15 @@
     <ion-item *ngFor="let c of comentariosFiltrados" class="post-card">
       <div class="post-info">
         <div class="post-header">
-          <h3>{{ c.autor }}</h3>
-          <ion-badge color="secondary">Post #{{ c.post_id }}</ion-badge>
+          <ion-avatar style="width: 40px; height: 40px; margin-right: 10px;">
+            <img *ngIf="c.autor_foto" [src]="c.autor_foto">
+            <ion-icon *ngIf="!c.autor_foto" name="person-circle-outline" style="font-size: 40px; color: #ccc;"></ion-icon>
+          </ion-avatar>
+
+          <div style="flex: 1;">
+            <h3>{{ c.autor }}</h3>
+            <ion-badge color="secondary">Post #{{ c.post_id }}</ion-badge>
+          </div>
         </div>
 
         <p class="post-texto">{{ c.texto }}</p>

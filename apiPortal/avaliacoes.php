@@ -23,7 +23,7 @@ if ($method === 'GET') {
     
     if ($acao === 'listar' && $projeto_id > 0) {
         $stmt = $conn->prepare("
-            SELECT a.*, u.nome as autor_nome
+            SELECT a.*, u.nome as autor_nome, u.foto as autor_foto 
             FROM projeto_avaliacoes a
             LEFT JOIN usuarios u ON a.usuario_id = u.id
             WHERE a.projeto_id = ?

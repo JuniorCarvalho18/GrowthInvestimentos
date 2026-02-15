@@ -8,6 +8,7 @@ export interface Post {
   usuario_id?: number;
   autor: string;
   tempo?: string;
+  autor_foto?: string;
   texto: string;
   categoria: string;
   imagem?: string;
@@ -22,6 +23,7 @@ export interface Comentario {
   post_id: number;
   usuario_id: number;
   autor: string;
+  autor_foto?: string;
   texto: string;
   data: string;
 }

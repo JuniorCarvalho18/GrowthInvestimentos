@@ -1,25 +1,94 @@
-/* filepath: /C:/GitHub/GrowthInvestimentos/Growth/src/app/profile/profile.page.scss */
 .profile-container {
-  padding: 16px;
-}
-
-.profile-photo {
+  padding: 20px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
+
+  // Wrapper para posicionar o ícone da câmera sobre a foto
+  .profile-photo-wrapper {
+    position: relative;
+    margin-bottom: 30px;
+    cursor: pointer;
+
+    .profile-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border: 4px solid var(--ion-color-light);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+      ion-icon {
+        font-size: 80px;
+        color: #ccc;
+      }
+
+      .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    // Pequeno ícone de câmera flutuante
+    .edit-badge {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: var(--ion-color-primary);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 3px solid white;
+
+      ion-icon {
+        font-size: 18px;
+      }
+    }
+  }
+
+  ion-item {
+    width: 100%;
+    margin-bottom: 10px;
+    --background: transparent;
+  }
+
+  .actions {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
-.profile-photo ion-icon {
-  font-size: 100px;
-  color: var(--ion-text-color);
-}
+// Adicione dentro de .profile-photo-wrapper
 
-ion-item {
-  margin-bottom: 16px;
-}
+    .remove-badge {
+      position: absolute;
+      bottom: 0;
+      left: 0; /* Fica do lado oposto da câmera */
+      background: var(--ion-color-danger);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 3px solid white;
+      cursor: pointer;
+      z-index: 10;
 
-ion-button {
-  --background: var(--dourado);
-  --color: var(--ion-text-color);
-}
+      ion-icon {
+        font-size: 18px;
+      }
+    }
