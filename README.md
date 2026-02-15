@@ -176,7 +176,7 @@ http://localhost/GrowthInvestimentos/apiPortal/crud1.php
 - [x] Feed de postagems
 - [x] Sistema de likes
 - [x] Sistema de comentários
-- [ ] Sistema de Avaliação de Projetos
+- [x] Sistema de Avaliação de Projetos
 
 ## 🎨 Design e UX
 
