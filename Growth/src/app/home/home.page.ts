@@ -18,10 +18,11 @@ interface Projeto {
   meta?: string;
   previsao?: string;
   local?: string;
-  avaliacoes?: any[];
-  avaliacoesOutros?: any[];  // ← NOVO: avaliações de outros usuários
+  avaliacoes: any[]; // Removido o '?'
+  avaliacoesOutros?: any[];
   minhaAvaliacao?: any;      // ← NOVO: minha avaliação
   mediaAvaliacoes?: number;
+  totalAvaliacoes?: number;
   mostrarFormAvaliacao?: boolean;
   notaTemp?: number;
   comentarioTemp?: string;
@@ -51,72 +52,8 @@ export class HomePage implements OnInit {
   loadingProjetos = true;
   loadingPosts = true;
 
-  projetosDestaque: Projeto[] = [
-    {
-      id: 1,
-      nome: 'Fazenda Solar Comunitária',
-      descricao: 'Energia limpa para 500 famílias',
-      categoria: 'Sustentável',
-      dataInicio: '01/12/2024',
-      meta: '50.000,00',
-      previsao: 'Dez/2025',
-      local: 'São Paulo, SP'
-    },
-    {
-      id: 2,
-      nome: 'Reflorestamento Amazônia',
-      descricao: 'Plantio de 10.000 árvores nativas',
-      categoria: 'Sustentável',
-      dataInicio: '15/01/2025',
-      meta: '35.000,00',
-      previsao: 'Out/2025',
-      local: 'Amazonas, AM'
-    }
-  ];
-
-  projetosSustentaveis: Projeto[] = [
-    {
-      id: 1,
-      nome: 'Energia Solar Residencial',
-      descricao: 'Painéis solares para redução de custos',
-      categoria: 'Energia Renovável',
-      avaliacoes: [
-        { autor: 'CotistaFeliz99', nota: 5, comentario: 'O projeto tem trazido muitos retornos!' },
-        { autor: 'InvestidorVerde', nota: 4, comentario: 'Ótima iniciativa sustentável!' },
-        { autor: 'EcoWarrior', nota: 5, comentario: 'Impacto ambiental visível!' }
-      ]
-    },
-    {
-      id: 2,
-      nome: 'Reciclagem Comunitária',
-      descricao: 'Centro de reciclagem no bairro',
-      categoria: 'Reciclagem',
-      avaliacoes: [
-        { autor: 'InvestidorVerde', nota: 4, comentario: 'Excelente iniciativa sustentável!' },
-        { autor: 'ApoiadorLocal', nota: 5, comentario: 'Transformou o bairro!' }
-      ]
-    },
-    {
-      id: 3,
-      nome: 'Horta Urbana Coletiva',
-      descricao: 'Alimentos orgânicos para a comunidade',
-      categoria: 'Reflorestamento',
-      avaliacoes: [
-        { autor: 'ApoiadorEco', nota: 5, comentario: 'Impacto ambiental visível!' },
-        { autor: 'Sustentavel123', nota: 4, comentario: 'Produtos frescos e saudáveis!' }
-      ]
-    },
-    {
-      id: 4,
-      nome: 'Tratamento de Água',
-      descricao: 'Sistema de filtragem comunitário',
-      categoria: 'Sustentável',
-      avaliacoes: [
-        { autor: 'InvesteSustentavel', nota: 4, comentario: 'Resultados consistentes!' },
-        { autor: 'AguaLimpa', nota: 5, comentario: 'Água de qualidade para todos!' }
-      ]
-    }
-  ];
+  projetosDestaque: Projeto[] = [];
+  projetosSustentaveis: Projeto[] = [];
 
   filtroCategoria = 'todos';
   projetosFiltrados: Projeto[] = [];
@@ -299,11 +236,11 @@ async enviarAvaliacao(projeto: Projeto) {
 
             // ✅ Separa MINHA avaliação das OUTRAS
             projeto.minhaAvaliacao = projeto.avaliacoes.find(
-              av => av.usuario_id === this.userId
+              av => Number(av.usuario_id) === Number(this.userId)
             );
 
             projeto.avaliacoesOutros = projeto.avaliacoes.filter(
-              av => av.usuario_id !== this.userId
+              av => Number(av.usuario_id) !== Number(this.userId)
             );
           }
         }
@@ -434,10 +371,27 @@ async enviarAvaliacao(projeto: Projeto) {
   getEstrelas(nota: number): string { return '⭐'.repeat(nota); }
 
   async verTodasAvaliacoes(projeto: Projeto) {
-    if (!projeto.avaliacoes) return;
+    // Garante que 'lista' use um array vazio caso 'avaliacoes' seja undefined
+    const avaliacoes = projeto.avaliacoes ?? [];
+
+    if (avaliacoes.length === 0) {
+      await this.showToast('Este projeto ainda não possui avaliações.', 'warning');
+      return;
+    }
+
     let lista = '';
-    projeto.avaliacoes.forEach((av, i) => { lista += `${av.autor} ${this.getEstrelas(av.nota)}\n"${av.comentario}"\n`; if (i < projeto.avaliacoes!.length - 1) lista += '\n'; });
-    const alert = await this.alertController.create({ header: `Avaliações - ${projeto.nome}`, message: lista, cssClass: 'avaliacoes-alert', buttons: ['Fechar'] });
+    avaliacoes?.forEach((av, i) => {
+      lista += `${av.autor} ${this.getEstrelas(av.nota)}\n"${av.comentario}"\n`;
+      if (i < avaliacoes.length - 1) lista += '\n';
+    });
+
+    const alert = await this.alertController.create({
+      header: `Avaliações - ${projeto.nome}`,
+      message: lista,
+      cssClass: 'avaliacoes-alert',
+      buttons: ['Fechar']
+    });
+
     await alert.present();
   }
 
