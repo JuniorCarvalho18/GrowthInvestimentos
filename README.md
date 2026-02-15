@@ -105,7 +105,7 @@ $senha = ''; // Sua senha do MySQL
 
 #### 4. Ajuste as URLs da API
 
-Edite *Growth/src/environments/environment.ts*:
+Edite `Growth/src/environments/environment.ts`:
 
 ```typescript
   export const environment = {
