@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { ProjetosService, Projeto } from '../services/projetos.service';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-projetos',
@@ -9,7 +10,7 @@ import { ProjetosService, Projeto } from '../services/projetos.service';
   styleUrls: ['./projetos.page.scss'],
   standalone: false,
 })
-export class ProjetosPage implements OnInit {
+export class ProjetosPage implements OnInit, OnDestroy {
   projetos: Projeto[] = [];
   projeto: Projeto = this.limparFormulario();
   loading: HTMLIonLoadingElement | null = null;
@@ -36,11 +37,21 @@ export class ProjetosPage implements OnInit {
     private projetosService: ProjetosService,
     private toast: ToastController,
     private alert: AlertController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private refreshSubscription?: Subscription
   ) {}
 
   ngOnInit() {
     this.listarProjetos();
+    this.refreshSubscription = interval(5000).subscribe(() => {
+      this.listarProjetos(true);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
   }
 
   limparFormulario(): Projeto {
@@ -84,12 +95,16 @@ export class ProjetosPage implements OnInit {
     await toast.present();
   }
 
-  async listarProjetos() {
-    await this.showLoading('Carregando projetos...');
+  async listarProjetos(silencioso = false) {
+    if (!silencioso) {
+      await this.showLoading('Carregando projetos...');
+    }
 
     this.projetosService.listarProjetos().subscribe({
       next: async (res) => {
-        await this.hideLoading();
+        if (!silencioso) {
+          await this.hideLoading();
+        }
         if (res.success) {
           this.projetos = res.projetos;
         } else {
@@ -97,7 +112,9 @@ export class ProjetosPage implements OnInit {
         }
       },
       error: async (error) => {
-        await this.hideLoading();
+        if (!silencioso) {
+          await this.hideLoading();
+        }
         console.error('Erro:', error);
         await this.presentToast('Erro ao conectar ao servidor', 'danger');
       }

@@ -81,6 +81,33 @@ const routes: Routes = [
     path: 'verificacao',
     loadChildren: () => import('./verificacao/verificacao.module').then( m => m.VerificacaoPageModule)
   },
+  {
+    path: 'gerenciar-posts',
+    loadChildren: () => import('./gerenciar-posts/gerenciar-posts.module').then( m => m.GerenciarPostsPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'gerenciar-comentarios',
+    loadChildren: () => import('./gerenciar-comentarios/gerenciar-comentarios.module').then( m => m.GerenciarComentariosPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'gerenciar-avaliacoes',
+    loadChildren: () => import('./gerenciar-avaliacoes/gerenciar-avaliacoes.module').then( m => m.GerenciarAvaliacoesPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'gerenciar-posts',
+    loadChildren: () => import('./gerenciar-posts/gerenciar-posts.module').then( m => m.GerenciarPostsPageModule)
+  },
+  {
+    path: 'gerenciar-comentarios',
+    loadChildren: () => import('./gerenciar-comentarios/gerenciar-comentarios.module').then( m => m.GerenciarComentariosPageModule)
+  },
+  {
+    path: 'gerenciar-avaliacoes',
+    loadChildren: () => import('./gerenciar-avaliacoes/gerenciar-avaliacoes.module').then( m => m.GerenciarAvaliacoesPageModule)
+  },
 ];
 
 @NgModule({

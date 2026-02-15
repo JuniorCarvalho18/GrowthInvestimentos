@@ -13,10 +13,24 @@ export class DevPage implements OnInit {
 
   ngOnInit() {
   }
+
   add1(){
     this.rota.navigate(['/usuarios']);
   }
+
   add2(){
     this.rota.navigate(['/projetos']);
+  }
+
+  add3(){
+    this.rota.navigate(['/gerenciar-posts']);
+  }
+
+  add4(){
+    this.rota.navigate(['/gerenciar-comentarios']);
+  }
+
+  add5(){
+    this.rota.navigate(['/gerenciar-avaliacoes']);
   }
 }

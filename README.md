@@ -124,7 +124,7 @@ npm install
 # Modo desenvolvimento (navegador)
 ionic serve
 
-# Ou abra em http://localhost:4200
+# Ou abra em http://localhost:8100
 ```
 
 #### 7. Teste a API
@@ -210,7 +210,7 @@ Para um guia completo de configuração no htdocs, consulte:
 - ✅ Senhas com hash BCrypt (NUNCA MD5)
 - ✅ Prepared statements (PDO) contra SQL Injection
 - ✅ Validação de inputs no frontend e backend
-- ✅ CORS configurado para localhost:4200
+- ✅ CORS configurado para localhost:8100
 - ✅ Guards para rotas administrativas
 - ⚠️ CORS deve ser ajustado para produção
 

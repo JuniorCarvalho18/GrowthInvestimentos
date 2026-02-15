@@ -1,0 +1,122 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dev"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gerenciar Posts</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Formulário -->
+  <div class="form-container">
+    <h2>{{ post.id ? 'Editar Post' : 'Novo Post' }}</h2>
+
+    <ion-item>
+      <ion-label position="floating">Autor *</ion-label>
+      <ion-input [(ngModel)]="post.autor" placeholder="Nome do autor"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Texto do Post *</ion-label>
+      <ion-textarea
+        [(ngModel)]="post.texto"
+        rows="4"
+        placeholder="Escreva o conteúdo do post...">
+      </ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Categoria *</ion-label>
+      <ion-select [(ngModel)]="post.categoria" interface="popover">
+        <ion-select-option value="Comunidade Prêmios">Comunidade Prêmios</ion-select-option>
+        <ion-select-option value="Investimentos">Investimentos</ion-select-option>
+        <ion-select-option value="Projetos Sustentáveis">Projetos Sustentáveis</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item button (click)="selecionarImagem()" lines="none" class="upload-imagem">
+      <ion-icon slot="start" name="image-outline"></ion-icon>
+      <ion-label>{{ post.imagem ? 'Alterar Imagem' : 'Adicionar Imagem' }}</ion-label>
+    </ion-item>
+
+    <div *ngIf="post.imagem" class="preview-container">
+      <img [src]="post.imagem" alt="Preview" class="preview-img" />
+      <ion-button
+        (click)="post.imagem = ''"
+        fill="clear"
+        size="small"
+        class="btn-remove-preview">
+        <ion-icon slot="icon-only" name="close-circle"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="button-group">
+      <ion-button expand="block" (click)="salvarPost()">
+        <ion-icon slot="start" [name]="post.id ? 'checkmark-circle-outline' : 'add-circle-outline'"></ion-icon>
+        {{ post.id ? 'Atualizar' : 'Salvar' }}
+      </ion-button>
+
+      <ion-button
+        *ngIf="post.id"
+        expand="block"
+        color="medium"
+        (click)="cancelarEdicao()">
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        Cancelar
+      </ion-button>
+    </div>
+  </div>
+
+  <ion-item-divider class="divider">
+    <ion-label>Lista de Posts ({{ posts.length }})</ion-label>
+  </ion-item-divider>
+
+  <!-- Lista de Posts -->
+  <ion-list *ngIf="posts.length > 0" class="post-list">
+    <ion-item *ngFor="let p of posts" class="post-card">
+      <div class="post-info">
+        <div class="post-header">
+          <h3>{{ p.autor }}</h3>
+          <ion-badge color="primary">{{ p.categoria }}</ion-badge>
+        </div>
+
+        <p class="post-texto">{{ p.texto }}</p>
+
+        <div *ngIf="p.imagem" class="post-image">
+          <img [src]="p.imagem" alt="Post image" />
+        </div>
+
+        <div class="post-stats">
+          <p>
+            <ion-icon name="thumbs-up-outline"></ion-icon>
+            {{ p.curtidas || 0 }} curtidas
+          </p>
+          <p>
+            <ion-icon name="chatbubble-outline"></ion-icon>
+            {{ p.comentarios || 0 }} comentários
+          </p>
+        </div>
+
+        <p class="post-data">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{ p.data_criacao | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+
+      <div class="actions" slot="end">
+        <ion-button color="warning" (click)="editar(p)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button color="danger" (click)="deletar(p.id!, p.autor)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+
+  <div *ngIf="posts.length === 0" class="empty-state">
+    <ion-icon name="document-text-outline"></ion-icon>
+    <p>Nenhum post cadastrado</p>
+  </div>
+</ion-content>

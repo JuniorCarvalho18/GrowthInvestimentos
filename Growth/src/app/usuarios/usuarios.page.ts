@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { UsuariosService, Usuario } from '../services/Usuarios.service';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-usuarios',
@@ -9,7 +10,7 @@ import { UsuariosService, Usuario } from '../services/Usuarios.service';
   styleUrls: ['./usuarios.page.scss'],
   standalone: false,
 })
-export class UsuariosPage implements OnInit {
+export class UsuariosPage implements OnInit, OnDestroy {
   usuarios: Usuario[] = [];
   usuario: Usuario = this.limparFormulario();
   loading: HTMLIonLoadingElement | null = null;
@@ -19,12 +20,22 @@ export class UsuariosPage implements OnInit {
     private usuariosService: UsuariosService,
     private toast: ToastController,
     private alert: AlertController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private refreshSubscription?: Subscription
   ) {}
 
   ngOnInit() {
     this.listarUsuarios();
+    this.refreshSubscription = interval(5000).subscribe(() => {
+      this.listarUsuarios(true);
+    });
   }
+
+  ngOnDestroy() {
+  if (this.refreshSubscription) {
+    this.refreshSubscription.unsubscribe();
+  }
+}
 
   limparFormulario(): Usuario {
     return {
@@ -61,12 +72,16 @@ export class UsuariosPage implements OnInit {
     await toast.present();
   }
 
-  async listarUsuarios() {
-    await this.showLoading('Carregando usuários...');
+  async listarUsuarios(silencioso = false) {
+    if (!silencioso) {
+      await this.showLoading('Carregando usuários...');
+    }
 
     this.usuariosService.listarUsuarios().subscribe({
       next: async (res) => {
-        await this.hideLoading();
+        if (!silencioso) {
+          await this.hideLoading();
+        }
         if (res.success) {
           this.usuarios = res.usuarios;
         } else {
@@ -74,7 +89,9 @@ export class UsuariosPage implements OnInit {
         }
       },
       error: async (error) => {
-        await this.hideLoading();
+        if (!silencioso) {
+          await this.hideLoading();
+        }
         console.error('Erro:', error);
         await this.presentToast('Erro ao conectar ao servidor', 'danger');
       }

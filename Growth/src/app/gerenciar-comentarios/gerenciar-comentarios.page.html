@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dev"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gerenciar Comentários</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Filtro por Post -->
+  <div class="filter-container">
+    <ion-item>
+      <ion-label position="stacked">Filtrar por Post:</ion-label>
+      <ion-select [(ngModel)]="postSelecionadoId" (ionChange)="filtrarComentarios()" interface="popover">
+        <ion-select-option [value]="0">Todos</ion-select-option>
+        <ion-select-option *ngFor="let p of posts" [value]="p.id">
+          {{ p.autor }} - {{ p.texto.substring(0, 40) }}...
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <ion-item-divider class="divider">
+    <ion-label>Lista de Comentários ({{ comentariosFiltrados.length }})</ion-label>
+  </ion-item-divider>
+
+  <!-- Lista de Comentários -->
+  <ion-list *ngIf="comentariosFiltrados.length > 0" class="comentario-list">
+    <ion-item *ngFor="let c of comentariosFiltrados" class="comentario-card">
+      <div class="comentario-info">
+        <div class="comentario-header">
+          <h3>{{ c.autor }}</h3>
+          <ion-badge color="primary">Post #{{ c.post_id }}</ion-badge>
+        </div>
+
+        <p class="comentario-texto">{{ c.texto }}</p>
+
+        <p class="comentario-data">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{ c.data | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+
+      <div class="actions" slot="end">
+        <ion-button color="danger" (click)="deletar(c.id!, c.autor)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+
+  <div *ngIf="comentariosFiltrados.length === 0" class="empty-state">
+    <ion-icon name="chatbubble-outline"></ion-icon>
+    <p>Nenhum comentário encontrado</p>
+  </div>
+</ion-content>

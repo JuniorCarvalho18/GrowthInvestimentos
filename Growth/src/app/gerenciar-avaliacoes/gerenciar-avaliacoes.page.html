@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dev"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gerenciar Avaliações</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Filtro por Projeto -->
+  <div class="filter-container">
+    <ion-item>
+      <ion-label position="stacked">Filtrar por Projeto:</ion-label>
+      <ion-select [(ngModel)]="projetoSelecionadoId" (ionChange)="filtrarAvaliacoes()" interface="popover">
+        <ion-select-option [value]="0">Todos</ion-select-option>
+        <ion-select-option *ngFor="let p of projetos" [value]="p.id">
+          {{ p.nome }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <ion-item-divider class="divider">
+    <ion-label>Lista de Avaliações ({{ avaliacoesFiltradas.length }})</ion-label>
+  </ion-item-divider>
+
+  <!-- Lista de Avaliações -->
+  <ion-list *ngIf="avaliacoesFiltradas.length > 0" class="avaliacao-list">
+    <ion-item *ngFor="let a of avaliacoesFiltradas" class="avaliacao-card">
+      <div class="avaliacao-info">
+        <div class="avaliacao-header">
+          <h3>{{ a.autor }}</h3>
+          <div class="rating">
+            <ion-icon
+              *ngFor="let star of [1,2,3,4,5]"
+              [name]="star <= a.nota ? 'star' : 'star-outline'"
+              [class.filled]="star <= a.nota">
+            </ion-icon>
+          </div>
+        </div>
+
+        <p class="projeto-nome">
+          <ion-icon name="folder-outline"></ion-icon>
+          <strong>{{ getProjetoNome(a.projeto_id) }}</strong>
+        </p>
+
+        <p class="avaliacao-comentario" *ngIf="a.comentario">{{ a.comentario }}</p>
+
+        <p class="avaliacao-data">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{ a.data | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+
+      <div class="actions" slot="end">
+        <ion-button color="danger" (click)="deletar(a.id!, a.autor)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+
+  <div *ngIf="avaliacoesFiltradas.length === 0" class="empty-state">
+    <ion-icon name="star-outline"></ion-icon>
+    <p>Nenhuma avaliação encontrada</p>
+  </div>
+</ion-content>

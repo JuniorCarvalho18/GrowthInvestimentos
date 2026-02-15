@@ -1,0 +1,142 @@
+.filter-container {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+
+  ion-item {
+    --background: transparent;
+    --border-color: rgba(227, 227, 227, 0.3);
+  }
+}
+
+.divider {
+  margin: 24px 0 16px 0;
+  --background: transparent;
+  --color: var(--ion-text-color);
+
+  ion-label {
+    font-weight: bold;
+    font-size: 18px;
+  }
+}
+
+.avaliacao-list {
+  background: transparent;
+}
+
+.avaliacao-card {
+  --background: rgba(255, 255, 255, 0.03);
+  --border-radius: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid rgba(227, 227, 227, 0.1);
+  align-items: flex-start;
+
+  .avaliacao-info {
+    flex: 1;
+    width: 100%;
+
+    .avaliacao-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      h3 {
+        margin: 0;
+        color: var(--ion-text-color);
+        font-size: 16px;
+        font-weight: 600;
+        flex: 1;
+      }
+
+      .rating {
+        display: flex;
+        gap: 4px;
+
+        ion-icon {
+          font-size: 18px;
+          color: #666;
+
+          &.filled {
+            color: var(--dourado);
+          }
+        }
+      }
+    }
+
+    .projeto-nome {
+      margin: 8px 0;
+      font-size: 14px;
+      color: rgba(227, 227, 227, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 16px;
+        color: var(--dourado);
+      }
+
+      strong {
+        color: var(--ion-text-color);
+      }
+    }
+
+    .avaliacao-comentario {
+      margin: 12px 0;
+      padding: 12px;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid var(--dourado);
+      border-radius: 4px;
+      font-size: 14px;
+      color: rgba(227, 227, 227, 0.9);
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .avaliacao-data {
+      margin: 0;
+      font-size: 12px;
+      color: rgba(227, 227, 227, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      ion-icon {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 12px;
+
+    ion-button {
+      --padding-start: 12px;
+      --padding-end: 12px;
+      height: 40px;
+      width: 50px;
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(227, 227, 227, 0.5);
+
+  ion-icon {
+    font-size: 80px;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
