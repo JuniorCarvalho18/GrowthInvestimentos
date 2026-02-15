@@ -58,10 +58,13 @@ Growth/
 │   ├── assets/              # Recursos estáticos
 │   ├── theme/               # Temas e variáveis CSS
 │   └── global.scss          # Estilos globais
-├── apiPortal/               # Backend PHP
-│   ├── connection.php       # Conexão com banco
-│   └── crud1.php           # API REST
-└── growthDB.sql            # Schema do banco de dados
+├── apiPortal/                # Backend PHP
+│   ├── connection.php        # Conexão PDO
+│   ├── crud1.php             # Autenticação e Usuários
+│   ├── posts.php             # Lógica de Feed e Comentários
+│   ├── projetos.php          # CRUD de Projetos
+│   └── avaliacoes.php        # Sistema de notas
+└── growthDB.sql              # Estrutura do Banco de Dados
 ```
 
 ## 🚀 Como Executar o Projeto
