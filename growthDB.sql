@@ -1,43 +1,53 @@
 -- ============================================
--- GROWTH INVESTIMENTOS - SQL SIMPLIFICADO
--- (SEM PROCEDURES - Para evitar erro 1558)
+-- GROWTH INVESTIMENTOS - POSTGRESQL SCHEMA
 -- ============================================
 
-DROP DATABASE IF EXISTS growth;
-CREATE DATABASE growth CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE growth;
+-- Limpeza inicial (com CASCADE para remover dependências de chave estrangeira)
+DROP TABLE IF EXISTS projeto_avaliacoes CASCADE;
+DROP TABLE IF EXISTS post_comentarios CASCADE;
+DROP TABLE IF EXISTS post_curtidas CASCADE;
+DROP TABLE IF EXISTS posts CASCADE;
+DROP TABLE IF EXISTS notificacoes CASCADE;
+DROP TABLE IF EXISTS resgates CASCADE;
+DROP TABLE IF EXISTS marketplace CASCADE;
+DROP TABLE IF EXISTS tokens CASCADE;
+DROP TABLE IF EXISTS investimentos CASCADE;
+DROP TABLE IF EXISTS projetos CASCADE;
+DROP TABLE IF EXISTS usuarios CASCADE;
+DROP TABLE IF EXISTS admins CASCADE;
 
 -- ============================================
 -- TABELAS
 -- ============================================
 
 CREATE TABLE admins (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     usuario VARCHAR(50) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL
 );
 
--- Insere o admin padrão (Senha 123456 já criptografada com BCRYPT)
+-- Insere o admin padrão
 INSERT INTO admins (usuario, senha) VALUES 
 ('admin', '$2y$10$YHtTDQEjxSIr.UCLmj/JD.VN7UD4hMBOtJNzfdjxW3s1TmcMyaOYK');
 
 CREATE TABLE usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cnpj VARCHAR(18) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    foto LONGTEXT,
+    foto TEXT,
     senha VARCHAR(255) NOT NULL,
     saldo DECIMAL(10,2) DEFAULT 0.00,
     tokens DECIMAL(10,2) DEFAULT 0.00,
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ultimo_acesso DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_email (email),
-    INDEX idx_cnpj (cnpj)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ultimo_acesso TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Índices para usuarios
+CREATE INDEX idx_usuarios_email ON usuarios(email);
+CREATE INDEX idx_usuarios_cnpj ON usuarios(cnpj);
 
 CREATE TABLE projetos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     meta DECIMAL(10,2) NOT NULL,
@@ -46,133 +56,135 @@ CREATE TABLE projetos (
     local VARCHAR(255),
     imagem TEXT,
     categoria VARCHAR(50) DEFAULT 'Geral',
-    status ENUM('ativo', 'concluido', 'cancelado') DEFAULT 'ativo',
+    status VARCHAR(20) DEFAULT 'ativo' CHECK (status IN ('ativo', 'concluido', 'cancelado')),
     impacto_estimado TEXT,
-    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_status (status),
-    INDEX idx_categoria (categoria)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Índices para projetos
+CREATE INDEX idx_projetos_status ON projetos(status);
+CREATE INDEX idx_projetos_categoria ON projetos(categoria);
 
 CREATE TABLE investimentos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     usuario_id INT NOT NULL,
     projeto_id INT NOT NULL,
     valor_investido DECIMAL(10,2) NOT NULL,
     tokens_ganhos DECIMAL(10,2) DEFAULT 0.00,
-    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     impacto_gerado TEXT,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (projeto_id) REFERENCES projetos(id) ON DELETE CASCADE,
-    INDEX idx_usuario (usuario_id),
-    INDEX idx_projeto (projeto_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    FOREIGN KEY (projeto_id) REFERENCES projetos(id) ON DELETE CASCADE
+);
+-- Índices para investimentos
+CREATE INDEX idx_investimentos_usuario ON investimentos(usuario_id);
+CREATE INDEX idx_investimentos_projeto ON investimentos(projeto_id);
 
 CREATE TABLE tokens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     usuario_id INT NOT NULL,
     investimento_id INT,
     quantidade DECIMAL(10,2) NOT NULL,
-    tipo ENUM('ganho', 'gasto', 'bonus') DEFAULT 'ganho',
+    tipo VARCHAR(20) DEFAULT 'ganho' CHECK (tipo IN ('ganho', 'gasto', 'bonus')),
     descricao VARCHAR(255),
-    data_ganho DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_ganho TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (investimento_id) REFERENCES investimentos(id) ON DELETE SET NULL,
-    INDEX idx_usuario (usuario_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    FOREIGN KEY (investimento_id) REFERENCES investimentos(id) ON DELETE SET NULL
+);
+CREATE INDEX idx_tokens_usuario ON tokens(usuario_id);
 
 CREATE TABLE marketplace (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nome_item VARCHAR(100) NOT NULL,
     descricao TEXT,
     tokens_necessarios DECIMAL(10,2) NOT NULL,
     categoria VARCHAR(50),
     imagem TEXT,
     disponibilidade BOOLEAN DEFAULT TRUE,
-    quantidade_disponivel INT DEFAULT 0,
-    INDEX idx_disponibilidade (disponibilidade)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    quantidade_disponivel INT DEFAULT 0
+);
+CREATE INDEX idx_marketplace_disp ON marketplace(disponibilidade);
 
 CREATE TABLE resgates (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     usuario_id INT NOT NULL,
     item_id INT NOT NULL,
     tokens_gastos DECIMAL(10,2) NOT NULL,
-    data DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('pendente', 'aprovado', 'enviado', 'concluido') DEFAULT 'pendente',
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'pendente' CHECK (status IN ('pendente', 'aprovado', 'enviado', 'concluido')),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (item_id) REFERENCES marketplace(id) ON DELETE CASCADE,
-    INDEX idx_usuario (usuario_id),
-    INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    FOREIGN KEY (item_id) REFERENCES marketplace(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_resgates_usuario ON resgates(usuario_id);
+CREATE INDEX idx_resgates_status ON resgates(status);
 
 CREATE TABLE notificacoes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     usuario_id INT NOT NULL,
     tipo VARCHAR(50),
     titulo VARCHAR(100),
     mensagem TEXT,
     lida BOOLEAN DEFAULT FALSE,
-    data_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    INDEX idx_usuario (usuario_id),
-    INDEX idx_lida (lida)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_notificacoes_usuario ON notificacoes(usuario_id);
+CREATE INDEX idx_notificacoes_lida ON notificacoes(lida);
 
 CREATE TABLE posts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     usuario_id INT NOT NULL,
     autor VARCHAR(100) NOT NULL,
     texto TEXT NOT NULL,
     categoria VARCHAR(50),
     imagem TEXT,
-    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    INDEX idx_usuario (usuario_id),
-    INDEX idx_data (data_criacao)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_posts_usuario ON posts(usuario_id);
+CREATE INDEX idx_posts_data ON posts(data_criacao);
 
 CREATE TABLE post_curtidas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     post_id INT NOT NULL,
     usuario_id INT NOT NULL,
-    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_curtida (post_id, usuario_id),
-    INDEX idx_post (post_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    UNIQUE (post_id, usuario_id)
+);
+CREATE INDEX idx_post_curtidas_post ON post_curtidas(post_id);
 
 CREATE TABLE post_comentarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     post_id INT NOT NULL,
     usuario_id INT NOT NULL,
     autor VARCHAR(100) NOT NULL,
     texto TEXT NOT NULL,
-    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    INDEX idx_post (post_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_post_comentarios_post ON post_comentarios(post_id);
 
 CREATE TABLE projeto_avaliacoes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     projeto_id INT NOT NULL,
     usuario_id INT NOT NULL,
     autor VARCHAR(100) NOT NULL,
     nota INT NOT NULL,
     comentario TEXT,
-    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (projeto_id) REFERENCES projetos(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_avaliacao (projeto_id, usuario_id),
-    INDEX idx_projeto (projeto_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    UNIQUE (projeto_id, usuario_id)
+);
+CREATE INDEX idx_projeto_avaliacoes_proj ON projeto_avaliacoes(projeto_id);
 
 -- ============================================
--- DADOS DE EXEMPLO
+-- DADOS DE EXEMPLO (Mantidos exatamente iguais)
 -- ============================================
 
--- Usuários (senha: senha123)
+-- Usuários
 INSERT INTO usuarios (nome, email, cnpj, senha, saldo, tokens) VALUES
 ('João Silva', 'joao@growth.com', '12.345.678/0001-90', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1000.00, 50.00),
 ('Maria Santos', 'maria@growth.com', '98.765.432/0001-10', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 750.00, 30.00),
@@ -219,11 +231,13 @@ INSERT INTO posts (usuario_id, autor, texto, categoria) VALUES
 (5, 'Pedro Costa', 'Já plantamos mais de 5.000 árvores! 🌳', 'Projetos Sustentáveis');
 
 -- ============================================
--- VERIFICAÇÃO FINAL
+-- VERIFICAÇÃO (Sintaxe Postgres)
 -- ============================================
 
-SHOW TABLES;
+-- Listar tabelas criadas
+-- \dt 
 
+-- Verificar contagem
 SELECT 'usuarios' as tabela, COUNT(*) as total FROM usuarios
 UNION ALL SELECT 'projetos', COUNT(*) FROM projetos
 UNION ALL SELECT 'projeto_avaliacoes', COUNT(*) FROM projeto_avaliacoes

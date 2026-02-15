@@ -34,7 +34,7 @@ if ($postjson['requisicao'] == 'salvar') {
     $query->bindValue(':cnpj', $postjson['cnpj']);
     $query->execute();
 
-    $id = $pdo->lastInsertId();
+    $id = $pdo->lastInsertId('usuarios_id_seq');
     echo json_encode(['success' => $query->rowCount() > 0, 'id' => $id]);
 }
 

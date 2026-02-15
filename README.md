@@ -35,7 +35,7 @@ Growth Investimentos é uma plataforma mobile desenvolvida com **Ionic + Angular
 
 ### Backend
 - **PHP 8.0** - Linguagem de servidor
-- **MySQL** - Banco de dados relacional
+- **PostGreSQL** - Banco de dados relacional
 - **PDO** - Camada de abstração de dados
 - **BCrypt** - Hash de senhas
 
@@ -74,7 +74,7 @@ Growth/
 - Node.js 16+
 - npm ou yarn
 - PHP 8.0+
-- MySQL/MariaDB
+- PostGreSQL
 - Ionic CLI (`npm install -g @ionic/cli`)
 
 ### Passo a Passo
@@ -90,7 +90,7 @@ cd growth-investimentos
 
 ```bash
 # Importe o arquivo SQL
-mysql -u root -p < growthDB.sql
+PostGreSQL -u root -p < growthDB.sql
 ```
 
 #### 3. Configure a API
@@ -100,7 +100,7 @@ Edite `apiPortal/connection.php`:
 $banco = 'growth';
 $host = 'localhost';
 $usuario = 'root';
-$senha = ''; // Sua senha do MySQL
+$senha = ''; // Sua senha do PostGreSQL
 ```
 
 #### 4. Ajuste as URLs da API
@@ -233,7 +233,7 @@ Solução: Inicie Apache no XAMPP
 ### Erro: "Database connection failed"
 ```
 Solução: 
-1. Verifique se MySQL está ativo
+1. Verifique se PostGreSQL está ativo
 2. Confirme credenciais em connection.php
 3. Importe growthDB.sql
 ```

@@ -37,7 +37,7 @@ if ($postjson['requisicao'] == 'salvar') {
         $query->bindValue(':imagem', $postjson['imagem'] ?? ''); // Bind da imagem
         $query->execute();
 
-        $id = $pdo->lastInsertId();
+        $id = $pdo->lastInsertId('projetos_id_seq');
         echo json_encode([
             'success' => true,
             'message' => 'Projeto criado com sucesso!',

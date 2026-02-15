@@ -52,7 +52,7 @@ else if ($requisicao == 'criar') {
         $query->bindValue(':imagem', $postjson['imagem'] ?? '');
         $query->execute();
 
-        $id = $pdo->lastInsertId();
+        $id = $pdo->lastInsertId('posts_id_seq');
         echo json_encode(['success' => true, 'id' => $id, 'message' => 'Post criado!']);
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Erro ao criar: ' . $e->getMessage()]);
@@ -132,7 +132,7 @@ else if ($requisicao == 'comentar') {
         $query->bindValue(':texto', $postjson['texto']);
         $query->execute();
 
-        $id = $pdo->lastInsertId();
+        $id = $pdo->lastInsertId('post_comentarios_id_seq');
         echo json_encode(['success' => true, 'id' => $id, 'message' => 'Comentário adicionado!']);
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Erro ao comentar: ' . $e->getMessage()]);
