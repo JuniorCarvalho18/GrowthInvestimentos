@@ -8,10 +8,65 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Filtro por Projeto -->
-  <div class="filter-container">
+  <div class="form-container">
+    <h2>{{ editando ? 'Editar Avaliação' : 'Nova Avaliação' }}</h2>
+
     <ion-item>
-      <ion-label position="stacked">Filtrar por Projeto:</ion-label>
+      <ion-label position="floating">Projeto *</ion-label>
+      <ion-select [(ngModel)]="avaliacaoForm.projeto_id" interface="popover">
+        <ion-select-option *ngFor="let p of projetos" [value]="p.id">
+          {{ p.nome }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Autor *</ion-label>
+      <ion-input [(ngModel)]="avaliacaoForm.autor" placeholder="Nome do autor"></ion-input>
+    </ion-item>
+
+    <ion-item lines="none" style="margin-top: 10px;">
+      <ion-label position="stacked" style="margin-bottom: 10px; color: var(--ion-text-color);">Nota ({{ avaliacaoForm.nota }})</ion-label>
+      <ion-range min="1" max="5" step="1" snaps="true" [(ngModel)]="avaliacaoForm.nota">
+        <ion-icon size="small" slot="start" name="star-outline" style="color: var(--dourado)"></ion-icon>
+        <ion-icon size="small" slot="end" name="star" style="color: var(--dourado)"></ion-icon>
+      </ion-range>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Comentário</ion-label>
+      <ion-textarea
+        [(ngModel)]="avaliacaoForm.comentario"
+        rows="4"
+        placeholder="Escreva a avaliação...">
+      </ion-textarea>
+    </ion-item>
+
+    <div class="button-group">
+      <ion-button expand="block" (click)="salvar()">
+        <ion-icon slot="start" [name]="editando ? 'checkmark-circle-outline' : 'add-circle-outline'"></ion-icon>
+        {{ editando ? 'Atualizar' : 'Salvar' }}
+      </ion-button>
+
+      <ion-button
+        *ngIf="editando"
+        expand="block"
+        color="medium"
+        (click)="cancelarEdicao()">
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        Cancelar
+      </ion-button>
+    </div>
+  </div>
+
+  <ion-item-divider class="divider">
+    <ion-label>Avaliações ({{ avaliacoesFiltradas.length }})</ion-label>
+  </ion-item-divider>
+
+  <div style="margin-bottom: 15px; padding: 0 5px;">
+    <ion-item style="--background: rgba(255,255,255,0.05); border-radius: 8px;">
+      <ion-icon slot="start" name="filter-outline" style="color: var(--dourado)"></ion-icon>
+      <ion-label>Filtrar por Projeto</ion-label>
       <ion-select [(ngModel)]="projetoSelecionadoId" (ionChange)="filtrarAvaliacoes()" interface="popover">
         <ion-select-option [value]="0">Todos</ion-select-option>
         <ion-select-option *ngFor="let p of projetos" [value]="p.id">
@@ -21,39 +76,36 @@
     </ion-item>
   </div>
 
-  <ion-item-divider class="divider">
-    <ion-label>Lista de Avaliações ({{ avaliacoesFiltradas.length }})</ion-label>
-  </ion-item-divider>
-
-  <!-- Lista de Avaliações -->
-  <ion-list *ngIf="avaliacoesFiltradas.length > 0" class="avaliacao-list">
-    <ion-item *ngFor="let a of avaliacoesFiltradas" class="avaliacao-card">
-      <div class="avaliacao-info">
-        <div class="avaliacao-header">
+  <ion-list *ngIf="avaliacoesFiltradas.length > 0" class="post-list">
+    <ion-item *ngFor="let a of avaliacoesFiltradas" class="post-card">
+      <div class="post-info">
+        <div class="post-header">
           <h3>{{ a.autor }}</h3>
-          <div class="rating">
-            <ion-icon
-              *ngFor="let star of [1,2,3,4,5]"
-              [name]="star <= a.nota ? 'star' : 'star-outline'"
-              [class.filled]="star <= a.nota">
-            </ion-icon>
+
+          <div style="display: flex; gap: 2px;">
+             <ion-icon *ngFor="let s of [1,2,3,4,5]"
+               [name]="s <= a.nota ? 'star' : 'star-outline'"
+               style="color: var(--dourado); font-size: 14px;">
+             </ion-icon>
           </div>
         </div>
 
-        <p class="projeto-nome">
-          <ion-icon name="folder-outline"></ion-icon>
-          <strong>{{ getProjetoNome(a.projeto_id) }}</strong>
+        <p style="font-size: 12px; color: var(--dourado); margin-top: 4px;">
+            <ion-icon name="folder-open-outline"></ion-icon> {{ getProjetoNome(a.projeto_id) }}
         </p>
 
-        <p class="avaliacao-comentario" *ngIf="a.comentario">{{ a.comentario }}</p>
+        <p class="post-texto" *ngIf="a.comentario">"{{ a.comentario }}"</p>
 
-        <p class="avaliacao-data">
+        <p class="post-data">
           <ion-icon name="calendar-outline"></ion-icon>
           {{ a.data | date:'dd/MM/yyyy HH:mm' }}
         </p>
       </div>
 
       <div class="actions" slot="end">
+        <ion-button color="warning" (click)="editar(a)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
         <ion-button color="danger" (click)="deletar(a.id!, a.autor)">
           <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
         </ion-button>

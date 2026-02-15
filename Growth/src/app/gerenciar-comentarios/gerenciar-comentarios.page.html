@@ -8,41 +8,86 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Filtro por Post -->
-  <div class="filter-container">
+  <div class="form-container">
+    <h2>{{ editando ? 'Editar Comentário' : 'Novo Comentário' }}</h2>
+
     <ion-item>
-      <ion-label position="stacked">Filtrar por Post:</ion-label>
-      <ion-select [(ngModel)]="postSelecionadoId" (ionChange)="filtrarComentarios()" interface="popover">
-        <ion-select-option [value]="0">Todos</ion-select-option>
+      <ion-label position="floating">Post Relacionado *</ion-label>
+      <ion-select [(ngModel)]="comentarioForm.post_id" interface="popover">
         <ion-select-option *ngFor="let p of posts" [value]="p.id">
-          {{ p.autor }} - {{ p.texto.substring(0, 40) }}...
+          {{ p.id }} - {{ p.autor }}: {{ p.texto.substring(0, 20) }}...
         </ion-select-option>
       </ion-select>
     </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Autor *</ion-label>
+      <ion-input [(ngModel)]="comentarioForm.autor" placeholder="Nome do autor"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Comentário *</ion-label>
+      <ion-textarea
+        [(ngModel)]="comentarioForm.texto"
+        rows="4"
+        placeholder="Escreva o comentário...">
+      </ion-textarea>
+    </ion-item>
+
+    <div class="button-group">
+      <ion-button expand="block" (click)="salvar()">
+        <ion-icon slot="start" [name]="editando ? 'checkmark-circle-outline' : 'add-circle-outline'"></ion-icon>
+        {{ editando ? 'Atualizar' : 'Salvar' }}
+      </ion-button>
+
+      <ion-button
+        *ngIf="editando"
+        expand="block"
+        color="medium"
+        (click)="cancelarEdicao()">
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        Cancelar
+      </ion-button>
+    </div>
   </div>
 
   <ion-item-divider class="divider">
     <ion-label>Lista de Comentários ({{ comentariosFiltrados.length }})</ion-label>
   </ion-item-divider>
 
-  <!-- Lista de Comentários -->
-  <ion-list *ngIf="comentariosFiltrados.length > 0" class="comentario-list">
-    <ion-item *ngFor="let c of comentariosFiltrados" class="comentario-card">
-      <div class="comentario-info">
-        <div class="comentario-header">
+  <div style="margin-bottom: 15px; padding: 0 5px;">
+    <ion-item style="--background: rgba(255,255,255,0.05); border-radius: 8px;">
+      <ion-icon slot="start" name="filter-outline" style="color: var(--dourado)"></ion-icon>
+      <ion-label>Filtrar por Post</ion-label>
+      <ion-select [(ngModel)]="postSelecionadoId" (ionChange)="filtrarComentarios()" interface="popover">
+        <ion-select-option [value]="0">Todos</ion-select-option>
+        <ion-select-option *ngFor="let p of posts" [value]="p.id">
+          {{ p.autor }} ({{ p.id }})
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <ion-list *ngIf="comentariosFiltrados.length > 0" class="post-list">
+    <ion-item *ngFor="let c of comentariosFiltrados" class="post-card">
+      <div class="post-info">
+        <div class="post-header">
           <h3>{{ c.autor }}</h3>
-          <ion-badge color="primary">Post #{{ c.post_id }}</ion-badge>
+          <ion-badge color="secondary">Post #{{ c.post_id }}</ion-badge>
         </div>
 
-        <p class="comentario-texto">{{ c.texto }}</p>
+        <p class="post-texto">{{ c.texto }}</p>
 
-        <p class="comentario-data">
+        <p class="post-data">
           <ion-icon name="calendar-outline"></ion-icon>
           {{ c.data | date:'dd/MM/yyyy HH:mm' }}
         </p>
       </div>
 
       <div class="actions" slot="end">
+        <ion-button color="warning" (click)="editar(c)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
         <ion-button color="danger" (click)="deletar(c.id!, c.autor)">
           <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
         </ion-button>
@@ -51,7 +96,7 @@
   </ion-list>
 
   <div *ngIf="comentariosFiltrados.length === 0" class="empty-state">
-    <ion-icon name="chatbubble-outline"></ion-icon>
+    <ion-icon name="chatbubbles-outline"></ion-icon>
     <p>Nenhum comentário encontrado</p>
   </div>
 </ion-content>

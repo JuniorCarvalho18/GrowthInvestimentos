@@ -84,10 +84,17 @@ export class PostsService {
     });
   }
 
+  editarComentario(comentario: Comentario): Observable<any> {
+    return this.http.post<any>(this.apiUrl, {
+      requisicao: 'editar_comentario',
+      ...comentario
+    });
+  }
+
   deletarComentario(id: number): Observable<any> {
-  return this.http.post<any>(this.apiUrl, {
-    requisicao: 'deletar_comentario',
-    id: id
-  });
-}
+    return this.http.post<any>(this.apiUrl, {
+      requisicao: 'deletar_comentario',
+      id: id
+    });
+  }
 }

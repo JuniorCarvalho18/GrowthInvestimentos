@@ -123,13 +123,18 @@
       margin: 12px 0;
       border-radius: 8px;
       overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.02);
 
-    img {
-          margin: auto;
-          height: 200px;
-          object-fit: cover;
-          border-radius: 8px;
-        }
+      img {
+        height: 200px;
+        width: auto;      /* Mantém a proporção */
+        max-width: 100%;  /* Garante que não estoure a largura no celular */
+        object-fit: cover;
+        border-radius: 8px;
+      }
     }
 
     .post-stats {

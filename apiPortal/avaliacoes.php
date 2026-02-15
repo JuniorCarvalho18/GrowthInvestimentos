@@ -34,8 +34,6 @@ if ($method === 'GET') {
         $result = $stmt->get_result();
         $avaliacoes = $result->fetch_all(MYSQLI_ASSOC);
         
-        // CORREÇÃO: Converter strings numéricas para tipos reais (int/float)
-        // Isso resolve o bug de comparação estrita (===) no JavaScript
         foreach ($avaliacoes as &$avaliacao) {
             $avaliacao['id'] = (int)$avaliacao['id'];
             $avaliacao['projeto_id'] = (int)$avaliacao['projeto_id'];
@@ -50,9 +48,7 @@ if ($method === 'GET') {
         
     } elseif ($acao === 'media' && $projeto_id > 0) {
         $stmt = $conn->prepare("
-            SELECT 
-                AVG(nota) as media,
-                COUNT(*) as total
+            SELECT AVG(nota) as media, COUNT(*) as total
             FROM projeto_avaliacoes
             WHERE projeto_id = ?
         ");
@@ -79,44 +75,35 @@ if ($method === 'POST') {
         $nota = (int)$data['nota'];
         $comentario = $data['comentario'] ?? '';
         
-        $check = $conn->prepare("
-            SELECT id FROM projeto_avaliacoes 
-            WHERE projeto_id = ? AND usuario_id = ?
-        ");
+        // Verifica se já existe para decidir entre INSERT e UPDATE
+        $check = $conn->prepare("SELECT id FROM projeto_avaliacoes WHERE projeto_id = ? AND usuario_id = ?");
         $check->bind_param("ii", $projeto_id, $usuario_id);
         $check->execute();
         $resultado = $check->get_result();
         
         if ($resultado->num_rows > 0) {
+            // ATUALIZADO: Agora permite editar o Autor também
             $stmt = $conn->prepare("
                 UPDATE projeto_avaliacoes 
-                SET nota = ?, comentario = ?, data = NOW()
+                SET autor = ?, nota = ?, comentario = ?, data = NOW()
                 WHERE projeto_id = ? AND usuario_id = ?
             ");
-            $stmt->bind_param("isii", $nota, $comentario, $projeto_id, $usuario_id);
+            $stmt->bind_param("sisii", $autor, $nota, $comentario, $projeto_id, $usuario_id);
             
             if ($stmt->execute()) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Avaliação atualizada com sucesso'
-                ]);
+                echo json_encode(['success' => true, 'message' => 'Avaliação atualizada']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Erro ao atualizar']);
             }
         } else {
             $stmt = $conn->prepare("
-                INSERT INTO projeto_avaliacoes 
-                (projeto_id, usuario_id, autor, nota, comentario)
+                INSERT INTO projeto_avaliacoes (projeto_id, usuario_id, autor, nota, comentario)
                 VALUES (?, ?, ?, ?, ?)
             ");
             $stmt->bind_param("iisis", $projeto_id, $usuario_id, $autor, $nota, $comentario);
             
             if ($stmt->execute()) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Avaliação criada com sucesso',
-                    'id' => $conn->insert_id
-                ]);
+                echo json_encode(['success' => true, 'message' => 'Avaliação criada', 'id' => $conn->insert_id]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Erro ao criar']);
             }
@@ -125,20 +112,13 @@ if ($method === 'POST') {
 
     elseif ($acao === 'deletar') {
         $id = (int)$data['id'];
-        
         $stmt = $conn->prepare("DELETE FROM projeto_avaliacoes WHERE id = ?");
         $stmt->bind_param("i", $id);
         
         if ($stmt->execute()) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Avaliação excluída com sucesso'
-            ]);
+            echo json_encode(['success' => true, 'message' => 'Avaliação excluída']);
         } else {
-            echo json_encode([
-                'success' => false, 
-                'message' => 'Erro ao excluir'
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Erro ao excluir']);
         }
     }
 }

@@ -20,8 +20,10 @@ if (!$postjson) {
     exit;
 }
 
+$requisicao = $postjson['requisicao'] ?? '';
+
 // ✅ LISTAR POSTS
-if ($postjson['requisicao'] == 'listar') {
+if ($requisicao == 'listar') {
     try {
         $query = $pdo->prepare("SELECT p.*, 
                                 (SELECT COUNT(*) FROM post_curtidas WHERE post_id = p.id) as curtidas,
@@ -38,7 +40,7 @@ if ($postjson['requisicao'] == 'listar') {
 }
 
 // ✅ CRIAR POST
-else if ($postjson['requisicao'] == 'criar') {
+else if ($requisicao == 'criar') {
     try {
         $query = $pdo->prepare("INSERT INTO posts (usuario_id, autor, texto, categoria, imagem) 
                                 VALUES (:usuario_id, :autor, :texto, :categoria, :imagem)");
@@ -57,15 +59,15 @@ else if ($postjson['requisicao'] == 'criar') {
 }
 
 // ✅ EDITAR POST
-else if ($postjson['requisicao'] == 'editar') {
+else if ($requisicao == 'editar') {
     try {
-        $query = $pdo->prepare("UPDATE posts SET texto = :texto, categoria = :categoria, imagem = :imagem 
-                                WHERE id = :id AND usuario_id = :usuario_id");
+        $query = $pdo->prepare("UPDATE posts SET texto = :texto, categoria = :categoria, imagem = :imagem, autor = :autor 
+                                WHERE id = :id");
         $query->bindValue(':texto', $postjson['texto']);
         $query->bindValue(':categoria', $postjson['categoria']);
         $query->bindValue(':imagem', $postjson['imagem'] ?? '');
+        $query->bindValue(':autor', $postjson['autor']);
         $query->bindValue(':id', $postjson['id']);
-        $query->bindValue(':usuario_id', $postjson['usuario_id']);
         $query->execute();
 
         echo json_encode(['success' => $query->rowCount() > 0, 'message' => 'Post atualizado!']);
@@ -75,11 +77,10 @@ else if ($postjson['requisicao'] == 'editar') {
 }
 
 // ✅ DELETAR POST
-else if ($postjson['requisicao'] == 'deletar') {
+else if ($requisicao == 'deletar') {
     try {
-        $query = $pdo->prepare("DELETE FROM posts WHERE id = :id AND usuario_id = :usuario_id");
+        $query = $pdo->prepare("DELETE FROM posts WHERE id = :id");
         $query->bindValue(':id', $postjson['id']);
-        $query->bindValue(':usuario_id', $postjson['usuario_id']);
         $query->execute();
 
         echo json_encode(['success' => $query->rowCount() > 0, 'message' => 'Post deletado!']);
@@ -89,7 +90,7 @@ else if ($postjson['requisicao'] == 'deletar') {
 }
 
 // ✅ CURTIR/DESCURTIR POST
-else if ($postjson['requisicao'] == 'curtir') {
+else if ($requisicao == 'curtir') {
     try {
         // Verifica se já curtiu
         $check = $pdo->prepare("SELECT id FROM post_curtidas WHERE post_id = :post_id AND usuario_id = :usuario_id");
@@ -120,7 +121,7 @@ else if ($postjson['requisicao'] == 'curtir') {
 }
 
 // ✅ ADICIONAR COMENTÁRIO
-else if ($postjson['requisicao'] == 'comentar') {
+else if ($requisicao == 'comentar') {
     try {
         $query = $pdo->prepare("INSERT INTO post_comentarios (post_id, usuario_id, autor, texto) 
                                 VALUES (:post_id, :usuario_id, :autor, :texto)");
@@ -137,8 +138,29 @@ else if ($postjson['requisicao'] == 'comentar') {
     }
 }
 
+// ✅ EDITAR COMENTÁRIO (NOVO)
+else if ($requisicao == 'editar_comentario') {
+    try {
+        $query = $pdo->prepare("UPDATE post_comentarios SET texto = :texto, autor = :autor WHERE id = :id");
+        $query->bindValue(':texto', $postjson['texto']);
+        $query->bindValue(':autor', $postjson['autor']);
+        $query->bindValue(':id', $postjson['id']);
+        $query->execute();
+
+        echo json_encode([
+            'success' => $query->rowCount() > 0, 
+            'message' => 'Comentário atualizado!'
+        ]);
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Erro ao atualizar comentário: ' . $e->getMessage()
+        ]);
+    }
+}
+
 // ✅ LISTAR COMENTÁRIOS DE UM POST
-else if ($postjson['requisicao'] == 'listar_comentarios') {
+else if ($requisicao == 'listar_comentarios') {
     try {
         $query = $pdo->prepare("SELECT * FROM post_comentarios WHERE post_id = :post_id ORDER BY data ASC");
         $query->bindValue(':post_id', $postjson['post_id']);
@@ -152,7 +174,7 @@ else if ($postjson['requisicao'] == 'listar_comentarios') {
 }
 
 // ✅ DELETAR COMENTÁRIO
-else if ($postjson['requisicao'] == 'deletar_comentario') {
+else if ($requisicao == 'deletar_comentario') {
     try {
         $query = $pdo->prepare("DELETE FROM post_comentarios WHERE id = :id");
         $query->bindValue(':id', $postjson['id']);
