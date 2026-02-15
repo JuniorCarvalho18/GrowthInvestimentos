@@ -4,7 +4,17 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 
-include_once 'db.php';
+include_once 'connection.php';
+
+// Criar conexão mysqli
+$conn = new mysqli('localhost', 'root', '', 'growth');
+
+// Verifica conexão
+if ($conn->connect_error) {
+    die(json_encode(['success' => false, 'message' => 'Erro de conexão: ' . $conn->connect_error]));
+}
+
+$conn->set_charset("utf8mb4");
 
 $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents("php://input"), true);

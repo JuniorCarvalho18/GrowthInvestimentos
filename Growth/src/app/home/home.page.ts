@@ -7,11 +7,6 @@ import { ToastController, AlertController, ActionSheetController } from '@ionic/
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ProjetosService } from '../services/projetos.service';
 import { AvaliacoesService } from '../services/avaliacoes.service';
-interface Avaliacao {
-  autor: string;
-  nota: number;
-  comentario: string;
-}
 
 interface Projeto {
   id?: number;
@@ -22,7 +17,9 @@ interface Projeto {
   meta?: string;
   previsao?: string;
   local?: string;
-  avaliacoes?: Avaliacao[];
+  avaliacoes?: any[];  // ← MUDAR para any[]
+  mediaAvaliacoes?: number;  // ← ADICIONAR
+  totalAvaliacoes?: number;
 }
 
 @Component({
@@ -155,56 +152,88 @@ export class HomePage implements OnInit {
 
     // Carrega posts
     this.carregarPosts();
+
+    // ✨ AUTO-REFRESH: Escuta quando novos projetos são criados
+    this.projetosService.projetosCriados.subscribe(() => {
+      console.log('🔄 Novo projeto detectado! Recarregando...');
+      this.carregarProjetos();
+    });
   }
 
   get userName(): string { return this.currentUser?.nome || 'Usuário'; }
   get userId(): number { return this.currentUser?.id || 0; }
 
-async carregarProjetos() {
-  this.loadingProjetos = true;
+  async carregarProjetos() {
+    this.loadingProjetos = true;
 
-  this.projetosService.listarProjetos().subscribe({
-    next: (response) => {
-      if (response.success && response.projetos) {
-        this.projetosSustentaveis = response.projetos.map((p: any) => ({
-          id: p.id,
-          nome: p.nome,
-          descricao: p.descricao,
-          categoria: p.categoria || 'Sustentável',
-          dataInicio: p.data_criacao ? new Date(p.data_criacao).toLocaleDateString('pt-BR') : '',
-          meta: p.meta ? p.meta.toString() : '0',
-          previsao: p.previsao || '',
-          local: p.local || '',
-          avaliacoes: []
-        }));
+    this.projetosService.listarProjetos().subscribe({
+      next: (response) => {
+        if (response.success && response.projetos) {
+          this.projetosSustentaveis = response.projetos.map((p: any) => ({
+            id: p.id,
+            nome: p.nome,
+            descricao: p.descricao,
+            categoria: p.categoria || 'Sustentável',
+            dataInicio: p.data_criacao ? new Date(p.data_criacao).toLocaleDateString('pt-BR') : '',
+            meta: p.meta ? p.meta.toString() : '0',
+            previsao: p.previsao || '',
+            local: p.local || '',
+            avaliacoes: [],
+            mediaAvaliacoes: 0,
+            totalAvaliacoes: 0
+          }));
 
-        // Busca avaliações para cada projeto
-        this.projetosSustentaveis.forEach(projeto => {
-          if (projeto.id) {
-            this.avaliacoesService.listarAvaliacoes(projeto.id).subscribe({
-              next: (res) => {
-                if (res.success) {
-                  projeto.avaliacoes = res.avaliacoes;
-                }
-              }
-            });
-          }
-        });
+          // Carrega avaliações para cada projeto
+          this.projetosSustentaveis.forEach(projeto => {
+            if (projeto.id) {
+              this.carregarAvaliacoesProjeto(projeto.id);
+            }
+          });
 
-        this.projetosDestaque = this.projetosSustentaveis.slice(0, 2);
+          this.projetosDestaque = this.projetosSustentaveis.slice(0, 2);
+        }
+
+        this.loadingProjetos = false;
+        this.filtrarProjetos();
+      },
+      error: async (error) => {
+        this.loadingProjetos = false;
+        console.error('Erro ao carregar projetos:', error);
+        await this.showToast('Erro ao carregar projetos.', 'warning');
+        this.filtrarProjetos();
       }
+    });
+  }
 
-      this.loadingProjetos = false;
-      this.filtrarProjetos();
-    },
-    error: async (error) => {
-      this.loadingProjetos = false;
-      console.error('Erro ao carregar projetos:', error);
-      await this.showToast('Erro ao carregar projetos.', 'warning');
-      this.filtrarProjetos();
-    }
-  });
-}
+  carregarAvaliacoesProjeto(projetoId: number) {
+    // Busca lista de avaliações
+    this.avaliacoesService.listarAvaliacoes(projetoId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          const projeto = this.projetosSustentaveis.find(p => p.id === projetoId);
+          if (projeto) {
+            projeto.avaliacoes = response.avaliacoes || [];
+          }
+        }
+      },
+      error: (error) => {
+        console.error(`Erro ao carregar avaliações do projeto ${projetoId}:`, error);
+      }
+    });
+
+    // Busca média
+    this.avaliacoesService.calcularMedia(projetoId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          const projeto = this.projetosSustentaveis.find(p => p.id === projetoId);
+          if (projeto) {
+            projeto.mediaAvaliacoes = response.media || 0;
+            projeto.totalAvaliacoes = response.total || 0;
+          }
+        }
+      }
+    });
+  }
 
   async carregarPosts() {
     this.loadingPosts = true;
