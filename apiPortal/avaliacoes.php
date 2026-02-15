@@ -63,7 +63,7 @@ if ($method === 'GET') {
     }
 }
 
-// POST - Criar avaliação
+// POST - Criar OU Atualizar avaliação
 if ($method === 'POST') {
     $acao = $data['acao'] ?? '';
     
@@ -74,40 +74,56 @@ if ($method === 'POST') {
         $nota = $data['nota'];
         $comentario = $data['comentario'] ?? '';
         
-        // Verifica se já avaliou
+        // ✅ Verifica se JÁ avaliou
         $check = $conn->prepare("
             SELECT id FROM projeto_avaliacoes 
             WHERE projeto_id = ? AND usuario_id = ?
         ");
         $check->bind_param("ii", $projeto_id, $usuario_id);
         $check->execute();
+        $resultado = $check->get_result();
         
-        if ($check->get_result()->num_rows > 0) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Você já avaliou este projeto'
-            ]);
-            exit;
-        }
-        
-        $stmt = $conn->prepare("
-            INSERT INTO projeto_avaliacoes 
-            (projeto_id, usuario_id, autor, nota, comentario)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        $stmt->bind_param("iisis", $projeto_id, $usuario_id, $autor, $nota, $comentario);
-        
-        if ($stmt->execute()) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Avaliação criada com sucesso',
-                'id' => $conn->insert_id
-            ]);
+        if ($resultado->num_rows > 0) {
+            // ✅ JÁ AVALIOU → ATUALIZAR
+            $stmt = $conn->prepare("
+                UPDATE projeto_avaliacoes 
+                SET nota = ?, comentario = ?, data = NOW()
+                WHERE projeto_id = ? AND usuario_id = ?
+            ");
+            $stmt->bind_param("isii", $nota, $comentario, $projeto_id, $usuario_id);
+            
+            if ($stmt->execute()) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Avaliação atualizada com sucesso'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Erro ao atualizar avaliação'
+                ]);
+            }
         } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Erro ao criar avaliação'
-            ]);
+            // ✅ PRIMEIRA VEZ → CRIAR
+            $stmt = $conn->prepare("
+                INSERT INTO projeto_avaliacoes 
+                (projeto_id, usuario_id, autor, nota, comentario)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmt->bind_param("iisis", $projeto_id, $usuario_id, $autor, $nota, $comentario);
+            
+            if ($stmt->execute()) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Avaliação criada com sucesso',
+                    'id' => $conn->insert_id
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Erro ao criar avaliação'
+                ]);
+            }
         }
     }
 }

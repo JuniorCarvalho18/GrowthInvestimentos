@@ -933,3 +933,203 @@ ion-content.addproj-content {
     transform: translateY(0);
   }
 }
+
+// ==========================================
+// ESTILO PARA CARDS SEM AVALIAÇÕES
+// ==========================================
+.sem-avaliacoes {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+
+  .info-projeto {
+    margin-bottom: 12px;
+
+    p {
+      margin: 6px 0;
+      font-size: 12px;
+      color: rgba(227, 227, 227, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      ion-icon {
+        font-size: 14px;
+        color: var(--dourado);
+      }
+    }
+  }
+
+  .btn-avaliar-projeto {
+    --border-color: var(--dourado);
+    --color: var(--dourado);
+    font-size: 12px;
+    height: 32px;
+    margin-top: 8px;
+
+    ion-icon {
+      font-size: 16px;
+    }
+
+    &:hover {
+      --background: rgba(168, 143, 95, 0.1);
+    }
+  }
+}
+
+// ==========================================
+// FORMULÁRIO DE AVALIAÇÃO INLINE
+// ==========================================
+.form-avaliacao-inline {
+  background-color: rgba(168, 143, 95, 0.1);
+  border: 1px solid var(--dourado);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: var(--ion-text-color);
+    font-weight: 600;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+
+    label {
+      display: block;
+      font-size: 11px;
+      color: rgba(227, 227, 227, 0.8);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .rating-input {
+      display: flex;
+      gap: 4px;
+
+      .star-clickable {
+        font-size: 24px;
+        cursor: pointer;
+        color: rgba(227, 227, 227, 0.3);
+        transition: all 0.2s;
+
+        &:hover {
+          transform: scale(1.2);
+        }
+
+        &[name="star"] {
+          color: var(--dourado);
+        }
+      }
+    }
+
+    textarea {
+      width: 100%;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(227, 227, 227, 0.2);
+      border-radius: 6px;
+      color: var(--ion-text-color);
+      font-family: inherit;
+      font-size: 12px;
+      resize: vertical;
+
+      &::placeholder {
+        color: rgba(227, 227, 227, 0.4);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--dourado);
+        background: rgba(0, 0, 0, 0.4);
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+
+    ion-button {
+      flex: 1;
+      height: 32px;
+      font-size: 11px;
+
+      &:first-child {
+        --border-color: rgba(227, 227, 227, 0.3);
+        --color: rgba(227, 227, 227, 0.7);
+      }
+
+      &:last-child {
+        --background: var(--dourado);
+        --color: var(--ion-text-color);
+
+        &:disabled {
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// MINHA AVALIAÇÃO (destaque especial)
+// ==========================================
+.minha-avaliacao-card {
+  background-color: rgba(168, 143, 95, 0.15);
+  border-left: 3px solid var(--dourado);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+
+  .avaliacao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+
+    .avaliador {
+      margin: 0;
+      font-size: 12px;
+      color: var(--ion-text-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex: 1;
+
+      strong {
+        font-weight: 600;
+        color: var(--dourado);
+      }
+
+      .estrelas {
+        font-size: 11px;
+        color: var(--dourado);
+        margin-left: 8px;
+      }
+    }
+
+    .btn-editar-avaliacao {
+      --color: var(--dourado);
+      --padding-start: 4px;
+      --padding-end: 4px;
+      height: 28px;
+      width: 28px;
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .comentario {
+    margin: 0;
+    font-size: 11px;
+    color: rgba(227, 227, 227, 0.9);
+    font-style: italic;
+    line-height: 1.3;
+  }
+}

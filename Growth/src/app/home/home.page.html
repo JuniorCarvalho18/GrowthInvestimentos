@@ -55,7 +55,7 @@
     </div>
   </div>
 
-  <!-- Projetos Sustentáveis COM AVALIAÇÕES -->
+  <!-- Projetos Sustentáveis COM AVALIAÇÕES E BOTÃO AVALIAR -->
   <div class="section projetos-sustaveis">
     <div class="section-header">
       <h2>Projetos Sustentáveis</h2>
@@ -81,32 +81,127 @@
 
     <!-- Grid de Projetos -->
     <div class="grid" *ngIf="!loadingProjetos">
-      <div class="card" *ngFor="let projeto of projetosFiltrados; trackBy: trackByProjetoId"
-           [@fadeIn]>
+      <div class="card" *ngFor="let projeto of projetosFiltrados; trackBy: trackByProjetoId" [@fadeIn]>
         <div class="imagem">
           <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
         </div>
         <p class="card-title">{{ projeto.nome }}</p>
         <p class="card-description">{{ projeto.descricao }}</p>
 
-        <!-- Múltiplas Avaliações por Projeto -->
+        <!-- AVALIAÇÕES -->
         <div class="avaliacoes-container">
-          <div class="avaliacao-card" *ngFor="let avaliacao of projeto.avaliacoes?.slice(0, 2)">
-            <p class="avaliador">
-              <strong>{{ avaliacao.autor }}</strong>
-              <span class="estrelas">{{ getEstrelas(avaliacao.nota) }}</span>
-            </p>
-            <p class="comentario">{{ avaliacao.comentario }}</p>
+          <!-- SE TEM AVALIAÇÕES: Mostra até 2 avaliações + MINHA AVALIAÇÃO -->
+          <div *ngIf="projeto.avaliacoes && projeto.avaliacoes.length > 0">
+            <!-- MINHA AVALIAÇÃO (se eu já avaliei) -->
+            <div *ngIf="projeto.minhaAvaliacao" class="minha-avaliacao-card">
+              <div class="avaliacao-header">
+                <p class="avaliador">
+                  <strong>Minha avaliação</strong>
+                  <span class="estrelas">{{ getEstrelas(projeto.minhaAvaliacao.nota) }}</span>
+                </p>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="btn-editar-avaliacao"
+                  (click)="editarMinhaAvaliacao(projeto)">
+                  <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                </ion-button>
+              </div>
+              <p class="comentario">{{ projeto.minhaAvaliacao.comentario }}</p>
+            </div>
+
+            <!-- AVALIAÇÕES DE OUTROS USUÁRIOS -->
+            <div class="avaliacao-card" *ngFor="let avaliacao of projeto.avaliacoesOutros?.slice(0, 2)">
+              <p class="avaliador">
+                <strong>{{ avaliacao.autor }}</strong>
+                <span class="estrelas">{{ getEstrelas(avaliacao.nota) }}</span>
+              </p>
+              <p class="comentario">{{ avaliacao.comentario }}</p>
+            </div>
+
+            <!-- Ver mais avaliações -->
+            <ion-button
+              *ngIf="(projeto.avaliacoesOutros?.length || 0) > 2"
+              fill="clear"
+              size="small"
+              class="ver-mais-avaliacoes"
+              (click)="verTodasAvaliacoes(projeto)">
+              +{{ (projeto.avaliacoesOutros?.length || 0) - 2 }} avaliações
+            </ion-button>
+
+            <!-- BOTÃO AVALIAR (se ainda não avaliei) -->
+            <ion-button
+              *ngIf="!projeto.minhaAvaliacao"
+              expand="block"
+              fill="outline"
+              size="small"
+              class="btn-avaliar-projeto"
+              (click)="abrirFormularioAvaliacao(projeto)">
+              <ion-icon slot="start" name="star-outline"></ion-icon>
+              Avaliar este projeto
+            </ion-button>
           </div>
 
-          <ion-button
-            *ngIf="projeto.avaliacoes && projeto.avaliacoes.length > 2"
-            fill="clear"
-            size="small"
-            class="ver-mais-avaliacoes"
-            (click)="verTodasAvaliacoes(projeto)">
-            +{{ projeto.avaliacoes.length - 2 }} avaliações
-          </ion-button>
+          <!-- SE NÃO TEM AVALIAÇÕES: Mostra info do projeto + botão avaliar -->
+          <div *ngIf="!projeto.avaliacoes || projeto.avaliacoes.length === 0" class="sem-avaliacoes">
+            <div class="info-projeto">
+              <p><ion-icon name="location-outline"></ion-icon> {{ projeto.local }}</p>
+              <p><ion-icon name="calendar-outline"></ion-icon> {{ projeto.dataInicio }}</p>
+              <p><ion-icon name="cash-outline"></ion-icon> Meta: R$ {{ projeto.meta }}</p>
+            </div>
+
+            <!-- Botão Avaliar -->
+            <ion-button
+              expand="block"
+              fill="outline"
+              size="small"
+              class="btn-avaliar-projeto"
+              (click)="abrirFormularioAvaliacao(projeto)">
+              <ion-icon slot="start" name="star-outline"></ion-icon>
+              Seja o primeiro a avaliar
+            </ion-button>
+          </div>
+
+          <!-- FORMULÁRIO DE AVALIAÇÃO INLINE -->
+          <div *ngIf="projeto.mostrarFormAvaliacao" class="form-avaliacao-inline" [@fadeIn]>
+            <h4>{{ projeto.minhaAvaliacao ? 'Editar minha avaliação' : 'Avalie este projeto' }}</h4>
+
+            <div class="form-group">
+              <label>Sua nota:</label>
+              <div class="rating-input">
+                <ion-icon
+                  *ngFor="let star of [1,2,3,4,5]"
+                  [name]="star <= projeto.notaTemp! ? 'star' : 'star-outline'"
+                  class="star-clickable"
+                  (click)="projeto.notaTemp = star">
+                </ion-icon>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Comentário (opcional):</label>
+              <textarea
+                [(ngModel)]="projeto.comentarioTemp"
+                placeholder="Compartilhe sua experiência..."
+                rows="3">
+              </textarea>
+            </div>
+
+            <div class="form-actions">
+              <ion-button
+                size="small"
+                fill="outline"
+                (click)="cancelarAvaliacao(projeto)">
+                Cancelar
+              </ion-button>
+              <ion-button
+                size="small"
+                [disabled]="!projeto.notaTemp"
+                (click)="enviarAvaliacao(projeto)">
+                {{ projeto.minhaAvaliacao ? 'Atualizar' : 'Enviar' }}
+              </ion-button>
+            </div>
+          </div>
         </div>
 
         <ion-button expand="block" class="investir" (click)="abrirModalInvestir(projeto)">

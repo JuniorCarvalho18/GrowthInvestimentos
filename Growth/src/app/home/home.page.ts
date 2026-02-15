@@ -7,6 +7,7 @@ import { ToastController, AlertController, ActionSheetController } from '@ionic/
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ProjetosService } from '../services/projetos.service';
 import { AvaliacoesService } from '../services/avaliacoes.service';
+import { UtilsService } from '../services/utils.service';
 
 interface Projeto {
   id?: number;
@@ -17,9 +18,13 @@ interface Projeto {
   meta?: string;
   previsao?: string;
   local?: string;
-  avaliacoes?: any[];  // ← MUDAR para any[]
-  mediaAvaliacoes?: number;  // ← ADICIONAR
-  totalAvaliacoes?: number;
+  avaliacoes?: any[];
+  avaliacoesOutros?: any[];  // ← NOVO: avaliações de outros usuários
+  minhaAvaliacao?: any;      // ← NOVO: minha avaliação
+  mediaAvaliacoes?: number;
+  mostrarFormAvaliacao?: boolean;
+  notaTemp?: number;
+  comentarioTemp?: string;
 }
 
 @Component({
@@ -139,7 +144,8 @@ export class HomePage implements OnInit {
     private toastController: ToastController,
     private alertController: AlertController,
     private actionSheetController: ActionSheetController,
-    private avaliacoesService: AvaliacoesService
+    private avaliacoesService: AvaliacoesService,
+    private utils: UtilsService
   ) {}
 
   ngOnInit() {
@@ -162,6 +168,83 @@ export class HomePage implements OnInit {
 
   get userName(): string { return this.currentUser?.nome || 'Usuário'; }
   get userId(): number { return this.currentUser?.id || 0; }
+
+abrirFormularioAvaliacao(projeto: Projeto) {
+  projeto.mostrarFormAvaliacao = true;
+  projeto.notaTemp = 0;
+  projeto.comentarioTemp = '';
+}
+
+/**
+ * Abre o formulário para EDITAR minha avaliação
+ */
+editarMinhaAvaliacao(projeto: Projeto) {
+  if (!projeto.minhaAvaliacao) return;
+
+  projeto.mostrarFormAvaliacao = true;
+  projeto.notaTemp = projeto.minhaAvaliacao.nota;
+  projeto.comentarioTemp = projeto.minhaAvaliacao.comentario || '';
+}
+
+/**
+ * Fecha o formulário de avaliação
+ */
+cancelarAvaliacao(projeto: Projeto) {
+  projeto.mostrarFormAvaliacao = false;
+  projeto.notaTemp = undefined;
+  projeto.comentarioTemp = '';
+}
+
+/**
+ * Envia a avaliação para a API (cria OU atualiza)
+ */
+async enviarAvaliacao(projeto: Projeto) {
+  if (!projeto.notaTemp || projeto.notaTemp < 1) {
+    await this.showToast('Por favor, selecione uma nota!', 'warning');
+    return;
+  }
+
+  if (!projeto.id) {
+    await this.showToast('Erro: projeto inválido', 'danger');
+    return;
+  }
+
+  await this.utils.showLoading('Enviando avaliação...');
+
+  const avaliacao = {
+    projeto_id: projeto.id,
+    usuario_id: this.userId,
+    autor: this.userName,
+    nota: projeto.notaTemp,
+    comentario: projeto.comentarioTemp || ''
+  };
+
+  this.avaliacoesService.criarAvaliacao(avaliacao).subscribe({
+    next: async (response) => {
+      await this.utils.hideLoading();
+
+      if (response.success) {
+        await this.showToast(
+          projeto.minhaAvaliacao ? 'Avaliação atualizada!' : 'Avaliação enviada!',
+          'success'
+        );
+
+        // Fecha o formulário
+        this.cancelarAvaliacao(projeto);
+
+        // Recarrega as avaliações do projeto
+        this.carregarAvaliacoesProjeto(projeto.id!);
+      } else {
+        await this.showToast(response.message || 'Erro ao enviar avaliação', 'danger');
+      }
+    },
+    error: async (error) => {
+      await this.utils.hideLoading();
+      console.error('Erro ao enviar avaliação:', error);
+      await this.showToast('Erro ao conectar ao servidor', 'danger');
+    }
+  });
+}
 
   async carregarProjetos() {
     this.loadingProjetos = true;
@@ -213,6 +296,15 @@ export class HomePage implements OnInit {
           const projeto = this.projetosSustentaveis.find(p => p.id === projetoId);
           if (projeto) {
             projeto.avaliacoes = response.avaliacoes || [];
+
+            // ✅ Separa MINHA avaliação das OUTRAS
+            projeto.minhaAvaliacao = projeto.avaliacoes.find(
+              av => av.usuario_id === this.userId
+            );
+
+            projeto.avaliacoesOutros = projeto.avaliacoes.filter(
+              av => av.usuario_id !== this.userId
+            );
           }
         }
       },
