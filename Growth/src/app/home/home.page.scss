@@ -338,6 +338,9 @@ h2 {
 // ==========================================
 // GRID DE PROJETOS COM FILTROS E AVALIAÇÕES
 // ==========================================
+ion-button {
+  color: var(--ion-text-color);
+}
 .projetos-sustaveis {
   .section-header {
     display: flex;
@@ -508,7 +511,6 @@ h2 {
 
       ion-button {
         --background: var(--dourado);
-        --color: var(--ion-text-color);
         font-size: 13px;
       }
     }
@@ -566,16 +568,15 @@ h2 {
     }
 
     .post-imagem {
-      width: 100%;
-      max-height: 200px;
+      width: fit-content;
+      margin: auto;
       margin-bottom: 12px;
       border-radius: 8px;
-      overflow: hidden;
 
       img {
-        width: 100%;
         height: 100%;
         object-fit: cover;
+        border-radius: 8px;
       }
     }
 
@@ -1132,4 +1133,90 @@ ion-content.addproj-content {
     font-style: italic;
     line-height: 1.3;
   }
+}
+
+/* =========================================
+   NOVAS CLASSES (Refatoração de Inline Styles)
+   ========================================= */
+
+/* Skeleton Loading (Projetos) */
+.skeleton-img {
+  height: 100px;
+  border-radius: 8px;
+}
+
+.skeleton-title {
+  width: 80%;
+  margin-top: 8px;
+}
+
+.skeleton-text {
+  width: 60%;
+}
+
+/* Skeleton Loading (Posts) */
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-meta {
+  flex: 1;
+  margin-left: 12px;
+}
+
+.skeleton-name {
+  width: 40%;
+}
+
+.skeleton-date {
+  width: 20%;
+}
+
+.skeleton-body {
+  width: 100%;
+  height: 60px;
+  margin-top: 12px;
+}
+
+/* Imagens */
+.img-destaque {
+  height: 100%;
+  object-fit: cover;
+}
+
+.img-card {
+  height: 100%;
+  object-fit: cover;
+}
+
+.img-investir {
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Post Actions */
+.icon-curtido {
+  color: var(--dourado);
+}
+
+/* Preview de Imagem (Novo Post) */
+.preview-container {
+  position: relative;
+  margin-top: 12px;
+}
+
+.preview-img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.btn-remove-preview {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  --background: rgba(0, 0, 0, 0.7);
+  --color: white;
 }

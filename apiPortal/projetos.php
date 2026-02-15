@@ -24,8 +24,9 @@ if (!$postjson) {
 // ✅ CRIAR (Salvar)
 if ($postjson['requisicao'] == 'salvar') {
     try {
-        $query = $pdo->prepare("INSERT INTO projetos (nome, descricao, meta, previsao, local, categoria, impacto_estimado, status) 
-                                VALUES (:nome, :descricao, :meta, :previsao, :local, :categoria, :impacto_estimado, 'ativo')");
+        // ADICIONADO: campo imagem
+        $query = $pdo->prepare("INSERT INTO projetos (nome, descricao, meta, previsao, local, categoria, impacto_estimado, imagem, status) 
+                                VALUES (:nome, :descricao, :meta, :previsao, :local, :categoria, :impacto_estimado, :imagem, 'ativo')");
         $query->bindValue(':nome', $postjson['nome']);
         $query->bindValue(':descricao', $postjson['descricao']);
         $query->bindValue(':meta', $postjson['meta']);
@@ -33,6 +34,7 @@ if ($postjson['requisicao'] == 'salvar') {
         $query->bindValue(':local', $postjson['local']);
         $query->bindValue(':categoria', $postjson['categoria'] ?? 'Geral');
         $query->bindValue(':impacto_estimado', $postjson['impacto_estimado'] ?? '');
+        $query->bindValue(':imagem', $postjson['imagem'] ?? ''); // Bind da imagem
         $query->execute();
 
         $id = $pdo->lastInsertId();
@@ -86,6 +88,7 @@ else if ($postjson['requisicao'] == 'buscar') {
 // ✅ EDITAR
 else if ($postjson['requisicao'] == 'editar') {
     try {
+        // ADICIONADO: campo imagem no UPDATE
         $query = $pdo->prepare("UPDATE projetos SET 
                                 nome = :nome, 
                                 descricao = :descricao, 
@@ -94,6 +97,7 @@ else if ($postjson['requisicao'] == 'editar') {
                                 local = :local, 
                                 categoria = :categoria, 
                                 impacto_estimado = :impacto_estimado,
+                                imagem = :imagem,
                                 status = :status
                                 WHERE id = :id");
         $query->bindValue(':nome', $postjson['nome']);
@@ -103,6 +107,7 @@ else if ($postjson['requisicao'] == 'editar') {
         $query->bindValue(':local', $postjson['local']);
         $query->bindValue(':categoria', $postjson['categoria'] ?? 'Geral');
         $query->bindValue(':impacto_estimado', $postjson['impacto_estimado'] ?? '');
+        $query->bindValue(':imagem', $postjson['imagem'] ?? ''); // Bind da imagem
         $query->bindValue(':status', $postjson['status'] ?? 'ativo');
         $query->bindValue(':id', $postjson['id']);
         $query->execute();

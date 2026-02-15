@@ -51,6 +51,7 @@ export class ProjetosPage implements OnInit {
       arrecadado: 0,
       previsao: '',
       local: '',
+      imagem: '',
       categoria: 'Energia Renovável',
       impacto_estimado: '',
       status: 'ativo'

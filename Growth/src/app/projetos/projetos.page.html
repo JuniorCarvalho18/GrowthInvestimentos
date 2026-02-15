@@ -8,7 +8,6 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Formulário -->
   <div class="form-container">
     <h2>{{ projeto.id ? 'Editar Projeto' : 'Novo Projeto' }}</h2>
 
@@ -24,6 +23,11 @@
           {{ cat }}
         </ion-select-option>
       </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">URL da Imagem</ion-label>
+      <ion-input [(ngModel)]="projeto.imagem" placeholder="https://exemplo.com/foto.jpg"></ion-input>
     </ion-item>
 
     <ion-item>
@@ -96,10 +100,13 @@
     <ion-label>Projetos Cadastrados ({{ projetos.length }})</ion-label>
   </ion-item-divider>
 
-  <!-- Lista de Projetos -->
   <ion-list *ngIf="projetos.length > 0" class="project-list">
     <ion-item *ngFor="let p of projetos" class="project-card">
       <div class="project-info">
+        <div *ngIf="p.imagem" class="project-image">
+           <img [src]="p.imagem" alt="Imagem do projeto" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
+        </div>
+
         <div class="project-header">
           <h3>{{ p.nome }}</h3>
           <ion-badge [color]="getStatusColor(p.status!)">

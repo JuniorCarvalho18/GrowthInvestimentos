@@ -6,10 +6,8 @@ header('Content-Type: application/json');
 
 include_once 'connection.php';
 
-// Criar conexão mysqli
 $conn = new mysqli('localhost', 'root', '', 'growth');
 
-// Verifica conexão
 if ($conn->connect_error) {
     die(json_encode(['success' => false, 'message' => 'Erro de conexão: ' . $conn->connect_error]));
 }
@@ -19,10 +17,9 @@ $conn->set_charset("utf8mb4");
 $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents("php://input"), true);
 
-// GET - Listar avaliações ou calcular média
 if ($method === 'GET') {
     $acao = $_GET['acao'] ?? '';
-    $projeto_id = $_GET['projeto_id'] ?? 0;
+    $projeto_id = isset($_GET['projeto_id']) ? (int)$_GET['projeto_id'] : 0;
     
     if ($acao === 'listar' && $projeto_id > 0) {
         $stmt = $conn->prepare("
@@ -36,6 +33,15 @@ if ($method === 'GET') {
         $stmt->execute();
         $result = $stmt->get_result();
         $avaliacoes = $result->fetch_all(MYSQLI_ASSOC);
+        
+        // CORREÇÃO: Converter strings numéricas para tipos reais (int/float)
+        // Isso resolve o bug de comparação estrita (===) no JavaScript
+        foreach ($avaliacoes as &$avaliacao) {
+            $avaliacao['id'] = (int)$avaliacao['id'];
+            $avaliacao['projeto_id'] = (int)$avaliacao['projeto_id'];
+            $avaliacao['usuario_id'] = (int)$avaliacao['usuario_id'];
+            $avaliacao['nota'] = (int)$avaliacao['nota'];
+        }
         
         echo json_encode([
             'success' => true,
@@ -57,24 +63,22 @@ if ($method === 'GET') {
         
         echo json_encode([
             'success' => true,
-            'media' => round($stats['media'], 1),
-            'total' => $stats['total']
+            'media' => $stats['media'] ? round((float)$stats['media'], 1) : 0,
+            'total' => (int)$stats['total']
         ]);
     }
 }
 
-// POST - Criar OU Atualizar avaliação
 if ($method === 'POST') {
     $acao = $data['acao'] ?? '';
     
     if ($acao === 'criar') {
-        $projeto_id = $data['projeto_id'];
-        $usuario_id = $data['usuario_id'];
+        $projeto_id = (int)$data['projeto_id'];
+        $usuario_id = (int)$data['usuario_id'];
         $autor = $data['autor'];
-        $nota = $data['nota'];
+        $nota = (int)$data['nota'];
         $comentario = $data['comentario'] ?? '';
         
-        // ✅ Verifica se JÁ avaliou
         $check = $conn->prepare("
             SELECT id FROM projeto_avaliacoes 
             WHERE projeto_id = ? AND usuario_id = ?
@@ -84,7 +88,6 @@ if ($method === 'POST') {
         $resultado = $check->get_result();
         
         if ($resultado->num_rows > 0) {
-            // ✅ JÁ AVALIOU → ATUALIZAR
             $stmt = $conn->prepare("
                 UPDATE projeto_avaliacoes 
                 SET nota = ?, comentario = ?, data = NOW()
@@ -98,13 +101,9 @@ if ($method === 'POST') {
                     'message' => 'Avaliação atualizada com sucesso'
                 ]);
             } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Erro ao atualizar avaliação'
-                ]);
+                echo json_encode(['success' => false, 'message' => 'Erro ao atualizar']);
             }
         } else {
-            // ✅ PRIMEIRA VEZ → CRIAR
             $stmt = $conn->prepare("
                 INSERT INTO projeto_avaliacoes 
                 (projeto_id, usuario_id, autor, nota, comentario)
@@ -119,10 +118,7 @@ if ($method === 'POST') {
                     'id' => $conn->insert_id
                 ]);
             } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Erro ao criar avaliação'
-                ]);
+                echo json_encode(['success' => false, 'message' => 'Erro ao criar']);
             }
         }
     }
