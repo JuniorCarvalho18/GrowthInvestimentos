@@ -13,15 +13,16 @@ Growth Investimentos é uma plataforma mobile desenvolvida com **Ionic + Angular
 
 ### 🎯 Funcionalidades Principais
 
-- 🔐 **Autenticação Segura**: Login e cadastro com hash bcrypt
-- 👥 **CRUD de Usuários**: Gerenciamento completo de usuários (admin)
-- 📁 **CRUD de Projetos**: Criação e gestão de projetos sustentáveis
-- 💰 **Sistema de Investimentos**: Investimento em projetos sustentáveis
-- 🪙 **Gamificação**: Sistema de tokens para recompensas
-- 🛒 **Marketplace**: Resgate de prêmios com tokens acumulados
-- 📊 **Dashboard**: Visualização de saldo e histórico
-- 🔔 **Notificações**: Sistema de notificações de projetos
-- ⚙️ **Painel Admin**: Área administrativa para desenvolvedores
+- 🔐 **Autenticação Segura**: Login e cadastro com criptografia hash (BCrypt).
+- 👥 **Gestão de Usuários**: Perfil editável com foto e alteração de senha.
+- 📁 **Projetos Sustentáveis**: Visualização, investimento e acompanhamento de projetos.
+- 💬 **Interação Social**: Sistema de posts, comentários e avaliações de projetos.
+- ⚙️ **Painel Admin (Dev)**:
+  - CRUD de Usuários
+  - CRUD de Projetos
+  - Gerenciamento de Posts, Comentários e Avaliações
+- 💰 **Investimentos**: Simulação de aporte em projetos.
+- 🔔 **Notificações**: Sistema de alertas para o usuário.
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -101,14 +102,14 @@ $senha = ''; // Sua senha do MySQL
 
 #### 4. Ajuste as URLs da API
 
-Em **3 arquivos TypeScript**, ajuste o nome da pasta conforme seu projeto:
-
-- `Growth/src/app/services/auth.service.ts`
-- `Growth/src/app/services/usuarios.service.ts`
-- `Growth/src/app/services/projetos.service.ts`
+Edite *Growth/src/environments/environment.ts*:
 
 ```typescript
-private apiUrl = 'http://localhost/GrowthInvestimentos/apiPortal/crud1.php';
+  export const environment = {
+    production: false,
+    // Ajuste o caminho conforme sua pasta no htdocs
+    apiUrl: 'http://localhost/GrowthInvestimentos/apiPortal/' 
+  };
 ```
 
 #### 5. Instale as dependências
@@ -134,15 +135,10 @@ Abra no navegador:
 http://localhost/GrowthInvestimentos/apiPortal/crud1.php
 ```
 
-
-## 🔧 Configuração Detalhada
-
-Para um guia completo de configuração no htdocs, consulte:
-- [`CONFIGURACAO_HTDOCS.md`](CONFIGURACAO_HTDOCS.md)
-
 ## 🗂️ Funcionalidades Implementadas
 
 ### ✅ Autenticação
+- [x] Login de Usuário ou Admin
 - [x] Login com email/CNPJ
 - [x] Cadastro de novos usuários
 - [x] Autenticação persistente (localStorage)
@@ -151,28 +147,19 @@ Para um guia completo de configuração no htdocs, consulte:
 - [x] Logout
 
 ### ✅ Perfil de Usuário
+- [x] Upload de foto de perfil
 - [x] Visualização de dados pessoais
 - [x] Edição de nome, email, CNPJ
 - [x] Alteração de senha
 - [x] Visualização de saldo e tokens
 
-### ✅ CRUD de Usuários (Admin)
-- [x] Listagem de todos os usuários
-- [x] Criação de novos usuários
-- [x] Edição de usuários existentes
-- [x] Exclusão de usuários
-- [x] Validação de dados
-- [x] Feedback visual (loading, toasts)
-
-### ✅ CRUD de Projetos (Admin)
-- [x] Listagem de projetos
-- [x] Criação de projetos
-- [x] Edição de projetos
-- [x] Exclusão de projetos
-- [x] Categorização por tipo
-- [x] Controle de status (ativo/concluído/cancelado)
-- [x] Cálculo de progresso
-- [x] Registro de impacto ambiental
+### ✅ Painel Administrativo (Admin)
+- [x] **Gestão de Usuários**: CRUD completo (listagem, criação, edição, exclusão), validação de dados e feedback visual.
+- [x] **Gestão de Projetos**: CRUD completo, categorização, controle de status (ativo/concluído), cálculo de progresso e registro de impacto.
+- [x] **Gerenciar Posts**: Interface para criar, editar e excluir postagens da comunidade.
+- [x] **Gerenciar Comentários**: Moderação de comentários (filtro por post e exclusão).
+- [x] **Gerenciar Avaliações**: Edição e moderação de notas e feedbacks de projetos.
+- [x] **Área Dev**: Dashboard central com acesso restrito a administradores.
 
 ### ✅ Interface do Usuário
 - [x] Página inicial (Home)
@@ -180,11 +167,12 @@ Para um guia completo de configuração no htdocs, consulte:
 - [x] Sistema de notificações (UI)
 - [x] Histórico (UI)
 - [x] Saldo (UI)
+- [x] Configurações de Perfil (UI)
 
-### 🚧 Em Desenvolvimento
-- [ ] Sistema de tokens funcional
-- [ ] Resgate de recompensas
-- [ ] Filtros e busca de projetos
+### ✅ Social
+- [x] Feed de postagems
+- [x] Sistema de likes
+- [x] Sistema de comentários
 
 ## 🎨 Design e UX
 
@@ -197,8 +185,10 @@ Para um guia completo de configuração no htdocs, consulte:
 
 ### Principais Tabelas
 
+- `admins` - Registro de desenvolvedores
 - `usuarios` - Dados dos investidores
 - `projetos` - Projetos sustentáveis
+- `posts` - Postagens dos usuários
 - `investimentos` - Relação usuário-projeto
 - `tokens` - Sistema de pontuação
 - `marketplace` - Itens para resgate
@@ -207,7 +197,7 @@ Para um guia completo de configuração no htdocs, consulte:
 
 ## 🔒 Segurança
 
-- ✅ Senhas com hash BCrypt (NUNCA MD5)
+- ✅ Senhas com hash BCrypt
 - ✅ Prepared statements (PDO) contra SQL Injection
 - ✅ Validação de inputs no frontend e backend
 - ✅ CORS configurado para localhost:8100
@@ -220,8 +210,6 @@ Para um guia completo de configuração no htdocs, consulte:
 - [ ] Cálculo automático de tokens
 - [ ] Histórico detalhado funcional
 - [ ] Notificações push
-- [ ] Upload de imagens para projetos
-- [ ] Sistema de posts de investidores
 - [ ] API REST documentada (Swagger)
 - [ ] Testes unitários e E2E
 - [ ] App nativo (Android/iOS)
