@@ -170,7 +170,7 @@ http://localhost/GrowthInvestimentos/apiPortal/crud1.php
 - [x] Sistema de notificações (UI)
 - [x] Histórico (UI)
 - [x] Saldo (UI)
-- [x] Configurações de Perfil (UI)
+- [x] Configurações de Perfil
 
 ### ✅ Social
 - [x] Feed de postagems
