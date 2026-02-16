@@ -1,16 +1,15 @@
-# Usa a versão oficial do PHP 8.1 com Apache (servidor web)
 FROM php:8.1-apache
 
-# Atualiza o sistema e instala as bibliotecas necessárias para o PostgreSQL
-# (libpq-dev é necessário para o driver pdo_pgsql)
+# Instala dependências do sistema e habilita as extensões pdo e pdo_pgsql
 RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo pdo_pgsql pgsql
 
-# Habilita o mod_rewrite do Apache (bom para segurança e URLs amigáveis)
+# Habilita o mod_rewrite do Apache
 RUN a2enmod rewrite
 
-# Copia a sua pasta 'apiPortal' para dentro do servidor na nuvem
+# Copia a pasta apiPortal para o diretório padrão do Apache
 COPY apiPortal/ /var/www/html/apiPortal/
 
-# Define as permissões corretas para o Apache conseguir ler os arquivos
+# Define as permissões para o usuário do Apache
 RUN chown -R www-data:www-data /var/www/html
