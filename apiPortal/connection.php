@@ -1,9 +1,30 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// Lista de origens permitidas
+$allowed_origins = [
+    'http://localhost:8100',
+    'https://growthinvestimentos-ted5.onrender.com'
+];
+
+// Pega a origem da requisição
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+// Se a origem estiver na lista, permite
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+} else {
+    header("Access-Control-Allow-Origin: http://localhost:8100"); // Fallback
+}
+
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Content-Type: application/json; charset=utf-8");
+
+// Preflight
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 $db_url = getenv('DATABASE_URL');
 
