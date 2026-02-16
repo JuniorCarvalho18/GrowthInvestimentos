@@ -243,31 +243,6 @@ span { color: var(--ion-text-color); }
   }
 }
 
-/* Força a transparência nos componentes que usam Shadow DOM */
-ion-app,
-ion-menu::part(container),
-ion-menu ion-content::part(background) {
-  background: transparent !important;
-  --background: transparent !important;
-}
-
-/* Garante que o menu lateral não tenha cor sólida de fundo */
-ion-menu {
-  --background: transparent !important;
-}
-
-/* Aplica a imagem de fundo no HTML/Body para que tudo 'flutue' sobre ela */
-body {
-  background: url(../../assets/icon-background.png) center / cover no-repeat fixed !important;
-}
-
-/* No modo Desktop, o fundo do app (768px) deve ser transparente para ver o body */
-@media (min-width: 1025px) {
-  ion-app {
-    background: transparent !important;
-  }
-}
-
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 
