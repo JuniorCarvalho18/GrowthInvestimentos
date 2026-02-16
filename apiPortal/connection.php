@@ -9,16 +9,29 @@ $db_url = getenv('DATABASE_URL');
 
 try {
     if ($db_url) {
-        // Para o PostgreSQL no Render, a URL já vem completa (postgres://...)
-        // O PDO aceita a string de conexão diretamente
-        $pdo = new PDO($db_url);
+        $db_parts = parse_url($db_url);
+        
+        $host = $db_parts['host'];
+        $port = $db_parts['port'] ?? 5432;
+        $dbname = ltrim($db_parts['path'], '/');
+        $user = $db_parts['user'];
+        $password = $db_parts['pass'];
+        
+        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
+        $pdo = new PDO($dsn, $user, $password);
+        
     } else {
-        // Fallback local caso você ainda use MySQL no seu PC
+        // Fallback local MySQL (seu ambiente de desenvolvimento)
         $pdo = new PDO("mysql:host=localhost;dbname=growth;charset=utf8", "root", "");
     }
+    
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    
 } catch(PDOException $e) {
-    // Retorna o erro real para sabermos se o problema é o DRIVER ou a SENHA
-    die(json_encode(['success' => false, 'message' => 'Erro de conexão: ' . $e->getMessage()]));
+    die(json_encode([
+        'success' => false, 
+        'message' => 'Erro de conexão: ' . $e->getMessage()
+    ]));
 }
 ?>
