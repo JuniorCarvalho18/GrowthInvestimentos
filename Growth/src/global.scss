@@ -176,68 +176,73 @@ span { color: var(--ion-text-color); }
 @media (min-width: 1025px) {
 
   body {
-    /* Cor de fundo da "mesa" (a área fora do app no PC) */
     background-image: radial-gradient(#1f1f1f 1px, transparent 1px);
-    background-size: 20px 20px; /* Um efeito de grid sutil no fundo */
-
-    /* Centraliza o App na tela */
+    background-size: 20px 20px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    overflow-y: hidden; /* Evita barra de rolagem dupla */
+    overflow-y: hidden;
   }
 
   ion-app {
-    /* Define a largura de um Tablet (iPad Portrait) */
     max-width: 768px;
     width: 100%;
-
-    /* Centraliza e adiciona sombra para destacar o app */
     margin: 0 auto;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
     min-height: 100vh;
     border-left: 1px solid #333;
     border-right: 1px solid #333;
-
-    /* Garante que o conteúdo interno respeite o limite */
     position: relative;
   }
 
-  /* --- Correções para componentes flutuantes --- */
+  /* --- AJUSTE DOS MODAIS (CORREÇÃO DE ALINHAMENTO) --- */
 
-  /* Garante que Modals fiquem centralizados na área do app */
   ion-modal {
-    left: 50%;
-    transform: translateX(-50%);
-    --max-width: 768px;
+    /* Centraliza o ponto de origem do modal no PC */
     --width: 100%;
+    --max-width: 768px;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 
-  /* Garante que Toasts (notificações) apareçam dentro do app */
-  ion-toast {
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 768px;
+  /* O Backdrop (fundo escuro) limitado à largura do app */
+  ion-modal::part(backdrop) {
+    width: 768px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    display: block !important;
   }
 
-  /* Garante que Alerts (popups) fiquem no centro */
-  ion-alert {
-    left: 50%;
-    transform: translateX(-50%);
+  /* A "caixa" do conteúdo corrigida para não ficar torta */
+  ion-modal::part(content) {
+    /* Define a proporção: 90% da largura do seu "tablet" de 768px */
+    width: 90% !important;
+    max-width: 690px !important;
+
+    /* Força o alinhamento central absoluto */
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+
+    border-radius: 16px;
+    box-shadow: 0 28px 48px rgba(0,0,0,0.4);
   }
 
-  /* Garante que Action Sheets fiquem dentro da largura */
-  ion-action-sheet {
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 768px;
+  /* --- OUTROS COMPONENTES --- */
+
+  ion-toast, ion-alert, ion-action-sheet {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: 768px !important;
+    width: 100% !important;
   }
 
   ion-menu {
     left: calc(50% - 384px) !important;
   }
 
-  /* Desativa o modo fixo que o Ionic tenta forçar no PC */
   .menu-pane-visible {
     display: none !important;
   }
