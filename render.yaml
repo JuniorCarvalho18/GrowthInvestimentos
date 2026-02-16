@@ -3,7 +3,7 @@ services:
   # BACKEND PHP (já funcionando)
   # ========================================
   - type: web
-    name: growthinvestimentos-api
+    name: growth-api
     runtime: docker
     dockerfilePath: ./Dockerfile
     envVars:
@@ -16,7 +16,7 @@ services:
   # FRONTEND ANGULAR (NOVA CONFIGURAÇÃO)
   # ========================================
   - type: web
-    name: growth-frontend
+    name: growthinvestimentos
     runtime: static
     buildCommand: cd Growth && npm install && npm run build
     staticPublishPath: ./Growth/www
