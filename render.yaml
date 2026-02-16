@@ -19,7 +19,7 @@ services:
     name: growthinvestimentos
     runtime: static
     buildCommand: cd Growth && npm install && npm run build
-    staticPublishPath: ./Growth/www
+    staticPublishPath: ./Growth/www/browser
     routes:
       - type: rewrite
         source: /*
