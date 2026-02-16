@@ -1,5 +1,5 @@
 <ion-app>
-  <ion-menu contentId="main-content" type="overlay" [disabled]="!user">
+  <ion-menu contentId="main-content" type="overlay" side="start" [disabled]="!user">
     <ion-header>
       <ion-toolbar color="primary">
         <ion-title>Menu</ion-title>
@@ -9,7 +9,7 @@
         <ion-avatar style="width: 80px; height: 80px; margin: 0 auto 10px;">
           <img [src]="user.foto || 'assets/img/icon-only.png'" style="object-fit: cover;">
         </ion-avatar>
-        <h3 style="margin: 0; color: var(--ion-color-dark);">{{ user.nome }}</h3>
+        <h3>{{ user.nome }}</h3>
       </div>
     </ion-header>
 

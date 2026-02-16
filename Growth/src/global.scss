@@ -233,10 +233,38 @@ span { color: var(--ion-text-color); }
     max-width: 768px;
   }
 
-  /* Corrige o Menu Lateral para não sair da área */
   ion-menu {
-    max-width: 768px;
-    left: auto; /* Reseta posicionamento padrão */
+    left: calc(50% - 384px) !important;
+  }
+
+  /* Desativa o modo fixo que o Ionic tenta forçar no PC */
+  .menu-pane-visible {
+    display: none !important;
+  }
+}
+
+/* Força a transparência nos componentes que usam Shadow DOM */
+ion-app,
+ion-menu::part(container),
+ion-menu ion-content::part(background) {
+  background: transparent !important;
+  --background: transparent !important;
+}
+
+/* Garante que o menu lateral não tenha cor sólida de fundo */
+ion-menu {
+  --background: transparent !important;
+}
+
+/* Aplica a imagem de fundo no HTML/Body para que tudo 'flutue' sobre ela */
+body {
+  background: url(../../assets/icon-background.png) center / cover no-repeat fixed !important;
+}
+
+/* No modo Desktop, o fundo do app (768px) deve ser transparente para ver o body */
+@media (min-width: 1025px) {
+  ion-app {
+    background: transparent !important;
   }
 }
 

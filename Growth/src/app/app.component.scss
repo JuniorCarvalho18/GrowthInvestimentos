@@ -1,16 +1,15 @@
-ion-content{
-  --background:url(../../assets/icon-background.png) center / cover no-repeat;
+ion-content {
+  --background: transparent;
 }
 
 ion-list-header{
   --color: var(--ion-text-color);
 }
-ion-item{
-  --background:  #0b3d2e00;
-  --color: var(--ion-text-color);
-}
-#inbox-list {
-  background:  #0b3d2e00;
+#inbox-list,
+ion-item,
+ion-list {
+  background: transparent !important;
+  --background: transparent !important;
 }
 #icone{
   background: rgba(255, 255, 255, 0.1);
@@ -174,4 +173,9 @@ ion-note {
 
 ion-item.selected {
   --color: var(--ion-color-primary);
+}
+
+ion-toolbar {
+  --background: rgba(35, 35, 35, 0.4); /* Leve escurecida para leitura */
+  backdrop-filter: blur(5px);
 }
