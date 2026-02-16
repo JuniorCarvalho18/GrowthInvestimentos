@@ -1,47 +1,37 @@
 <ion-app>
-  <ion-split-pane contentId="main-content">
-    <ion-menu contentId="main-content" type="overlay">
-      <ion-content>
-        <ion-list id="inbox-list">
-          <ion-list-header>Menu</ion-list-header>
-          <br>
+  <ion-menu contentId="main-content" type="overlay" [disabled]="!user">
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Menu</ion-title>
+      </ion-toolbar>
 
-          <div class="menu-header" *ngIf="user" style="text-align: center;">
-            <ion-avatar style="width: 80px; height: 80px; margin: 0 auto 10px;">
-              <img [src]="user.foto || 'assets/img/icon-only.png'">
-            </ion-avatar>
-            <h3>{{ user.nome }}</h3>
-          </div>
+      <div class="menu-header" *ngIf="user" style="text-align: center;">
+        <ion-avatar style="width: 80px; height: 80px; margin: 0 auto 10px;">
+          <img [src]="user.foto || 'assets/img/icon-only.png'" style="object-fit: cover;">
+        </ion-avatar>
+        <h3 style="margin: 0; color: var(--ion-color-dark);">{{ user.nome }}</h3>
+      </div>
+    </ion-header>
 
-          <div id="Contas" style="text-align: center;cursor: pointer;" [ngClass]="{ 'ativo': isContasAtivo }" (click)="toggleContas($event);">
-            <ion-label style="display: flex; font-size: 14px;text-align: left;font-weight: bold;color: var(--ion-text-color); margin-bottom: 10px;">Saldo</ion-label>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 20px; font-weight: bold;">R$ ****</span>
-              <ion-icon name="eye-outline" id="icone"></ion-icon>
-            </div>
-            <div id="Historico" style="display:flex; margin-top: 10px; text-align: left; cursor: pointer;" [ngClass]="{ 'ativo': isHistoricoAtivo }" (click)="navigateToHistorico($event)">
-              <ion-icon name="document-text-outline" style="vertical-align: middle;"></ion-icon>
-              <span>Histórico</span>
-            </div>
-          </div>
+    <ion-content>
+      <ion-list id="inbox-list">
+        <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages">
+          <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
+            <ion-icon slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+            <ion-label>{{ p.title }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
 
-          <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
-            <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
-              <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-              <ion-label>{{ p.title }}</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="false" *ngIf="user">
+          <ion-item button (click)="logout()" lines="none" detail="false">
+            <ion-icon slot="start" name="log-out-outline"></ion-icon>
+            <ion-label>Sair</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
 
-          <!-- Botão Sair FORA do loop -->
-          <ion-menu-toggle auto-hide="false">
-            <ion-item lines="none" detail="false" button (click)="logout()">
-              <ion-icon aria-hidden="true" slot="start" name="log-out-outline"></ion-icon>
-              <ion-label>Sair</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-        </ion-list>
-      </ion-content>
-    </ion-menu>
-    <ion-router-outlet id="main-content"></ion-router-outlet>
-  </ion-split-pane>
-</ion-app>
+  <ion-router-outlet id="main-content"></ion-router-outlet>
+
+  </ion-app>

@@ -170,6 +170,76 @@ span { color: var(--ion-text-color); }
 .action-sheet-destructive { --color: #eb445a; }
 .action-sheet-cancel { --color: rgba(227, 227, 227, 0.7); }
 
+/* ======================================================
+   MODO DESKTOP (SIMULAÇÃO DE TELA DE TABLET/MOBILE)
+   ====================================================== */
+@media (min-width: 1025px) {
+
+  body {
+    /* Cor de fundo da "mesa" (a área fora do app no PC) */
+    background-image: radial-gradient(#1f1f1f 1px, transparent 1px);
+    background-size: 20px 20px; /* Um efeito de grid sutil no fundo */
+
+    /* Centraliza o App na tela */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: hidden; /* Evita barra de rolagem dupla */
+  }
+
+  ion-app {
+    /* Define a largura de um Tablet (iPad Portrait) */
+    max-width: 768px;
+    width: 100%;
+
+    /* Centraliza e adiciona sombra para destacar o app */
+    margin: 0 auto;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+    min-height: 100vh;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+
+    /* Garante que o conteúdo interno respeite o limite */
+    position: relative;
+  }
+
+  /* --- Correções para componentes flutuantes --- */
+
+  /* Garante que Modals fiquem centralizados na área do app */
+  ion-modal {
+    left: 50%;
+    transform: translateX(-50%);
+    --max-width: 768px;
+    --width: 100%;
+  }
+
+  /* Garante que Toasts (notificações) apareçam dentro do app */
+  ion-toast {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 768px;
+  }
+
+  /* Garante que Alerts (popups) fiquem no centro */
+  ion-alert {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Garante que Action Sheets fiquem dentro da largura */
+  ion-action-sheet {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 768px;
+  }
+
+  /* Corrige o Menu Lateral para não sair da área */
+  ion-menu {
+    max-width: 768px;
+    left: auto; /* Reseta posicionamento padrão */
+  }
+}
+
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 
