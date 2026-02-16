@@ -195,32 +195,24 @@ span { color: var(--ion-text-color); }
     position: relative;
   }
 
-  /* --- AJUSTE DOS MODAIS (CORREÇÃO DE ALINHAMENTO) --- */
+  /* --- AJUSTE DOS MODAIS --- */
 
-  ion-modal {
-    /* Centraliza o ponto de origem do modal no PC */
+  /* 1. MODAIS PADRÃO (Alertas, Confirmações, etc.)
+     Esta regra aplica-se a TODOS os modais, EXCETO (.not) ao 'add-project-modal'.
+     Isso centraliza tudo o que for padrão e deixa o resto em paz.
+  */
+  ion-modal:not(.add-project-modal) {
     --width: 100%;
     --max-width: 768px;
-    display: flex !important;
     justify-content: center !important;
     align-items: center !important;
   }
 
-  /* O Backdrop (fundo escuro) limitado à largura do app */
-  ion-modal::part(backdrop) {
-    width: 768px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    display: block !important;
-  }
-
-  /* A "caixa" do conteúdo corrigida para não ficar torta */
-  ion-modal::part(content) {
-    /* Define a proporção: 90% da largura do seu "tablet" de 768px */
+  ion-modal:not(.add-project-modal)::part(content) {
     width: 90% !important;
     max-width: 690px !important;
 
-    /* Força o alinhamento central absoluto */
+    /* Centralização forçada APENAS para modais comuns */
     position: fixed !important;
     left: 50% !important;
     top: 50% !important;
@@ -228,6 +220,38 @@ span { color: var(--ion-text-color); }
 
     border-radius: 16px;
     box-shadow: 0 28px 48px rgba(0,0,0,0.4);
+  }
+
+  /* 2. MODAL ADD PROJECT (Sheet Modal / Estilo Gaveta)
+     Este modal deve vir de baixo. Não aplicamos 'transform' aqui para
+     permitir que o Ionic faça a animação de slide nativa.
+  */
+  ion-modal.add-project-modal {
+    --width: 100%;
+    --max-width: 768px;
+    align-items: flex-end !important; /* Alinha na base da tela */
+  }
+
+  ion-modal.add-project-modal::part(content) {
+    /* Garante que não ultrapasse a largura do app */
+    max-width: 768px !important;
+    margin-inline: auto !important;
+
+    /* Estilo visual */
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
+
+    /* IMPORTANTE: Não definimos 'top', 'transform' ou 'position' aqui
+       para não quebrar a animação de entrada/saída do Ionic */
+  }
+
+  /* O Backdrop (fundo escuro) serve para ambos */
+  ion-modal::part(backdrop) {
+    width: 100% !important;
+    max-width: 768px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    display: block !important;
   }
 
   /* --- OUTROS COMPONENTES --- */
