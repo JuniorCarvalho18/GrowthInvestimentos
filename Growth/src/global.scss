@@ -8,284 +8,174 @@
  * For more information on global stylesheets, visit the documentation:
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
- html{
-  scroll-behavior: smooth;
- }
- * { font-family: 'Roboto', sans-serif; }
- ion-toolbar {--background: #232323;}
- ion-toolbar {color: var(--ion-text-color);}
- ion-content {color: var(--ion-text-color);}
- ion-item {color: var(--ion-text-color);}
-  ion-input {
-    border: 1px solid rgba(227, 227, 227, 0.7);
-    --padding-start: 10px;
-    border-radius: 5px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-  }
-  .native-input.sc-ion-input-md {
-    padding-left: 10px;
-  }
-  ion-button {
-    --border: none;
-    --border-radius: 8px;
-    font-weight: bold;
-  }
-  ion-button:active {
-    transition: 100ms;
-    transform: scale(1.02);
-    --background: var(--dourado);
-    --color: var(--ion-text-color);
-  }
 
-ion-modal.notifications-modal {
-  /* Define que a altura será automática baseada no conteúdo */
-  --height: 70%;
-  /* Impede que fique maior que 50% da tela se tiver muita notificação */
-  --max-height: 70%;
-  /* Opcional: Arredonda as bordas se quiser estilo "card" */
-  --border-radius: 16px;
-  /* Ajusta o alinhamento (center para meio da tela, ou deixe sem para bottom) */
-  align-items: center;
-}
-
-ion-modal.notifications-modal .ion-page {
-  /* Garante que a página interna não force altura */
-  position: relative;
-  display: block;
-  contain: content;
-}
-
-/* --- Personalização da Barra de Rolagem (Global) --- */
-
-/* Define a largura e altura da barra */
-::-webkit-scrollbar {
-  width: 8px;  /* Largura da barra vertical */
-  height: 8px; /* Altura da barra horizontal (se houver) */
-  background: transparent; /* Remove o fundo geral da área da barra */
-}
-
-/* O "trilho" (fundo) por onde a barra corre */
-::-webkit-scrollbar-track {
-  background: transparent; /* Deixa o fundo transparente */
-}
-
-/* A "pega" (a parte que se mexe) */
-::-webkit-scrollbar-thumb {
-  background: rgba(150, 150, 150, 0.3); /* Cor discreta e semi-transparente */
-  border-radius: 10px; /* Bordas arredondadas */
-}
-
-/* Efeito ao passar o rato por cima da barra */
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(150, 150, 150, 0.6); /* Fica um pouco mais visível */
-}
-
-// Estilos para loading customizado
-.custom-loading {
-  --background: rgba(0, 0, 0, 0.8);
-  --spinner-color: var(--dourado);
-
-  .loading-wrapper {
-    border-radius: 8px;
-  }
-}
-
-// Melhorias nos toasts
-ion-toast {
-  --border-radius: 8px;
-  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-
-  &::part(message) {
-    font-size: 14px;
-  }
-}
-
-// Animações suaves
-.fade-in {
-  animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Melhoria nos inputs
-ion-input, ion-textarea {
-  --background: rgba(255, 255, 255, 0.05);
-  --color: var(--ion-text-color);
-  --placeholder-color: rgba(227, 227, 227, 0.5);
-  --padding-start: 15px;
-  --padding-end: 15px;
-
-  &:focus-within {
-    --border-color: var(--dourado);
-    --background: rgba(255, 255, 255, 0.08);
-  }
-}
-
-.alert-button {
-  color: var(--ion-text-color) !important; /* Cor do texto */
-}
-
-.alert-button.alert-button-role-cancel {
-  color: #232323 !important;
-}
-
-::ng-deep {
-  .alert-radio-label {
-    color: var(--ion-text-color) !important;
-  }
-
-  .alert-radio-button-checked .alert-radio-label {
-    color: var(--dourado) !important;
-  }
-
-  .alert-title {
-    color: var(--ion-text-color) !important;
-  }
-
-  .alert-button {
-    color: var(--dourado) !important;
-
-    &.alert-button-role-cancel {
-      color: #999 !important; // Cor do botão Cancelar
-    }
-  }
-
-}
-
-/* Action Sheet */
-.action-sheet-button { --color: var(--ion-text-color); }
-span { color: var(--ion-text-color); }
-.action-sheet-wrapper { --color: var(--ion-text-color);}
-.action-sheet-icon { color: var(--dourado); }
-.action-sheet-destructive { --color: #eb445a; }
-.action-sheet-cancel { --color: rgba(227, 227, 227, 0.7); }
-
-/* ======================================================
-   MODO DESKTOP (SIMULAÇÃO DE TELA DE TABLET/MOBILE)
-   ====================================================== */
-@media (min-width: 1025px) {
-
-  body {
-    background-image: radial-gradient(#1f1f1f 1px, transparent 1px);
-    background-size: 20px 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow-y: hidden;
-  }
-
-  ion-app {
-    max-width: 768px;
-    width: 100%;
-    margin: 0 auto;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
-    min-height: 100vh;
-    border-left: 1px solid #333;
-    border-right: 1px solid #333;
-    position: relative;
-  }
-
-  /* --- AJUSTE DOS MODAIS --- */
-
-  /* 1. MODAIS PADRÃO (Alertas, Confirmações, etc.)
-     Esta regra aplica-se a TODOS os modais, EXCETO (.not) ao 'add-project-modal'.
-     Isso centraliza tudo o que for padrão e deixa o resto em paz.
-  */
-  ion-modal:not(.add-project-modal) {
-    --width: 100%;
-    --max-width: 768px;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-
-  ion-modal:not(.add-project-modal)::part(content) {
-    width: 90% !important;
-    max-width: 690px !important;
-
-    /* Centralização forçada APENAS para modais comuns */
-    position: fixed !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-
-    border-radius: 16px;
-    box-shadow: 0 28px 48px rgba(0,0,0,0.4);
-  }
-
-  /* 2. MODAL ADD PROJECT (Sheet Modal / Estilo Gaveta)
-     Este modal deve vir de baixo. Não aplicamos 'transform' aqui para
-     permitir que o Ionic faça a animação de slide nativa.
-  */
-  ion-modal.add-project-modal {
-    --width: 100%;
-    --max-width: 768px;
-    align-items: flex-end !important; /* Alinha na base da tela */
-  }
-
-  ion-modal.add-project-modal::part(content) {
-    /* Garante que não ultrapasse a largura do app */
-    max-width: 768px !important;
-    margin-inline: auto !important;
-
-    /* Estilo visual */
-    border-radius: 20px 20px 0 0 !important;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
-
-    /* IMPORTANTE: Não definimos 'top', 'transform' ou 'position' aqui
-       para não quebrar a animação de entrada/saída do Ionic */
-  }
-
-  /* O Backdrop (fundo escuro) serve para ambos */
-  ion-modal::part(backdrop) {
-    width: 100% !important;
-    max-width: 768px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    display: block !important;
-  }
-
-  /* --- OUTROS COMPONENTES --- */
-
-  ion-toast, ion-alert, ion-action-sheet {
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    max-width: 768px !important;
-    width: 100% !important;
-  }
-
-  ion-menu {
-    left: calc(50% - 384px) !important;
-  }
-
-  .menu-pane-visible {
-    display: none !important;
-  }
-}
-
-/* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
-
-/* Optional CSS utils that can be commented out */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
+html { scroll-behavior: smooth; }
+* { font-family: 'Roboto', sans-serif; }
 
+ion-toolbar { --background: #232323; color: var(--ion-text-color); }
+ion-content, ion-item { color: var(--ion-text-color); }
+
+/* --- Inputs --- */
+ion-input, ion-textarea {
+  border: 1px solid rgba(227, 227, 227, 0.2);
+  --padding-start: 15px; --padding-end: 15px;
+  border-radius: 8px; margin-top: 15px; margin-bottom: 15px;
+  --background: rgba(255, 255, 255, 0.05);
+  --color: var(--ion-text-color);
+  --placeholder-color: rgba(227, 227, 227, 0.5);
+}
+ion-input:focus-within, ion-textarea:focus-within {
+  --border-color: var(--dourado);
+  --background: rgba(255, 255, 255, 0.08);
+  border-color: var(--dourado);
+}
+.native-input.sc-ion-input-md { padding-left: 10px; }
+
+/* --- Buttons --- */
+ion-button { --border: none; --border-radius: 8px; font-weight: bold; }
+ion-button:active {
+  transition: 100ms; transform: scale(1.02);
+  --background: var(--dourado); --color: var(--ion-text-color);
+}
+
+/* --- Modals --- */
+ion-modal.notifications-modal {
+  --height: 70%; --max-height: 70%; --border-radius: 16px; align-items: center;
+}
+ion-modal.notifications-modal .ion-page { position: relative; display: block; contain: content; }
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.6); }
+
+/* --- Loading --- */
+.custom-loading {
+  --background: rgba(0, 0, 0, 0.85); --spinner-color: var(--dourado); --backdrop-opacity: 0.4;
+}
+
+/* ======================================================
+   TOASTS (Estilo Pílula - Correção Definitiva)
+   ====================================================== */
+ion-toast {
+  /* 1. Força a largura a se adaptar ao conteúdo (O Pulo do Gato) */
+  --width: fit-content;
+
+  /* 2. Garante um tamanho mínimo e máximo para não quebrar em telas pequenas */
+  --min-width: 150px;
+  --max-width: 85%; /* Deixa uma margem de respiro nas laterais */
+
+  /* 3. Centralização Horizontal */
+  /* O margin-inline: auto centraliza blocos que têm largura definida */
+  margin-inline: auto;
+  /* Resetamos left/right para evitar que o Ionic estique o componente */
+  left: 0;
+  right: 0;
+
+  /* 4. Visual Arredondado */
+  --box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+
+  /* 5. Espaçamento */
+  --padding-start: 20px;
+  --padding-end: 20px;
+}
+
+/* Centraliza o texto e ícones dentro da pílula */
+ion-toast::part(message) {
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  font-size: 14px;
+}
+
+ion-toast::part(container) {
+  /* Garante que o fundo da pílula acompanhe o conteúdo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* --- Alertas e Actions --- */
+.alert-button { color: var(--ion-text-color) !important; }
+.alert-button.alert-button-role-cancel { color: #999 !important; }
+::ng-deep .alert-radio-label { color: var(--ion-text-color) !important; }
+::ng-deep .alert-radio-button-checked .alert-radio-label { color: var(--dourado) !important; }
+.action-sheet-button, .action-sheet-wrapper, span { --color: var(--ion-text-color); color: var(--ion-text-color); }
+.action-sheet-icon { color: var(--dourado); }
+.action-sheet-destructive { --color: #eb445a; }
+.action-sheet-cancel { --color: rgba(227, 227, 227, 0.7); }
+
+
+/* ======================================================
+   MODO DESKTOP (SIMULAÇÃO MOBILE)
+   ====================================================== */
+@media (min-width: 1025px) {
+  body {
+    background-image: radial-gradient(#1f1f1f 1px, transparent 1px);
+    background-size: 20px 20px;
+    display: flex; justify-content: center; align-items: flex-start; overflow-y: hidden;
+  }
+
+  ion-app {
+    max-width: 768px; width: 100%; margin: 0 auto;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.6); min-height: 100vh;
+    border-left: 1px solid #333; border-right: 1px solid #333; position: relative;
+  }
+
+  /* Modais Padrão (Centralizados) */
+  ion-modal:not(.add-project-modal) {
+    --width: 100%; --max-width: 768px;
+    justify-content: center !important; align-items: center !important;
+  }
+  ion-modal:not(.add-project-modal)::part(content) {
+    width: 90% !important; max-width: 690px !important;
+    position: fixed !important; left: 50% !important; top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 16px; box-shadow: 0 28px 48px rgba(0,0,0,0.4);
+  }
+
+  /* Modal Add Project (Sheet vindo de baixo) */
+  ion-modal.add-project-modal {
+    --width: 100%; --max-width: 768px; align-items: flex-end !important;
+  }
+  ion-modal.add-project-modal::part(content) {
+    max-width: 768px !important; margin-inline: auto !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
+  }
+  ion-modal::part(backdrop) {
+    width: 100% !important; max-width: 768px !important;
+    left: 50% !important; transform: translateX(-50%) !important; display: block !important;
+  }
+
+  /* Alerts e Action Sheet no Desktop */
+  ion-alert, ion-action-sheet {
+    left: 50% !important; transform: translateX(-50%) !important;
+    max-width: 768px !important; width: 100% !important;
+  }
+
+  /* Toast no Desktop */
+  ion-toast {
+    /* Mantém o comportamento de fit-content, mas garante que a centralização
+       respeite a coluna central do layout desktop */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+  }
+
+  ion-menu { left: calc(50% - 384px) !important; }
+  .menu-pane-visible { display: none !important; }
+}

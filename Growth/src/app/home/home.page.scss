@@ -574,7 +574,7 @@ ion-button {
       border-radius: 8px;
 
       img {
-        height: 100%;
+        max-height: 22vh;
         object-fit: cover;
         border-radius: 8px;
       }
