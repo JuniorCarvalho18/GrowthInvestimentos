@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { UtilsService } from '../services/utils.service';
 import { PostsService, Post, Comentario } from '../services/posts.service';
 import { Subscription, interval, forkJoin } from 'rxjs';
 
@@ -20,19 +20,17 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
   comentarioForm: Comentario = this.limparFormulario();
   editando = false;
 
-  loading: HTMLIonLoadingElement | null = null;
   private refreshSubscription?: Subscription;
 
   constructor(
     private rota: Router,
     private postsService: PostsService,
-    private toast: ToastController,
-    private alert: AlertController,
-    private loadingController: LoadingController
+    private utils: UtilsService // <--- Injeção do Utils
   ) {}
 
   ngOnInit() {
     this.carregarDados();
+    // 🔄 Atualiza a cada 5 segundos
     this.refreshSubscription = interval(5000).subscribe(() => {
       this.carregarDados(true);
     });
@@ -54,34 +52,10 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
     };
   }
 
-  async showLoading(message: string = 'Carregando...') {
-    this.loading = await this.loadingController.create({
-      message,
-      spinner: 'crescent'
-    });
-    await this.loading.present();
-  }
-
-  async hideLoading() {
-    if (this.loading) {
-      await this.loading.dismiss();
-      this.loading = null;
-    }
-  }
-
-  async presentToast(msg: string, color: 'success' | 'danger' | 'warning' = 'success') {
-    const toast = await this.toast.create({
-      message: msg,
-      duration: 3000,
-      color,
-      position: 'top',
-      buttons: [{ text: 'OK', role: 'cancel' }]
-    });
-    await toast.present();
-  }
+  // --- CARREGAMENTO DE DADOS ---
 
   async carregarDados(silencioso = false) {
-    if (!silencioso) await this.showLoading('Carregando dados...');
+    if (!silencioso) await this.utils.showLoading('Carregando dados...');
 
     this.postsService.listarPosts().subscribe({
       next: async (res) => {
@@ -89,13 +63,16 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
           this.posts = res.posts;
           await this.carregarTodosComentarios(silencioso);
         } else {
-          if (!silencioso) await this.hideLoading();
+          if (!silencioso) {
+            await this.utils.hideLoading();
+            await this.utils.toast('Erro ao carregar posts', 'warning');
+          }
         }
       },
       error: async (error) => {
         if (!silencioso) {
-          await this.hideLoading();
-          await this.presentToast('Erro ao carregar posts', 'danger');
+          await this.utils.hideLoading();
+          await this.utils.toastError('Erro de conexão ao carregar posts');
         }
       }
     });
@@ -108,7 +85,7 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
 
     forkJoin(requests).subscribe({
       next: async (results) => {
-        if (!silencioso) await this.hideLoading();
+        if (!silencioso) await this.utils.hideLoading();
         this.todosComentarios = [];
         results.forEach(res => {
           if (res.success) {
@@ -118,8 +95,9 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
         this.filtrarComentarios();
       },
       error: async (error) => {
-        if (!silencioso) await this.hideLoading();
+        if (!silencioso) await this.utils.hideLoading();
         console.error(error);
+        if (!silencioso) await this.utils.toastError('Erro ao carregar comentários');
       }
     });
   }
@@ -132,11 +110,11 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
         c => c.post_id == this.postSelecionadoId
       );
     }
-    // Ordenar decrescente
+    // Ordenar decrescente por ID (mais novos primeiro)
     this.comentariosFiltrados.sort((a, b) => (b.id || 0) - (a.id || 0));
   }
 
-  // --- CRUD ---
+  // --- CRUD (Salvar / Editar / Deletar) ---
 
   editar(c: Comentario) {
     this.comentarioForm = { ...c };
@@ -151,19 +129,19 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
 
   async salvar() {
     if (!this.comentarioForm.post_id) {
-      this.presentToast('Selecione um Post', 'warning');
+      this.utils.toast('Selecione um Post', 'warning');
       return;
     }
     if (!this.comentarioForm.autor) {
-      this.presentToast('Informe o Autor', 'warning');
+      this.utils.toast('Informe o Autor', 'warning');
       return;
     }
     if (!this.comentarioForm.texto) {
-      this.presentToast('Informe o Texto', 'warning');
+      this.utils.toast('Informe o Texto', 'warning');
       return;
     }
 
-    await this.showLoading('Salvando...');
+    await this.utils.showLoading('Salvando...');
 
     const request = this.editando
       ? this.postsService.editarComentario(this.comentarioForm)
@@ -171,50 +149,47 @@ export class GerenciarComentariosPage implements OnInit, OnDestroy {
 
     request.subscribe({
       next: async (res) => {
-        await this.hideLoading();
+        await this.utils.hideLoading();
         if (res.success) {
-          await this.presentToast(this.editando ? 'Atualizado!' : 'Criado!', 'success');
+          await this.utils.toast(this.editando ? 'Atualizado com sucesso!' : 'Criado com sucesso!', 'success');
           this.cancelarEdicao();
           this.carregarDados();
         } else {
-          await this.presentToast('Erro ao salvar', 'danger');
+          await this.utils.toastError('Erro ao salvar comentário');
         }
       },
       error: async () => {
-        await this.hideLoading();
-        await this.presentToast('Erro de conexão', 'danger');
+        await this.utils.hideLoading();
+        await this.utils.toastError('Erro de conexão');
       }
     });
   }
 
   async deletar(id: number, autor: string) {
-    const alert = await this.alert.create({
-      header: 'Confirmar Exclusão',
-      message: `Deletar comentário de ${autor}?`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Excluir',
-          cssClass: 'alert-button-danger',
-          handler: async () => {
-            await this.showLoading('Excluindo...');
-            this.postsService.deletarComentario(id).subscribe({
-              next: async (res) => {
-                await this.hideLoading();
-                if (res.success) {
-                  await this.presentToast('Excluído!', 'success');
-                  this.carregarDados();
-                }
-              },
-              error: async () => {
-                await this.hideLoading();
-                await this.presentToast('Erro ao excluir', 'danger');
-              }
-            });
+    // Usa o alert padronizado do Utils
+    const confirmou = await this.utils.alertConfirm(
+      'Confirmar Exclusão',
+      `Deseja realmente excluir o comentário de "${autor}"?`
+    );
+
+    if (confirmou) {
+      await this.utils.showLoading('Excluindo...');
+
+      this.postsService.deletarComentario(id).subscribe({
+        next: async (res) => {
+          await this.utils.hideLoading();
+          if (res.success) {
+            await this.utils.toast('Comentário excluído!', 'success');
+            this.carregarDados();
+          } else {
+            await this.utils.toastError('Erro ao excluir comentário');
           }
+        },
+        error: async () => {
+          await this.utils.hideLoading();
+          await this.utils.toastError('Erro de conexão');
         }
-      ]
-    });
-    await alert.present();
+      });
+    }
   }
 }

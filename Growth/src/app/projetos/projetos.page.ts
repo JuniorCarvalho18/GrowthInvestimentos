@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { UtilsService } from '../services/utils.service'; // <--- Importado
 import { ProjetosService, Projeto } from '../services/projetos.service';
 import { Subscription, interval } from 'rxjs';
 
@@ -13,7 +13,6 @@ import { Subscription, interval } from 'rxjs';
 export class ProjetosPage implements OnInit, OnDestroy {
   projetos: Projeto[] = [];
   projeto: Projeto = this.limparFormulario();
-  loading: HTMLIonLoadingElement | null = null;
   private refreshSubscription?: Subscription;
 
   categorias = [
@@ -36,13 +35,12 @@ export class ProjetosPage implements OnInit, OnDestroy {
   constructor(
     private rota: Router,
     private projetosService: ProjetosService,
-    private toast: ToastController,
-    private alert: AlertController,
-    private loadingController: LoadingController,
+    private utils: UtilsService // <--- Injeção do Utils
   ) {}
 
   ngOnInit() {
     this.listarProjetos();
+    // 🔄 Auto-refresh a cada 5s
     this.refreshSubscription = interval(5000).subscribe(() => {
       this.listarProjetos(true);
     });
@@ -69,77 +67,55 @@ export class ProjetosPage implements OnInit, OnDestroy {
     };
   }
 
-  async showLoading(message: string = 'Carregando...') {
-    this.loading = await this.loadingController.create({
-      message,
-      spinner: 'crescent'
-    });
-    await this.loading.present();
-  }
-
-  async hideLoading() {
-    if (this.loading) {
-      await this.loading.dismiss();
-      this.loading = null;
-    }
-  }
-
-  async presentToast(msg: string, color: 'success' | 'danger' | 'warning' = 'success') {
-    const toast = await this.toast.create({
-      message: msg,
-      duration: 3000,
-      color,
-      position: 'top',
-      buttons: [{ text: 'OK', role: 'cancel' }]
-    });
-    await toast.present();
-  }
+  // --- LISTAGEM ---
 
   async listarProjetos(silencioso = false) {
     if (!silencioso) {
-      await this.showLoading('Carregando projetos...');
+      await this.utils.showLoading('Carregando projetos...');
     }
 
     this.projetosService.listarProjetos().subscribe({
       next: async (res) => {
-        if (!silencioso) {
-          await this.hideLoading();
-        }
+        if (!silencioso) await this.utils.hideLoading();
+
         if (res.success) {
           this.projetos = res.projetos;
         } else {
-          await this.presentToast('Erro ao carregar projetos', 'danger');
+          // Erro leve, apenas aviso se não for silencioso
+          if (!silencioso) await this.utils.toast('Erro ao carregar projetos', 'warning');
         }
       },
       error: async (error) => {
         if (!silencioso) {
-          await this.hideLoading();
+          await this.utils.hideLoading();
+          console.error('Erro:', error);
+          await this.utils.toastError('Erro ao conectar ao servidor');
         }
-        console.error('Erro:', error);
-        await this.presentToast('Erro ao conectar ao servidor', 'danger');
       }
     });
   }
 
+  // --- VALIDAÇÃO E SALVAMENTO ---
+
   validarFormulario(): boolean {
     if (!this.projeto.nome.trim()) {
-      this.presentToast('Nome do projeto é obrigatório!', 'warning');
+      this.utils.toast('Nome do projeto é obrigatório!', 'warning');
       return false;
     }
     if (!this.projeto.descricao.trim()) {
-      this.presentToast('Descrição é obrigatória!', 'warning');
+      this.utils.toast('Descrição é obrigatória!', 'warning');
       return false;
     }
     if (!this.projeto.meta || this.projeto.meta <= 0) {
-      this.presentToast('Meta deve ser maior que zero!', 'warning');
+      this.utils.toast('Meta deve ser maior que zero!', 'warning');
       return false;
     }
     if (!this.projeto.previsao) {
-      this.presentToast('Previsão é obrigatória!', 'warning');
+      this.utils.toast('Previsão é obrigatória!', 'warning');
       return false;
     }
     if (!this.projeto.local.trim()) {
-      this.presentToast('Local é obrigatório!', 'warning');
+      this.utils.toast('Local é obrigatório!', 'warning');
       return false;
     }
 
@@ -151,7 +127,7 @@ export class ProjetosPage implements OnInit, OnDestroy {
       return;
     }
 
-    await this.showLoading(this.projeto.id ? 'Atualizando...' : 'Salvando...');
+    await this.utils.showLoading(this.projeto.id ? 'Atualizando...' : 'Salvando...');
 
     const observable = this.projeto.id
       ? this.projetosService.editarProjeto(this.projeto)
@@ -159,25 +135,27 @@ export class ProjetosPage implements OnInit, OnDestroy {
 
     observable.subscribe({
       next: async (res) => {
-        await this.hideLoading();
+        await this.utils.hideLoading();
         if (res.success) {
-          await this.presentToast(
+          await this.utils.toast(
             this.projeto.id ? 'Projeto atualizado!' : 'Projeto criado!',
             'success'
           );
           this.projeto = this.limparFormulario();
           this.listarProjetos();
         } else {
-          await this.presentToast('Erro ao salvar projeto!', 'danger');
+          await this.utils.toastError('Erro ao salvar projeto!');
         }
       },
       error: async (error) => {
-        await this.hideLoading();
+        await this.utils.hideLoading();
         console.error('Erro:', error);
-        await this.presentToast('Erro ao salvar projeto', 'danger');
+        await this.utils.toastError('Erro de conexão');
       }
     });
   }
+
+  // --- CRUD AUXILIAR ---
 
   editar(p: Projeto) {
     this.projeto = { ...p };
@@ -189,42 +167,35 @@ export class ProjetosPage implements OnInit, OnDestroy {
   }
 
   async deletar(id: number, nome: string) {
-    const alert = await this.alert.create({
-      header: 'Confirmar Exclusão',
-      message: `Deseja realmente excluir o projeto "${nome}"? Esta ação não pode ser desfeita.`,
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Excluir',
-          cssClass: 'alert-button-danger',
-          handler: async () => {
-            await this.showLoading('Excluindo...');
+    // Confirmação usando Utils
+    const confirmou = await this.utils.alertConfirm(
+      'Confirmar Exclusão',
+      `Deseja realmente excluir o projeto "${nome}"? Esta ação não pode ser desfeita.`
+    );
 
-            this.projetosService.deletarProjeto(id).subscribe({
-              next: async (res) => {
-                await this.hideLoading();
-                if (res.success) {
-                  await this.presentToast('Projeto excluído!', 'success');
-                  this.listarProjetos();
-                } else {
-                  await this.presentToast('Erro ao excluir projeto', 'danger');
-                }
-              },
-              error: async (error) => {
-                await this.hideLoading();
-                console.error('Erro:', error);
-                await this.presentToast('Erro ao conectar ao servidor', 'danger');
-              }
-            });
+    if (confirmou) {
+      await this.utils.showLoading('Excluindo...');
+
+      this.projetosService.deletarProjeto(id).subscribe({
+        next: async (res) => {
+          await this.utils.hideLoading();
+          if (res.success) {
+            await this.utils.toast('Projeto excluído!', 'success');
+            this.listarProjetos();
+          } else {
+            await this.utils.toastError('Erro ao excluir projeto');
           }
+        },
+        error: async (error) => {
+          await this.utils.hideLoading();
+          console.error('Erro:', error);
+          await this.utils.toastError('Erro de conexão');
         }
-      ]
-    });
-    await alert.present();
+      });
+    }
   }
+
+  // --- UI HELPERS ---
 
   getStatusColor(status: string): string {
     switch (status) {

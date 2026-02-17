@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { UtilsService } from '../services/utils.service'; // <--- Importado
 import { ProjetosService } from '../services/projetos.service';
 import { AvaliacoesService, Avaliacao } from '../services/avaliacoes.service';
 import { Subscription, interval, forkJoin } from 'rxjs';
@@ -21,20 +21,18 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
   avaliacaoForm: Avaliacao = this.limparFormulario();
   editando = false;
 
-  loading: HTMLIonLoadingElement | null = null;
   private refreshSubscription?: Subscription;
 
   constructor(
     private rota: Router,
     private projetosService: ProjetosService,
     private avaliacoesService: AvaliacoesService,
-    private toast: ToastController,
-    private alert: AlertController,
-    private loadingController: LoadingController
+    private utils: UtilsService // <--- Injeção do Utils
   ) {}
 
   ngOnInit() {
     this.carregarDados();
+    // 🔄 Atualiza a cada 5 segundos
     this.refreshSubscription = interval(5000).subscribe(() => {
       this.carregarDados(true);
     });
@@ -54,30 +52,10 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
     };
   }
 
-  async showLoading(message: string = 'Carregando...') {
-    this.loading = await this.loadingController.create({
-      message, spinner: 'crescent'
-    });
-    await this.loading.present();
-  }
-
-  async hideLoading() {
-    if (this.loading) {
-      await this.loading.dismiss();
-      this.loading = null;
-    }
-  }
-
-  async presentToast(msg: string, color: 'success' | 'danger' | 'warning' = 'success') {
-    const toast = await this.toast.create({
-      message: msg, duration: 3000, color, position: 'top',
-      buttons: [{ text: 'OK', role: 'cancel' }]
-    });
-    await toast.present();
-  }
+  // --- CARREGAMENTO DE DADOS ---
 
   async carregarDados(silencioso = false) {
-    if (!silencioso) await this.showLoading();
+    if (!silencioso) await this.utils.showLoading();
 
     this.projetosService.listarProjetos().subscribe({
       next: async (res) => {
@@ -85,13 +63,16 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
           this.projetos = res.projetos;
           await this.carregarTodasAvaliacoes(silencioso);
         } else {
-          if (!silencioso) await this.hideLoading();
+          if (!silencioso) {
+            await this.utils.hideLoading();
+            await this.utils.toast('Erro ao carregar projetos', 'warning');
+          }
         }
       },
       error: async () => {
         if (!silencioso) {
-          await this.hideLoading();
-          await this.presentToast('Erro ao carregar projetos', 'danger');
+          await this.utils.hideLoading();
+          await this.utils.toastError('Erro ao carregar projetos');
         }
       }
     });
@@ -104,7 +85,7 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
 
     forkJoin(requests).subscribe({
       next: async (results) => {
-        if (!silencioso) await this.hideLoading();
+        if (!silencioso) await this.utils.hideLoading();
         this.todasAvaliacoes = [];
         results.forEach(res => {
           if (res.success) {
@@ -114,8 +95,9 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
         this.filtrarAvaliacoes();
       },
       error: async (error) => {
-        if (!silencioso) await this.hideLoading();
+        if (!silencioso) await this.utils.hideLoading();
         console.error(error);
+        if (!silencioso) await this.utils.toastError('Erro ao carregar avaliações');
       }
     });
   }
@@ -138,7 +120,7 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
     return p ? p.nome : `Projeto #${projetoId}`;
   }
 
-  // --- CRUD ---
+  // --- CRUD (Salvar / Editar / Deletar) ---
 
   editar(a: Avaliacao) {
     this.avaliacaoForm = { ...a };
@@ -153,65 +135,59 @@ export class GerenciarAvaliacoesPage implements OnInit, OnDestroy {
 
   async salvar() {
     if (!this.avaliacaoForm.projeto_id) {
-      this.presentToast('Selecione um projeto', 'warning');
+      this.utils.toast('Selecione um projeto', 'warning');
       return;
     }
     if (!this.avaliacaoForm.autor) {
-      this.presentToast('Informe o autor', 'warning');
+      this.utils.toast('Informe o autor', 'warning');
       return;
     }
 
-    await this.showLoading('Salvando...');
+    await this.utils.showLoading('Salvando...');
 
-    // O método criarAvaliacao no PHP funciona como UPSERT (Atualiza se existir, Cria se não)
-    // baseado no par (projeto_id, usuario_id).
     this.avaliacoesService.criarAvaliacao(this.avaliacaoForm).subscribe({
       next: async (res) => {
-        await this.hideLoading();
+        await this.utils.hideLoading();
         if (res.success) {
-          await this.presentToast('Salvo com sucesso!', 'success');
+          await this.utils.toast('Salvo com sucesso!', 'success');
           this.cancelarEdicao();
           this.carregarDados();
         } else {
-          await this.presentToast('Erro ao salvar', 'danger');
+          await this.utils.toastError('Erro ao salvar avaliação');
         }
       },
       error: async () => {
-        await this.hideLoading();
-        await this.presentToast('Erro de conexão', 'danger');
+        await this.utils.hideLoading();
+        await this.utils.toastError('Erro de conexão');
       }
     });
   }
 
   async deletar(id: number, autor: string) {
-    const alert = await this.alert.create({
-      header: 'Excluir Avaliação',
-      message: `Deletar avaliação de ${autor}?`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Excluir', cssClass: 'alert-button-danger',
-          handler: async () => {
-            await this.showLoading('Excluindo...');
-            this.avaliacoesService.deletarAvaliacao(id).subscribe({
-              next: async (res) => {
-                await this.hideLoading();
-                if (res.success) {
-                  await this.presentToast('Excluído!', 'success');
-                  this.carregarDados();
-                } else {
-                  await this.presentToast('Erro ao excluir', 'danger');
-                }
-              },
-              error: async () => {
-                await this.hideLoading();
-                await this.presentToast('Erro de conexão', 'danger');
-              }
-            });
+    // Usa o alert padronizado do Utils
+    const confirmou = await this.utils.alertConfirm(
+      'Excluir Avaliação',
+      `Deletar avaliação de ${autor}?`
+    );
+
+    if (confirmou) {
+      await this.utils.showLoading('Excluindo...');
+
+      this.avaliacoesService.deletarAvaliacao(id).subscribe({
+        next: async (res) => {
+          await this.utils.hideLoading();
+          if (res.success) {
+            await this.utils.toast('Avaliação excluída!', 'success');
+            this.carregarDados();
+          } else {
+            await this.utils.toastError('Erro ao excluir avaliação');
           }
+        },
+        error: async () => {
+          await this.utils.hideLoading();
+          await this.utils.toastError('Erro de conexão');
         }
-      ]
-    });
-    await alert.present();
+      });
+    }
   }
 }

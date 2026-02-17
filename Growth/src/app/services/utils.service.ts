@@ -1,22 +1,29 @@
 import { Injectable } from '@angular/core';
-import { LoadingController, ToastController } from '@ionic/angular';
+import { ToastController, LoadingController, AlertController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UtilsService {
-  private loading: HTMLIonLoadingElement | null = null;
+
+  loading: HTMLIonLoadingElement | null = null;
 
   constructor(
-    private loadingController: LoadingController,
-    private toastController: ToastController
-  ) {}
+    private toastCtrl: ToastController,
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController
+  ) { }
 
+  // --- LOADING (Carregando...) ---
   async showLoading(message: string = 'Carregando...') {
-    this.loading = await this.loadingController.create({
+    // Se já existir um loading, fecha antes de abrir outro para evitar sobreposição
+    await this.hideLoading();
+
+    this.loading = await this.loadingCtrl.create({
       message,
       spinner: 'crescent',
-      cssClass: 'custom-loading'
+      cssClass: 'custom-loading', // Opcional: usa seu estilo global se tiver
+      duration: 10000 // Segurança: fecha sozinho em 10s se algo travar
     });
     await this.loading.present();
   }
@@ -28,31 +35,65 @@ export class UtilsService {
     }
   }
 
-  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success', duration: number = 3000) {
-    const toast = await this.toastController.create({
-      message,
-      duration,
-      color,
+  async toast(
+      message: string,
+      color: 'success' | 'warning' | 'danger' | 'medium' | 'dark' | 'primary' = 'success',
+      duration: number = 3000
+    ) {
+      const toast = await this.toastCtrl.create({
+        message: message,
+        duration: duration,
+        color: color,
+        position: 'top',
+        cssClass: 'toast-custom',
+        buttons: []
+      });
+      await toast.present();
+    }
+
+  // --- TOAST DE ERRO (Requer Atenção) ---
+  // Use este para: "Erro de conexão", "Falha ao salvar", "Erro 500"
+  async toastError(message: string, duration: number = 5000) {
+    const toast = await this.toastCtrl.create({
+      message: message,
+      duration: duration, // Dura mais tempo (5s)
+      color: 'danger',
       position: 'top',
+      icon: 'alert-circle-outline',
+      // COM BOTÃO: Caso o erro seja longo, o usuário pode fechar.
       buttons: [
         {
           text: 'OK',
-          role: 'cancel'
+          role: 'cancel',
+          handler: () => {
+            console.log('Fechou erro');
+          }
         }
       ]
     });
     await toast.present();
   }
 
-  async showSuccess(message: string) {
-    await this.showToast(message, 'success');
-  }
-
-  async showError(message: string) {
-    await this.showToast(message, 'danger', 4000);
-  }
-
-  async showWarning(message: string) {
-    await this.showToast(message, 'warning');
+  // --- ALERTA (Confirmação) ---
+  // Use este para: "Deseja excluir?", "Tem certeza?"
+  async alertConfirm(header: string, message: string): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      const alert = await this.alertCtrl.create({
+        header,
+        message,
+        buttons: [
+          {
+            text: 'Não',
+            role: 'cancel',
+            cssClass: 'secondary',
+            handler: () => resolve(false)
+          }, {
+            text: 'Sim',
+            handler: () => resolve(true)
+          }
+        ]
+      });
+      await alert.present();
+    });
   }
 }
