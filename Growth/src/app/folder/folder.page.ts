@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { UtilsService } from '../services/utils.service';
 
@@ -7,63 +7,53 @@ import { UtilsService } from '../services/utils.service';
   selector: 'app-folder',
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
-  standalone: false,
+  standalone: false
 })
 export class FolderPage implements OnInit {
-  login = {
-    emailCnpj: '',
-    senha: '',
-  };
+  public folder!: string;
+  emailCnpj: string = '';
+  senha: string = '';
 
   constructor(
-    private rota: Router,
+    private activatedRoute: ActivatedRoute,
     private authService: AuthService,
+    private router: Router,
     private utils: UtilsService
-  ) {}
+  ) { }
 
   ngOnInit() {
-    if (this.authService.isAuthenticated()) {
-      this.rota.navigate(['/home']);
+    this.folder = this.activatedRoute.snapshot.paramMap.get('id') as string;
+  }
+
+  async login() {
+    if (!this.emailCnpj || !this.senha) {
+      await this.utils.toast('Por favor, preencha todos os campos.', 'warning');
+      return;
     }
-  }
 
-  criarConta() {
-    this.rota.navigate(['/cadastro']);
-  }
+    await this.utils.showLoading('Entrando...');
 
-  async logar() {
-  if (!this.login.emailCnpj.trim() || !this.login.senha.trim()) {
-    await this.utils.showWarning('Por favor, preencha todos os campos!');
-    return;
-  }
+    this.authService.login(this.emailCnpj, this.senha).subscribe({
+      next: async (response) => {
+        await this.utils.hideLoading();
+        if (response.success) {
+          // Salva o usuário no serviço (já faz no login, mas garantindo)
+          if(response.user){
+             // this.authService.currentUserSubject.next(response.user); // Geralmente já feito no service
+          }
 
-  await this.utils.showLoading('Entrando...');
-
-  this.authService.login(this.login.emailCnpj, this.login.senha).subscribe({
-    next: async (response) => {
-      await this.utils.hideLoading();
-
-      // 🔍 ADICIONE ESTE LOG TEMPORÁRIO
-      console.log('📋 Resposta do login:', response);
-
-      if (response.success) {
-        // 🔍 ADICIONE ESTE LOG TEMPORÁRIO
-        console.log('✅ Login bem-sucedido, navegando para /home');
-
-        await this.utils.showSuccess('Bem-vindo ao Growth!');
-
-        // 🔍 ADICIONE ESTE LOG TEMPORÁRIO
-        const navResult = await this.rota.navigate(['/home']);
-        console.log('🧭 Resultado da navegação:', navResult);
-      } else {
-        await this.utils.showError(response.message || 'Credenciais inválidas!');
+          await this.utils.toast(`Bem-vindo, ${response.user.nome}!`, 'success');
+          this.router.navigate(['/home']);
+        } else {
+          // Erro de credenciais inválidas
+          await this.utils.toast(response.message || 'Credenciais inválidas!', 'danger');
+        }
+      },
+      error: async (error) => {
+        await this.utils.hideLoading();
+        console.error(error);
+        await this.utils.toastError('Erro ao conectar ao servidor.');
       }
-    },
-    error: async (error) => {
-      await this.utils.hideLoading();
-      console.error('❌ Erro no login:', error);
-      await this.utils.showError('Erro ao conectar ao servidor.');
-    }
-  });
-}
+    });
+  }
 }

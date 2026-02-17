@@ -7,80 +7,65 @@ import { UtilsService } from '../services/utils.service';
   selector: 'app-cadastro',
   templateUrl: './cadastro.page.html',
   styleUrls: ['./cadastro.page.scss'],
-  standalone: false,
+  standalone: false
 })
 export class CadastroPage implements OnInit {
-  cadastro = {
+
+  usuario = {
     nome: '',
     email: '',
     cnpj: '',
     senha: '',
-    confirmarSenha: '',
+    confirmaSenha: ''
   };
 
   constructor(
-    private rota: Router,
     private authService: AuthService,
+    private router: Router,
     private utils: UtilsService
-  ) {}
+  ) { }
 
-  ngOnInit() {}
-
-  voltar() {
-    this.rota.navigate(['/folder/inbox']);
-  }
+  ngOnInit() { }
 
   async cadastrar() {
     // Validações
-    if (
-      !this.cadastro.nome.trim() ||
-      !this.cadastro.email.trim() ||
-      !this.cadastro.cnpj.trim() ||
-      !this.cadastro.senha.trim() ||
-      !this.cadastro.confirmarSenha.trim()
-    ) {
-      await this.utils.showWarning('Por favor, preencha todos os campos!');
+    if (!this.usuario.nome || !this.usuario.email || !this.usuario.cnpj || !this.usuario.senha || !this.usuario.confirmaSenha) {
+      await this.utils.toast('Por favor, preencha todos os campos.', 'warning');
       return;
     }
 
-    const cnpjPattern = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
-    if (!cnpjPattern.test(this.cadastro.cnpj)) {
-      await this.utils.showError('CNPJ inválido! Formato: 00.000.000/0000-00');
+    // Validação simples de CNPJ (apenas tamanho para exemplo)
+    if (this.usuario.cnpj.length < 14) {
+      await this.utils.toast('CNPJ inválido! Formato: 00.000.000/0000-00', 'warning');
       return;
     }
 
-    if (this.cadastro.senha.length < 6) {
-      await this.utils.showWarning('A senha deve ter pelo menos 6 caracteres!');
+    if (this.usuario.senha.length < 6) {
+      await this.utils.toast('A senha deve ter pelo menos 6 caracteres.', 'warning');
       return;
     }
 
-    if (this.cadastro.senha !== this.cadastro.confirmarSenha) {
-      await this.utils.showError('As senhas não coincidem!');
+    if (this.usuario.senha !== this.usuario.confirmaSenha) {
+      await this.utils.toast('As senhas não coincidem!', 'warning');
       return;
     }
 
     await this.utils.showLoading('Criando conta...');
 
-    this.authService.cadastrar({
-      nome: this.cadastro.nome,
-      email: this.cadastro.email,
-      cnpj: this.cadastro.cnpj,
-      senha: this.cadastro.senha,
-    }).subscribe({
+    this.authService.cadastrar(this.usuario).subscribe({
       next: async (response) => {
         await this.utils.hideLoading();
-
         if (response.success) {
-          await this.utils.showSuccess('Conta criada! Faça login para continuar.');
-          this.rota.navigate(['/folder/inbox']);
+          await this.utils.toast('Conta criada! Faça login para continuar.', 'success');
+          this.router.navigate(['/folder/inbox']);
         } else {
-          await this.utils.showError('Erro ao criar conta. Email ou CNPJ já cadastrado.');
+          await this.utils.toastError('Erro ao criar conta. Email ou CNPJ já cadastrados.');
         }
       },
       error: async (error) => {
         await this.utils.hideLoading();
-        console.error('Erro:', error);
-        await this.utils.showError('Erro ao conectar ao servidor.');
+        console.error(error);
+        await this.utils.toastError('Erro ao conectar ao servidor.');
       }
     });
   }

@@ -1,202 +1,140 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { AuthService, User } from '../services/auth.service';
-import { UtilsService } from '../services/utils.service';
-import { AlertController } from '@ionic/angular';
+import { UtilsService } from '../services/utils.service'; // <--- Utils moderno
+import { ImageUploadService } from '../services/image.upload.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { ImageUploadService } from '../services/image.upload.service';
-
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
-  standalone: false,
+  standalone: false
 })
 export class ProfilePage implements OnInit {
-  user: User = {
-    id: 0,
-    nome: '',
-    cnpj: '',
-    email: '',
-    saldo: 0,
-    tokens: 0,
-    foto: ''
-  };
+  user: User | null = null;
 
-  private apiUrl = environment.apiUrl;
+  // Dados para edição
+  nome: string = '';
+  email: string = '';
+
+  // Senha
+  senhaAtual: string = '';
+  novaSenha: string = '';
+  confirmaSenha: string = '';
 
   constructor(
-    private rota: Router,
     private authService: AuthService,
     private utils: UtilsService,
-    private alertController: AlertController,
-    private imageService: ImageUploadService,
+    private imageUploadService: ImageUploadService,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit() {
-    this.loadUserProfile();
-  }
-
-  loadUserProfile() {
-      const currentUser = this.authService.currentUserValue;
-      if (currentUser) {
-        this.user = {
-          ...currentUser,
-          saldo: Number(currentUser.saldo || 0),
-          tokens: Number(currentUser.tokens || 0)
-        };
+    this.authService.currentUser.subscribe(u => {
+      this.user = u;
+      if (u) {
+        this.nome = u.nome;
+        this.email = u.email;
       }
-    }
+    });
+  }
 
-  async changePhoto() {
-    const imagemBase64 = await this.imageService.selecionarImagem();
-    if (imagemBase64) {
-      this.user.foto = imagemBase64;
+  async selecionarFoto() {
+    if (!this.user) return;
+    const base64 = await this.imageUploadService.selecionarImagem();
+    if (base64) {
+      this.user.foto = base64;
+      this.salvarPerfil(true); // Salva silenciosamente a foto
     }
   }
 
-  async saveProfile() {
-    // Validações
-    if (!this.user.nome.trim() || !this.user.email.trim()) {
-      await this.utils.showWarning('Nome e email são obrigatórios!');
+  async salvarPerfil(apenasFoto = false) {
+    if (!this.user) return;
+
+    if (!this.nome.trim() || !this.email.trim()) {
+      await this.utils.toast('Nome e email são obrigatórios!', 'warning');
       return;
     }
 
-    // Validação de email
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(this.user.email)) {
-      await this.utils.showError('Email inválido!');
+    // Validação básica de email
+    if (!this.email.includes('@')) {
+      await this.utils.toast('Email inválido!', 'warning');
       return;
     }
 
-    await this.utils.showLoading('Salvando...');
+    await this.utils.showLoading('Atualizando perfil...');
 
-    // Chama a API para atualizar o perfil
-    this.http.post<any>(this.apiUrl, {
-      requisicao: 'editar',
-      id: this.user.id,
-      nome: this.user.nome,
-      email: this.user.email,
-      cnpj: this.user.cnpj,
-      foto: this.user.foto
-    }).subscribe({
+    const dadosAtualizados = {
+      ...this.user,
+      nome: this.nome,
+      email: this.email,
+      requisicao: 'editar_perfil'
+    };
+
+    this.http.post<any>(environment.apiUrl, dadosAtualizados).subscribe({
       next: async (response) => {
         await this.utils.hideLoading();
-
         if (response.success) {
-          this.authService.updateUser(this.user);
-          await this.utils.showSuccess('Perfil atualizado com sucesso!');
+          // Atualiza o local storage e o subject
+          this.authService.updateUser(dadosAtualizados);
+          if (!apenasFoto) {
+            await this.utils.toast('Perfil atualizado com sucesso!', 'success');
+          }
         } else {
-          await this.utils.showError('Erro ao atualizar perfil. Email pode já estar em uso.');
+          await this.utils.toastError('Erro ao atualizar perfil. Email pode já estar em uso.');
         }
       },
       error: async (error) => {
         await this.utils.hideLoading();
-        console.error('Erro:', error);
-        await this.utils.showError('Erro ao conectar ao servidor.');
+        await this.utils.toastError('Erro ao conectar ao servidor.');
       }
     });
   }
 
-  async changePassword() {
-    const alert = await this.alertController.create({
-      header: 'Alterar Senha',
-      inputs: [
-        {
-          name: 'senhaAtual',
-          type: 'password',
-          placeholder: 'Senha atual'
-        },
-        {
-          name: 'novaSenha',
-          type: 'password',
-          placeholder: 'Nova senha'
-        },
-        {
-          name: 'confirmarSenha',
-          type: 'password',
-          placeholder: 'Confirmar nova senha'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Alterar',
-          handler: async (data) => {
-            if (!data.senhaAtual || !data.novaSenha || !data.confirmarSenha) {
-              await this.utils.showWarning('Preencha todos os campos!');
-              return false;
-            }
+  async alterarSenha() {
+    if (!this.user) return;
 
-            if (data.novaSenha.length < 6) {
-              await this.utils.showWarning('A nova senha deve ter pelo menos 6 caracteres!');
-              return false;
-            }
+    if (!this.senhaAtual || !this.novaSenha || !this.confirmaSenha) {
+      await this.utils.toast('Preencha todos os campos de senha.', 'warning');
+      return;
+    }
 
-            if (data.novaSenha !== data.confirmarSenha) {
-              await this.utils.showError('As senhas não coincidem!');
-              return false;
-            }
+    if (this.novaSenha.length < 6) {
+      await this.utils.toast('A nova senha deve ter pelo menos 6 caracteres.', 'warning');
+      return;
+    }
 
-            await this.updatePassword(data.senhaAtual, data.novaSenha);
-            return true;
-          }
-        }
-      ]
-    });
+    if (this.novaSenha !== this.confirmaSenha) {
+      await this.utils.toast('As senhas não coincidem!', 'warning');
+      return;
+    }
 
-    await alert.present();
-  }
-
-  async updatePassword(senhaAtual: string, novaSenha: string) {
     await this.utils.showLoading('Alterando senha...');
 
-    this.http.post<any>(this.apiUrl, {
+    const payload = {
       requisicao: 'alterar_senha',
       id: this.user.id,
-      senha_atual: senhaAtual,
-      nova_senha: novaSenha
-    }).subscribe({
+      senha_atual: this.senhaAtual,
+      nova_senha: this.novaSenha
+    };
+
+    this.http.post<any>(environment.apiUrl, payload).subscribe({
       next: async (response) => {
         await this.utils.hideLoading();
-
         if (response.success) {
-          await this.utils.showSuccess('Senha alterada com sucesso!');
+          this.senhaAtual = '';
+          this.novaSenha = '';
+          this.confirmaSenha = '';
+          await this.utils.toast('Senha alterada com sucesso!', 'success');
         } else {
-          await this.utils.showError(response.message || 'Senha atual incorreta!');
+          await this.utils.toast(response.message || 'Senha atual incorreta.', 'danger');
         }
       },
       error: async (error) => {
         await this.utils.hideLoading();
-        console.error('Erro:', error);
-        await this.utils.showError('Erro ao conectar ao servidor.');
+        await this.utils.toastError('Erro ao conectar ao servidor.');
       }
     });
-  }
-
-  async removePhoto(event: Event) {
-    event.stopPropagation(); // Evita abrir a galeria ao clicar na lixeira
-
-    const alert = await this.alertController.create({
-      header: 'Remover Foto',
-      message: 'Tem certeza que deseja remover sua foto de perfil?',
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Remover',
-          handler: () => {
-            this.user.foto = ''; // Limpa a foto localmente
-            this.saveProfile();  // Salva no banco imediatamente
-          }
-        }
-      ]
-    });
-    await alert.present();
   }
 }

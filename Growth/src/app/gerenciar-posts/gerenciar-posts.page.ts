@@ -25,17 +25,27 @@ export class GerenciarPostsPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.listarPosts();
+    // 🔄 AUTO-REFRESH: Atualiza a cada 5 segundos
     this.refreshSubscription = interval(5000).subscribe(() => {
       this.listarPosts(true);
     });
   }
 
   ngOnDestroy() {
-    if (this.refreshSubscription) this.refreshSubscription.unsubscribe();
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
   }
 
   limparFormulario(): Post {
-    return { autor: '', texto: '', categoria: 'Comunidade Prêmios', imagem: '', curtidas: 0, comentarios: 0 };
+    return {
+      autor: '',
+      texto: '',
+      categoria: 'Comunidade Prêmios',
+      imagem: '',
+      curtidas: 0,
+      comentarios: 0
+    };
   }
 
   async listarPosts(silencioso = false) {
@@ -63,7 +73,7 @@ export class GerenciarPostsPage implements OnInit, OnDestroy {
     const imagemBase64 = await this.imageUploadService.selecionarImagem();
     if (imagemBase64) {
       this.post.imagem = imagemBase64;
-      await this.utils.toast('Imagem adicionada!');
+      await this.utils.toast('Imagem adicionada!', 'success');
     }
   }
 
@@ -80,14 +90,15 @@ export class GerenciarPostsPage implements OnInit, OnDestroy {
       this.utils.toast('Categoria é obrigatória!', 'warning');
       return false;
     }
-
     return true;
   }
 
   async salvarPost() {
-    if (!this.validarFormulario()) return;
+    if (!this.validarFormulario()) {
+      return;
+    }
 
-    await this.utils.showLoading('Salvando...');
+    await this.utils.showLoading(this.post.id ? 'Atualizando...' : 'Salvando...');
 
     const observable = this.post.id
       ? this.postsService.editarPost(this.post)
@@ -97,7 +108,10 @@ export class GerenciarPostsPage implements OnInit, OnDestroy {
       next: async (res) => {
         await this.utils.hideLoading();
         if (res.success) {
-          await this.utils.toast(this.post.id ? 'Post atualizado!' : 'Post criado!', 'success');
+          await this.utils.toast(
+            this.post.id ? 'Post atualizado!' : 'Post criado!',
+            'success'
+          );
           this.post = this.limparFormulario();
           this.listarPosts();
         } else {
@@ -106,9 +120,21 @@ export class GerenciarPostsPage implements OnInit, OnDestroy {
       },
       error: async (error) => {
         await this.utils.hideLoading();
+        console.error('Erro:', error);
         await this.utils.toastError('Erro ao conectar ao servidor');
       }
     });
+  }
+
+  // --- MÉTODOS QUE FALTAVAM ---
+
+  editar(p: Post) {
+    this.post = { ...p };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  cancelarEdicao() {
+    this.post = this.limparFormulario();
   }
 
   async deletar(id: number, autor: string) {
@@ -119,6 +145,7 @@ export class GerenciarPostsPage implements OnInit, OnDestroy {
 
     if (confirmou) {
       await this.utils.showLoading('Excluindo...');
+
       this.postsService.deletarPost(id, 1).subscribe({
         next: async (res) => {
           await this.utils.hideLoading();
@@ -129,8 +156,9 @@ export class GerenciarPostsPage implements OnInit, OnDestroy {
             await this.utils.toastError('Erro ao excluir post');
           }
         },
-        error: async () => {
+        error: async (error) => {
           await this.utils.hideLoading();
+          console.error('Erro:', error);
           await this.utils.toastError('Erro de conexão');
         }
       });
