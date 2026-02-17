@@ -11,12 +11,13 @@ import { UtilsService } from '../services/utils.service';
 })
 export class CadastroPage implements OnInit {
 
-  usuario = {
+  // O HTML espera um objeto chamado 'cadastro'
+  cadastro = {
     nome: '',
     email: '',
     cnpj: '',
     senha: '',
-    confirmaSenha: ''
+    confirmarSenha: '' // O HTML chama de 'confirmarSenha', não 'confirmaSenha'
   };
 
   constructor(
@@ -28,35 +29,37 @@ export class CadastroPage implements OnInit {
   ngOnInit() { }
 
   async cadastrar() {
+    const c = this.cadastro; // Atalho
+
     // Validações
-    if (!this.usuario.nome || !this.usuario.email || !this.usuario.cnpj || !this.usuario.senha || !this.usuario.confirmaSenha) {
+    if (!c.nome || !c.email || !c.cnpj || !c.senha || !c.confirmarSenha) {
       await this.utils.toast('Por favor, preencha todos os campos.', 'warning');
       return;
     }
 
-    // Validação simples de CNPJ (apenas tamanho para exemplo)
-    if (this.usuario.cnpj.length < 14) {
-      await this.utils.toast('CNPJ inválido! Formato: 00.000.000/0000-00', 'warning');
+    if (c.cnpj.length < 14) {
+      await this.utils.toast('CNPJ inválido!', 'warning');
       return;
     }
 
-    if (this.usuario.senha.length < 6) {
+    if (c.senha.length < 6) {
       await this.utils.toast('A senha deve ter pelo menos 6 caracteres.', 'warning');
       return;
     }
 
-    if (this.usuario.senha !== this.usuario.confirmaSenha) {
+    if (c.senha !== c.confirmarSenha) {
       await this.utils.toast('As senhas não coincidem!', 'warning');
       return;
     }
 
     await this.utils.showLoading('Criando conta...');
 
-    this.authService.cadastrar(this.usuario).subscribe({
+    // O serviço provavelmente espera { nome, email... }, então passamos o objeto cadastro
+    this.authService.cadastrar(c).subscribe({
       next: async (response) => {
         await this.utils.hideLoading();
         if (response.success) {
-          await this.utils.toast('Conta criada! Faça login para continuar.', 'success');
+          await this.utils.toast('Conta criada! Faça login.', 'success');
           this.router.navigate(['/folder/inbox']);
         } else {
           await this.utils.toastError('Erro ao criar conta. Email ou CNPJ já cadastrados.');

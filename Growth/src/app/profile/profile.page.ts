@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService, User } from '../services/auth.service';
-import { UtilsService } from '../services/utils.service'; // <--- Utils moderno
+import { UtilsService } from '../services/utils.service';
 import { ImageUploadService } from '../services/image.upload.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -12,13 +12,8 @@ import { environment } from 'src/environments/environment';
   standalone: false
 })
 export class ProfilePage implements OnInit {
-  user: User | null = null;
+  user: any = { nome: '', email: '', cnpj: '', saldo: 0, tokens: 0, foto: '' };
 
-  // Dados para edição
-  nome: string = '';
-  email: string = '';
-
-  // Senha
   senhaAtual: string = '';
   novaSenha: string = '';
   confirmaSenha: string = '';
@@ -32,34 +27,31 @@ export class ProfilePage implements OnInit {
 
   ngOnInit() {
     this.authService.currentUser.subscribe(u => {
-      this.user = u;
       if (u) {
-        this.nome = u.nome;
-        this.email = u.email;
+        this.user = { ...u };
       }
     });
   }
 
-  async selecionarFoto() {
-    if (!this.user) return;
+  // O HTML chama changePhoto()
+  async changePhoto() {
     const base64 = await this.imageUploadService.selecionarImagem();
     if (base64) {
       this.user.foto = base64;
-      this.salvarPerfil(true); // Salva silenciosamente a foto
+      this.saveProfile(true);
     }
   }
 
-  async salvarPerfil(apenasFoto = false) {
-    if (!this.user) return;
+  // O HTML chama removePhoto($event)
+  removePhoto(event: Event) {
+    event.stopPropagation(); // Evita abrir o seletor ao clicar no X
+    this.user.foto = '';
+  }
 
-    if (!this.nome.trim() || !this.email.trim()) {
+  // O HTML chama saveProfile()
+  async saveProfile(apenasFoto = false) {
+    if (!this.user.nome || !this.user.email) {
       await this.utils.toast('Nome e email são obrigatórios!', 'warning');
-      return;
-    }
-
-    // Validação básica de email
-    if (!this.email.includes('@')) {
-      await this.utils.toast('Email inválido!', 'warning');
       return;
     }
 
@@ -67,8 +59,6 @@ export class ProfilePage implements OnInit {
 
     const dadosAtualizados = {
       ...this.user,
-      nome: this.nome,
-      email: this.email,
       requisicao: 'editar_perfil'
     };
 
@@ -76,13 +66,12 @@ export class ProfilePage implements OnInit {
       next: async (response) => {
         await this.utils.hideLoading();
         if (response.success) {
-          // Atualiza o local storage e o subject
           this.authService.updateUser(dadosAtualizados);
           if (!apenasFoto) {
             await this.utils.toast('Perfil atualizado com sucesso!', 'success');
           }
         } else {
-          await this.utils.toastError('Erro ao atualizar perfil. Email pode já estar em uso.');
+          await this.utils.toastError('Erro ao atualizar. Email pode já estar em uso.');
         }
       },
       error: async (error) => {
@@ -92,9 +81,8 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  async alterarSenha() {
-    if (!this.user) return;
-
+  // O HTML chama changePassword()
+  async changePassword() {
     if (!this.senhaAtual || !this.novaSenha || !this.confirmaSenha) {
       await this.utils.toast('Preencha todos os campos de senha.', 'warning');
       return;

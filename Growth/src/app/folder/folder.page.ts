@@ -11,8 +11,12 @@ import { UtilsService } from '../services/utils.service';
 })
 export class FolderPage implements OnInit {
   public folder!: string;
-  emailCnpj: string = '';
-  senha: string = '';
+
+  // O HTML espera um objeto 'login'
+  login = {
+    emailCnpj: '',
+    senha: ''
+  };
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -25,27 +29,22 @@ export class FolderPage implements OnInit {
     this.folder = this.activatedRoute.snapshot.paramMap.get('id') as string;
   }
 
-  async login() {
-    if (!this.emailCnpj || !this.senha) {
+  // O HTML chama (click)="logar()"
+  async logar() {
+    if (!this.login.emailCnpj || !this.login.senha) {
       await this.utils.toast('Por favor, preencha todos os campos.', 'warning');
       return;
     }
 
     await this.utils.showLoading('Entrando...');
 
-    this.authService.login(this.emailCnpj, this.senha).subscribe({
+    this.authService.login(this.login.emailCnpj, this.login.senha).subscribe({
       next: async (response) => {
         await this.utils.hideLoading();
         if (response.success) {
-          // Salva o usuário no serviço (já faz no login, mas garantindo)
-          if(response.user){
-             // this.authService.currentUserSubject.next(response.user); // Geralmente já feito no service
-          }
-
-          await this.utils.toast(`Bem-vindo, ${response.user.nome}!`, 'success');
+          await this.utils.toast(`Bem-vindo!`, 'success');
           this.router.navigate(['/home']);
         } else {
-          // Erro de credenciais inválidas
           await this.utils.toast(response.message || 'Credenciais inválidas!', 'danger');
         }
       },
@@ -55,5 +54,9 @@ export class FolderPage implements OnInit {
         await this.utils.toastError('Erro ao conectar ao servidor.');
       }
     });
+  }
+
+  criarConta() {
+    this.router.navigate(['/cadastro']);
   }
 }
