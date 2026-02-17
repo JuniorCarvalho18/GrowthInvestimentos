@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
 
 const routes: Routes = [
   {
@@ -16,7 +17,7 @@ const routes: Routes = [
     path: 'cadastro',
     loadChildren: () => import('./cadastro/cadastro.module').then(m => m.CadastroPageModule)
   },
-  // 🔒 ROTAS PROTEGIDAS - Requerem login
+
   {
     path: 'home',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule),
@@ -53,23 +54,8 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'addproj',
-    loadChildren: () => import('./addproj/addproj.module').then( m => m.AddprojPageModule),
-    canActivate: [AuthGuard]
-  },
-  {
     path: 'investir',
     loadChildren: () => import('./investir/investir.module').then( m => m.InvestirPageModule),
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'dev',
-    loadChildren: () => import('./dev/dev.module').then( m => m.DevPageModule),
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'usuarios',
-    loadChildren: () => import('./usuarios/usuarios.module').then( m => m.UsuariosPageModule),
     canActivate: [AuthGuard]
   },
   {
@@ -77,36 +63,41 @@ const routes: Routes = [
     loadChildren: () => import('./notificacoes/notificacoes.module').then( m => m.NotificacoesPageModule),
     canActivate: [AuthGuard]
   },
+
   {
-    path: 'verificacao',
-    loadChildren: () => import('./verificacao/verificacao.module').then( m => m.VerificacaoPageModule)
+    path: 'dev',
+    loadChildren: () => import('./dev/dev.module').then( m => m.DevPageModule),
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'addproj',
+    loadChildren: () => import('./addproj/addproj.module').then( m => m.AddprojPageModule),
+    canActivate: [AuthGuard, AdminGuard]
+  },
+  {
+    path: 'usuarios',
+    loadChildren: () => import('./usuarios/usuarios.module').then( m => m.UsuariosPageModule),
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'gerenciar-posts',
     loadChildren: () => import('./gerenciar-posts/gerenciar-posts.module').then( m => m.GerenciarPostsPageModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'gerenciar-comentarios',
     loadChildren: () => import('./gerenciar-comentarios/gerenciar-comentarios.module').then( m => m.GerenciarComentariosPageModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'gerenciar-avaliacoes',
     loadChildren: () => import('./gerenciar-avaliacoes/gerenciar-avaliacoes.module').then( m => m.GerenciarAvaliacoesPageModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, AdminGuard]
   },
+
   {
-    path: 'gerenciar-posts',
-    loadChildren: () => import('./gerenciar-posts/gerenciar-posts.module').then( m => m.GerenciarPostsPageModule)
-  },
-  {
-    path: 'gerenciar-comentarios',
-    loadChildren: () => import('./gerenciar-comentarios/gerenciar-comentarios.module').then( m => m.GerenciarComentariosPageModule)
-  },
-  {
-    path: 'gerenciar-avaliacoes',
-    loadChildren: () => import('./gerenciar-avaliacoes/gerenciar-avaliacoes.module').then( m => m.GerenciarAvaliacoesPageModule)
+    path: 'verificacao',
+    loadChildren: () => import('./verificacao/verificacao.module').then( m => m.VerificacaoPageModule)
   },
 ];
 
